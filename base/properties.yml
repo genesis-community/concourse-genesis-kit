@@ -8,11 +8,13 @@ params:
   external_url:      (( param "Please specify the URL users will use to connect to Concourse" ))
   concourse_network: concourse
   concourse_vm_type: small
+  stemcell_os: ubuntu-trusty
+  stemcell_version: latest
 
 instance_groups:
   - name: haproxy
     instances: 1
-    stemcell: ubuntu-trusty
+    stemcell: default
     vm_type: (( grab params.concourse_vm_type ))
     networks:
     - name: (( grab params.concourse_network ))
@@ -28,7 +30,7 @@ instance_groups:
 
   - name: web
     instances: 1
-    stemcell: ubuntu-trusty
+    stemcell: default
     vm_type: (( grab params.concourse_vm_type ))
     networks:
     - name: (( grab params.concourse_network ))
@@ -49,7 +51,7 @@ instance_groups:
 
   - name: db
     instances: 1
-    stemcell: ubuntu-trusty
+    stemcell: default
     vm_type: (( grab params.concourse_vm_type ))
     networks:
     - name: (( grab params.concourse_network ))
@@ -71,7 +73,7 @@ instance_groups:
 
   - name: worker
     instances: 3
-    stemcell: ubuntu-trusty
+    stemcell: default
     vm_type: (( grab params.concourse_vm_type ))
     networks:
     - name: (( grab params.concourse_network ))
@@ -118,6 +120,6 @@ releases:
   version: 9
 
 stemcells:
-- alias: ubuntu-trusty
-  os: ubuntu-trusty
-  version: latest
+- alias: default
+  os: (( grab params.stemcell_os ))
+  version: (( grab params.stemcell_version ))
