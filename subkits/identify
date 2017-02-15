@@ -2,7 +2,7 @@
 set -e
 
 rc=0
-auth=$(genesis lookup params.auth_method $1 basic)
+auth=$($GENESIS lookup params.auth_method $1 basic)
 case $auth in
 (basic|http) ;;
 (github) echo github-oauth ;;
@@ -15,7 +15,7 @@ case $auth in
 	;;
 esac
 
-case $(genesis lookup params.toolbelt $1 enabled) in
+case $($GENESIS lookup params.toolbelt $1 enabled) in
 (yes|y|enabled|true|1|on) echo toolbelt;;
 esac
 
