@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+
+rc=0
+auth=$(genesis lookup params.auth_method $1 basic)
+case $auth in
+(basic|http) ;;
+(github) echo github-oauth ;;
+(cf|uaa) echo cf-oauth ;;
+(*)
+	echo >&2 "Unrecognized params.auth_method of '$auth'"
+	echo >&2 "(must be one of: basic, github, or cf)"
+	echo >&2
+	rc=1
+	;;
+esac
+
+case $(genesis lookup params.toolbelt $1 enabled) in
+(yes|y|enabled|true|1|on) echo toolbelt;;
+esac
+
+exit $rc

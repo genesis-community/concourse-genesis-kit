@@ -1,0 +1,9 @@
+---
+name: Concourse CI/CD
+
+vault:
+  database/atc:
+    password: random 64
+
+  webui:
+    password: random 16

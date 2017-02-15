@@ -1,0 +1,20 @@
+---
+params:
+  github:
+    client_key:    (( param "Please provide your GitHub OAuth Provider Client Key" ))
+    client_secret: (( param "Please provide your GitHub OAuth Provider Secret" ))
+    authorize:     (( param "Please provide a list of org/teams/users authorized for using Concourse" ))
+
+instance_groups:
+  - name: web
+    jobs:
+    - name: atc
+      properties:
+        uaa_auth: (( prune ))
+        generic_auth: (( prune ))
+        basic_auth_username: (( prune ))
+        basic_auth_password: (( prune ))
+        github_auth:
+          authorize:     (( grab params.github.authorize ))
+          client_id:     (( grab params.github.client_key ))
+          client_secret: (( grab params.github.client_secret ))

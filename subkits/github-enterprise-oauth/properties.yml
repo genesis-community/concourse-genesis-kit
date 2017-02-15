@@ -1,0 +1,26 @@
+---
+params:
+  github:
+    client_key:    (( param "Please provide your GitHub OAuth Provider Client Key" ))
+    client_secret: (( param "Please provide your GitHub OAuth Provider Secret" )) 
+    authorize:     (( param "Please provide a list of org/teams/users authorized for using Concourse" ))
+    api_url:       (( param "Please provide the URL to your GitHub Enterprise API (requires trailing slash" ))
+    token_url:     (( param "Please provide the URL to your GitHub Enterprise token endpoint" ))
+    auth_url:      (( param "Please provide the URL to your GitHub Enterprise OAuth endpoint" ))
+
+instance_groups:
+  - name: web
+    jobs:
+    - name: atc
+      properties:
+        uaa_auth: (( prune ))
+        basic_auth_username: (( prune ))
+        basic_auth_password: (( prune ))
+        github_auth:
+          authorize:     (( grab params.github.authorize ))
+          client_id:     (( grab params.github.client_key ))
+          client_secret: (( grab params.github.client_secret ))
+  
+          api_url:   (( grab params.github.api_url ))
+          auth_url:  (( grab params.github.auth_url ))
+          token_url: (( grab params.github.token_url ))
