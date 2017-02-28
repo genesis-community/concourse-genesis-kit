@@ -3,7 +3,6 @@ meta:
   vault: (( concat "secret/" params.vault ))
 
 params:
-  shield_public_key: (( param "Please specify the shield public key (use the vault operator if possible)" ))
   ssl_pem:           (( param "Please put your Concourse SSL PEM file in Vault, and reference it here" ))
   external_url:      (( param "Please specify the URL users will use to connect to Concourse" ))
   concourse_network: concourse
@@ -64,12 +63,6 @@ instance_groups:
             - name: atc
               role: atc
               password: (( vault meta.vault "/database/atc:password" ))
-      - release: shield
-        name: shield-agent
-        properties:
-          shield:
-            agent:
-              daemon_public_key: (( grab params.shield_public_key ))
 
   - name: worker
     instances: 3
@@ -108,8 +101,6 @@ releases:
   sha1: 17d850ff3bbf46d78b507eae9f6737740f9fa675
   url: https://github.com/cloudfoundry-community/haproxy-boshrelease/releases/download/v8.0.12/haproxy-8.0.12.tgz
   version: 8.0.12
-- name: shield
-  version: latest
 - name: garden-runc
   sha1: 6e50e37efbfbfcfa803d5d87a7a85a3073f69243
   url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.1.1

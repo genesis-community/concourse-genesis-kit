@@ -1,0 +1,17 @@
+---
+params:
+  shield_public_key: (( param "Please specify the shield public key (use the vault operator if possible)" ))
+
+instance_groups:
+- name: db
+  jobs:
+  - name: shield-agent
+    release: shield
+    properties:
+      shield:
+        agent:
+          daemon_public_key: (( grab params.shield_public_key ))
+
+releases:
+- name: shield
+  version: latest
