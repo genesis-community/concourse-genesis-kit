@@ -1,9 +1,141 @@
 ---
 name: Concourse CI/CD
+author:   Geoff Franks <geoff@starkandwayne.com>
+homepage: https://concourse.ci
+github:   https://github.com/genesis-community/concourse-genesis-kit
 
-vault:
-  database/atc:
-    password: random 64
+subkits:
+  - prompt: What authentication backend do you wish to use with Concourse?
+    type: auth backend
+    choices:
+      - subkit: github-oauth
+        label: GitHub OAuth Integration
+      - subkit: github-enterprise-oauth
+        label: GitHub Enterprise OAuth Integration
+      - subkit: cf-oauth
+        label: UAA OAuth Integration
+      - subkit: ~
+        label: HTTP Basic Auth
+  - prompt: Do you want to install SHIELD on your BOSH for backups?
+    subkit: shield
+  - prompt: Should the toolbelt-boshrelease be installed on VMs to assist in troubleshooting?
+    subkit: toolbelt
 
-  webui:
-    password: random 16
+params:
+  base:
+    - ask: What is the external URL for concourse?
+      description: |
+        The external URL for concourse is the URL users will use to access it via their
+        web browser, or the fly CLI.
+      param: external_url
+    - ask: What is the SSL cert + key pair for Concourse?
+      type: multi-line
+      description: |
+        Concoure will be running on https by default, and as such, needs an SSL cert/key
+        specified. Please enter a combined pem-encoded private key + signed certificate.
+      vault: ssl:combined
+  github-enterprise-oauth:
+    - ask: What is your GitHub OAuth Client ID?
+      description: |
+        The GitHub OAuth Client Key is used to authenticate Concourse to GitHub,
+        so that Concourse can then authorize users after they log into GitHub. GitHub refers
+        to this as the `client_id`. See https://developer.github.com/v3/oauth/ for more info.
+      vault: oauth:provider_key
+    - ask: What is your GitHub OAuth Client Secret?
+      description: |
+        The GitHub OAuth Client Secret is used to authenticate Concourse to GitHub,
+        so that Concourse can then authorize users after they log into GitHub. GitHub refers
+        to this as the `client_secret`. See https://developer.github.com/v3/oauth/ for more info.
+      vault: oauth:provider_secret
+    - ask: What GitHub organizations do you want to grant access to Concourse?
+      description: |
+        Concourse authorizes access based off of GitHub Organizations. Specify all the
+        orgs whose users will be given access to Concourse here.
+      param: authz_allowed_orgs
+    - ask: What is the API URL for your GitHub?
+      description: |
+        This should be the URL for your GitHub Enteprise installation's API
+      example: https://github.example.com/api/v3/
+      param: github_api_url
+    - ask: What is the token URL for your GitHub Enterprise installation?
+      description: |
+        This should be the URL used by GitHub Enterprise to generate OAuth Tokens
+      example: https://github.example.com/login/oauth/access_token
+      param: github_token_url
+    - ask: What is the Auth URL for your GitHub Enterprise installation?
+      description: |
+        This should be the URL used by GitHub Enterprise to authorize OAuth requests
+      example: https://github.example.com/login/oauth/authorize
+      param: github_auth_url
+  github-oauth:
+    - ask: What is your GitHub OAuth Client ID?
+      description: |
+        The GitHub OAuth Client Key is used to authenticate Concourse to GitHub,
+        so that Concourse can then authorize users after they log into GitHub. GitHub refers
+        to this as the `client_id`. See https://developer.github.com/v3/oauth/ for more info.
+      vault: oauth:provider_key
+    - ask: What is your GitHub OAuth Client Secret?
+      description: |
+        The GitHub OAuth Client Secret is used to authenticate Concourse to GitHub,
+        so that Concourse can then authorize users after they log into GitHub. GitHub refers
+        to this as the `client_secret`. See https://developer.github.com/v3/oauth/ for more info.
+      vault: oauth:provider_secret
+    - ask: What GitHub organizations do you want to grant access to Concourse?
+      description: |
+        Concourse authorizes access based off of GitHub Organizations. Specify all the
+        orgs whose users will be given access to Concourse here.
+      param: authz_allowed_orgs
+
+  cf-oauth:
+    - ask: What is your UAA Client ID?
+      description: |
+        The UAA client id is used to authenticate Concourse to the UAA,
+        so that Concourse can then authorize users after they log into the UAA.
+      vault: oauth:provider_key
+    - ask: What is your UAA Client Secret?
+      description: |
+        The UAA client secret is used to authenticate Concourse to the UAA,
+        so that Concourse can then authorize users after they log into the UAA.
+      vault: oauth:provider_secret
+    - ask: What UAA groups do you want to grant access to Concourse?
+      description: |
+        Concourse authorizes access based off of UAA Groups. Specify all the
+        groups whose users will be given access to Concourse here.
+      param: authz_allowed_groups
+    - ask: What is the URL to your CF API?
+      description: |
+        This is the URL of the CF installation that
+        will be used for UAA-based authentication.
+        Should be the same URL that is used to log
+        in to the CF installation.
+      example: https://api.system.bosh-lite.com
+      param: cf_api_url
+    - ask: What is the UAA Token URL?
+      param: uaa_token_url_
+      description: |
+        This is the URL provided by the UAA for generating
+        OAuth Tokens
+      example: https://login.system.bosh-lite.com/oauth/token
+    - ask: What is the UAA Auth URL?
+      param: uaa_auth_url
+      description: |
+        This is the URL provided by the UAA for authz
+      example: https://login.system.bosh-lite.com/oauth/authorize
+
+
+  shield:
+    - ask: What is the Vault path to your Concourse Agent public key?
+      description: |
+        This is usually something like `secret/path/to/keys/for/shield/agent:public`
+        If you are unsure, use `safe tree` to find it.
+      param: shield_key_vault_path
+
+certificates: {}
+
+credentials:
+  base:
+    database/atc:
+      password: random 64
+
+    webui:
+      password: random 16

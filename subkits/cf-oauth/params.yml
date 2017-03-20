@@ -1,0 +1,7 @@
+---
+params:
+  authz_allowed_groups: (( param "Please provide a list of CF space GUIDs whose developers can access Concourse" ))
+
+  cf_api_url:       (( param "Please provide the URL to your CF API" ))
+  uaa_token_url:     (( param "Please provide the URL to your UAA Token endpoint" ))
+  uaa_auth_url:      (( param "Please provide the URL to your UAA Auth endpoint" ))

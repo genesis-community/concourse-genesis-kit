@@ -1,14 +1,4 @@
 ---
-params:
-  uaa:
-    client_id:        (( param "Please provide your UAA Client ID" ))
-    client_secret:     (( param "Please provide your UAA Client Secret" ))
-    authorized_spaces: (( param "Please provide a list of CF space GUIDs whose developers can access Concourse" ))
-
-    api_url:       (( param "Please provide the URL to your CF API" ))
-    token_url:     (( param "Please provide the URL to your UAA Token endpoint" ))
-    auth_url:      (( param "Please provide the URL to your UAA Auth endpoint" ))
-
 instance_groups:
   - name: web
     jobs:
@@ -19,10 +9,10 @@ instance_groups:
         basic_auth_username: (( prune ))
         basic_auth_password: (( prune ))
         uaa_auth:
-          cf_spaces:     (( grab params.uaa.authorized_spaces ))
-          client_id:     (( grab params.uaa.client_id ))
-          client_secret: (( grab params.uaa.client_secret ))
+          cf_spaces:     (( grab params.authz_allowed_groups ))
+          client_id:     (( vault meta.vault "/oauth:provider_key" ))
+          client_secret: (( vault meta.vault "/oatuh:provider_secret" ))
   
-          api_url:   (( grab params.uaa.api_url ))
-          auth_url:  (( grab params.uaa.auth_url ))
-          token_url: (( grab params.uaa.token_url ))
+          api_url:   (( grab params.cf_api_url ))
+          auth_url:  (( grab params.uaa_auth_url ))
+          token_url: (( grab params.uaa_token_url ))

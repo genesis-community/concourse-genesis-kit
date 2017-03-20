@@ -2,14 +2,6 @@
 meta:
   vault: (( concat "secret/" params.vault ))
 
-params:
-  ssl_pem:           (( param "Please put your Concourse SSL PEM file in Vault, and reference it here" ))
-  external_url:      (( param "Please specify the URL users will use to connect to Concourse" ))
-  concourse_network: concourse
-  concourse_vm_type: small
-  stemcell_os: ubuntu-trusty
-  stemcell_version: latest
-
 instance_groups:
   - name: haproxy
     instances: 1

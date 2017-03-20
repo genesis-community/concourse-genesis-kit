@@ -1,0 +1,8 @@
+---
+params:
+  ssl_pem:           (( vault meta.vault "/ssl:combined" ))
+  external_url:      (( param "Please specify the URL users will use to connect to Concourse" ))
+  concourse_network: concourse
+  concourse_vm_type: small
+  stemcell_os: ubuntu-trusty
+  stemcell_version: latest
