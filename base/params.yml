@@ -4,5 +4,6 @@ params:
   external_url:      (( param "Please specify the URL users will use to connect to Concourse" ))
   concourse_network: concourse
   concourse_vm_type: small
+  concourse_disk_type: concourse
   stemcell_os: ubuntu-trusty
   stemcell_version: latest

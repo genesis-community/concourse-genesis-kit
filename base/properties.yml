@@ -46,7 +46,7 @@ instance_groups:
     vm_type: (( grab params.concourse_vm_type ))
     networks:
     - name: (( grab params.concourse_network ))
-    persistent_disk: 10240
+    persistent_disk_pool: (( grab params.concourse_disk_type ))
     jobs:
       - release: concourse
         name: postgresql
