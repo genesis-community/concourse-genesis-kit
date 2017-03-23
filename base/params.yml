@@ -7,3 +7,8 @@ params:
   concourse_disk_type: concourse
   stemcell_os: ubuntu-trusty
   stemcell_version: latest
+
+  availability_zones:
+  - z1
+  - z2
+  - z3
