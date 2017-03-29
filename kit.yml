@@ -20,8 +20,6 @@ subkits:
     subkit: azure
   - prompt: Do you want to install SHIELD on your BOSH for backups?
     subkit: shield
-  - prompt: Should the toolbelt-boshrelease be installed on VMs to assist in troubleshooting?
-    subkit: toolbelt
 
 params:
   base:
