@@ -124,7 +124,7 @@ params:
 
 
   shield:
-    - ask: What is the Vault path to your Concourse Agent public key?
+    - ask: What is the Vault path to your SHIELD Agent public key?
       description: |
         This is usually something like `secret/path/to/keys/for/shield/agent:public`
         If you are unsure, use `safe tree` to find it.
