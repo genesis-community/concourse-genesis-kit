@@ -18,7 +18,7 @@ subkits:
         label: HTTP Basic Auth
   - prompt: Are you deploying Concourse on Azure?
     subkit: azure
-  - prompt: Do you want to install SHIELD on your BOSH for backups?
+  - prompt: Do you want to install SHIELD on your Concourse for backups?
     subkit: shield
 
 params:
