@@ -134,6 +134,12 @@ certificates: {}
 
 credentials:
   base:
+    tsa/host_key: ssh 2048
+    tsa/worker_key: ssh 2048
+
+    locker/api:
+      password: random 16
+
     database/atc:
       password: random 64
 
