@@ -67,10 +67,11 @@ instance_groups:
       - name: locker
         release: locker
         properties:
-          user: locker
-          password: (( vault meta.vault "/locker/api:password" ))
-          ssl_cert: (( vault meta.vault "/locker/server:certificate" ))
-          ssl_key: (( vault meta.vault "/locker/server:key" ))
+          locker:
+            user: locker
+            password: (( vault meta.vault "/locker/api:password" ))
+            ssl_cert: (( vault meta.vault "/locker/server:certificate" ))
+            ssl_key: (( vault meta.vault "/locker/server:key" ))
 
   - name: worker
     instances: 3
