@@ -21,7 +21,7 @@ instance_groups:
             ssl_pem: (( grab params.ssl_pem ))
 
   - name: web
-    instances: 2
+    instances: 1
     azs: (( grab params.availability_zones ))
     stemcell: default
     vm_type: (( grab params.concourse_vm_type ))
@@ -35,7 +35,7 @@ instance_groups:
           host_key: (( vault meta.vault "/tsa/host_key:private" ))
           host_public_key: (( vault meta.vault "/tsa/host_key:public" ))
           authorized_keys:
-          - (( vault meta.vault "/tsa/worker_key: public" ))
+          - (( vault meta.vault "/tsa/worker_key:public" ))
           authorize_generated_worker_key: false
       - release: concourse
         name: atc
@@ -69,8 +69,8 @@ instance_groups:
         properties:
           user: locker
           password: (( vault meta.vault "/locker/api:password" ))
-          ssl_cert: (( vault meta.vault "/locker/cert:certificate" ))
-          ssl_key: (( vault meta.vault "/locker/cert:key" ))
+          ssl_cert: (( vault meta.vault "/locker/server:certificate" ))
+          ssl_key: (( vault meta.vault "/locker/server:key" ))
 
   - name: worker
     instances: 3
@@ -87,8 +87,8 @@ instance_groups:
         name: groundcrew
         properties:
           tsa:
-            private_key: (( vault meta.vault_prefix "/tsa/worker_key:private" ))
-            host_public_key: (( vault meta.vault_prefix "/tsa/host_key:public" ))
+            private_key: (( vault meta.vault "/tsa/worker_key:private" ))
+            host_public_key: (( vault meta.vault "/tsa/host_key:public" ))
       - release: concourse
         name: baggageclaim
         properties: {}

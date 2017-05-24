@@ -138,8 +138,8 @@ certificates:
 
 credentials:
   base:
-    tsa/host_key: ssh 2048
-    tsa/worker_key: ssh 2048
+    tsa/host_key: ssh 2048 fixed
+    tsa/worker_key: ssh 2048 fixed
 
     locker/api:
       password: random 16
