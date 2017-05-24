@@ -60,10 +60,17 @@ instance_groups:
       - release: concourse
         name: postgresql
         properties:
-         databases:
+          databases:
             - name: atc
               role: atc
               password: (( vault meta.vault "/database/atc:password" ))
+      - name: locker
+        release: locker
+        properties:
+          user: locker
+          password: (( vault meta.vault "/locker/api:password" ))
+          ssl_cert: (( vault meta.vault "/locker/cert:certificate" ))
+          ssl_key: (( vault meta.vault "/locker/cert:key" ))
 
   - name: worker
     instances: 3

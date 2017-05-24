@@ -130,7 +130,11 @@ params:
         If you are unsure, use `safe tree` to find it.
       param: shield_key_vault_path
 
-certificates: {}
+certificates:
+  base:
+    locker:
+      ca: { valid_for: 10y }
+      server: { valid_for: 1y, names: [ "locker" ] }
 
 credentials:
   base:
