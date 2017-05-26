@@ -123,9 +123,9 @@ releases:
   url: https://github.com/cloudfoundry-community/haproxy-boshrelease/releases/download/v8.0.12/haproxy-8.0.12.tgz
   version: 8.0.12
 - name: garden-runc
-  sha1: 6e50e37efbfbfcfa803d5d87a7a85a3073f69243
-  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.1.1
-  version: 1.1.1
+  sha1: 58fbc64aff303e6d76899441241dd5dacef50cb7
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.6.0
+  version: 1.6.0
 - name: slack-notification-resource
   sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
