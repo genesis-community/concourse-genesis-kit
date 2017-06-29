@@ -112,6 +112,20 @@ Params
 
   For example: `secret/us/proto/shield/agent:public`
 
+Cloud Config
+------------
+
+By default, this kit uses the following VM types/networks/disk pools from your
+Cloud Config. Feel free to override them in your environment, if you would
+rather they use entities already existing in your Cloud Foundry:
+
+```
+params:
+  concourse_network:   concourse
+  concourse_disk_pool: concourse # should be at least 10GB (used for the concourse DB)
+  concourse_vm_type:   small # VMs should have at least 2 CPUs, and 4GB of memory
+```
+
 [1]: https://concourse.ci
 [2]: https://github.com/starkandwayne/genesis
 [3]: https://github.com/cloudfoundry-community/locker
