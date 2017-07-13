@@ -111,9 +111,9 @@ update:
 
 releases:
 - name: concourse
-  sha1: ade4f7b6a939d3a47590006410aa89f69b4dbd1f
-  url: https://bosh.io/d/github.com/concourse/concourse?v=3.0.1
-  version: 3.0.1
+  sha1: 2c876303dc6866afb845e728eab58abae8ff3be2
+  url: https://bosh.io/d/github.com/concourse/concourse?v=3.3.2
+  version: 3.3.2
 - name: locker
   sha1: ccfcc48d63555a3733c3594d9429a5c1875a9dd2
   url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
