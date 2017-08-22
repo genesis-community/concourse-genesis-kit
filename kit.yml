@@ -121,7 +121,7 @@ params:
       example: https://api.system.bosh-lite.com
       param: cf_api_url
     - ask: What is the UAA Token URL?
-      param: uaa_token_url_
+      param: uaa_token_url
       description: |
         This is the URL provided by the UAA for generating
         OAuth Tokens

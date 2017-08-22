@@ -11,7 +11,7 @@ instance_groups:
         uaa_auth:
           cf_spaces:     (( grab params.authz_allowed_groups ))
           client_id:     (( vault meta.vault "/oauth:provider_key" ))
-          client_secret: (( vault meta.vault "/oatuh:provider_secret" ))
+          client_secret: (( vault meta.vault "/oauth:provider_secret" ))
   
           api_url:   (( grab params.cf_api_url ))
           auth_url:  (( grab params.uaa_auth_url ))
