@@ -16,6 +16,13 @@ subkits:
         label: UAA OAuth Integration
       - subkit: ~
         label: HTTP Basic Auth
+
+  - prompt: Do you have an SSL certificate for Concourse, or do you need a self-signed cert?
+    choices:
+      - subkit: provided-cert
+        label: I have my own certificate for Concourse
+      - subkit: self-signed-cert
+        label: Please have Genesis create a self-signed certificate for Concourse
   - prompt: Are you deploying Concourse on Azure?
     subkit: azure
   - prompt: Do you want to install SHIELD on your Concourse for backups?
@@ -23,17 +30,20 @@ subkits:
 
 params:
   base:
-    - ask: What is the external URL for concourse?
+    - ask: What is the external domain for concourse?
       description: |
-        The external URL for concourse is the URL users will use to access it via their
-        web browser, or the fly CLI.
-      param: external_url
+        The external domain for concourse is the IP/DNS entry users will use to access Concourse.
+        Do not include 'https://' in this value.
+      param: external_domain
+
+  provided-cert:
     - ask: What is the SSL cert + key pair for Concourse?
       type: multi-line
       description: |
         Concoure will be running on https by default, and as such, needs an SSL cert/key
         specified. Please enter a combined pem-encoded private key + signed certificate.
-      vault: ssl:combined
+      vault: ssl/server:combined
+
   github-enterprise-oauth:
     - ask: What is your GitHub OAuth Client ID?
       description: |
@@ -135,6 +145,11 @@ certificates:
     locker:
       ca: { valid_for: 10y }
       server: { valid_for: 1y, names: [ "locker" ] }
+
+  self-signed-cert:
+    ssl:
+      ca: { valid_for: 10y }
+      server: { valid_for: 1y, names: [ "${params.external_domain}" ] }
 
 credentials:
   base:

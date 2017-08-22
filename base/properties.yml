@@ -19,6 +19,7 @@ instance_groups:
             backend_port: 8080
             backend_servers: (( grab instance_groups.web.networks.0.static_ips ))
             ssl_pem: (( grab params.ssl_pem ))
+            https_redirect_all: true
 
   - name: web
     instances: 1
