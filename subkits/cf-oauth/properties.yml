@@ -9,10 +9,11 @@ instance_groups:
         basic_auth_username: (( prune ))
         basic_auth_password: (( prune ))
         uaa_auth:
-          cf_spaces:     (( grab params.authz_allowed_groups ))
+          cf_spaces:     (( grab params.cf_spaces ))
           client_id:     (( vault meta.vault "/oauth:provider_key" ))
           client_secret: (( vault meta.vault "/oauth:provider_secret" ))
   
-          api_url:   (( grab params.cf_api_url ))
+          cf_api_url:   (( grab params.cf_api_url ))
           auth_url:  (( grab params.uaa_auth_url ))
           token_url: (( grab params.uaa_token_url ))
+          cf_ca_cert: (( vault params.cf_ca_cert_vault_path ))

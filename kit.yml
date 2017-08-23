@@ -107,11 +107,20 @@ params:
         The UAA client secret is used to authenticate Concourse to the UAA,
         so that Concourse can then authorize users after they log into the UAA.
       vault: oauth:provider_secret
-    - ask: What UAA groups do you want to grant access to Concourse?
+    - ask: What is your CF CA cert path?
       description: |
-        Concourse authorizes access based off of UAA Groups. Specify all the
-        groups whose users will be given access to Concourse here.
-      param: authz_allowed_groups
+        The CF CA cert is used to authenticate Concourse to the UAA,
+        so that Concourse can then authorize users after they log into the UAA. 
+        This is usually something like `secret/path/to/keys/for/haproxy/ssl:certificate`
+        If you are unsure, use `safe tree` to find it. If you are terminating ssl on LBs or
+        Go routers, you will need cert on those nodes.
+      param: cf_ca_cert_vault_path
+    - ask: What CF spaces do you want to grant access to Concourse?
+      description: |
+        List of space GUIDs for Cloud Foundry spaces whose developers
+        will have access.
+      type: list
+      param: cf_spaces
     - ask: What is the URL to your CF API?
       description: |
         This is the URL of the CF installation that
