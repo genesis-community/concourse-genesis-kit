@@ -1,7 +1,8 @@
 ---
 params:
-  ssl_pem:           (( vault meta.vault "/ssl:combined" ))
-  external_url:      (( param "Please specify the URL users will use to connect to Concourse" ))
+  ssl_pem:           (( vault meta.vault "/ssl/server:combined" ))
+  external_domain:   (( param "Please specify the IP/DNS users will use to connect to Concourse" ))
+  external_url:      (( concat "https://" params.external_domain ))
   concourse_network: concourse
   concourse_vm_type: small
   concourse_disk_type: concourse
