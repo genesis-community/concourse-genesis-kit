@@ -120,7 +120,7 @@ releases:
   url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
   version: 0.2.1
 - name: haproxy
-  sha1: 17d850ff3bbf46d78b507eae9f6737740f9fa675
+  sha1: 01ff0f16c9f55eb6f56d5735772934de31b2ceb2
   url: https://github.com/cloudfoundry-incubator/haproxy-boshrelease/releases/download/v8.4.0/haproxy-8.4.0.tgz
   version: 8.4.0
 - name: garden-runc
