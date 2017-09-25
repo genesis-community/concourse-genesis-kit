@@ -27,6 +27,8 @@ subkits:
     subkit: azure
   - prompt: Do you want to install SHIELD on your Concourse for backups?
     subkit: shield
+  - prompt: Do you want to use the newer, dedicated Postgres release (recommended)
+    subkit: postgres-new
 
 params:
   base:

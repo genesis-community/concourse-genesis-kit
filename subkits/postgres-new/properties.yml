@@ -1,0 +1,25 @@
+instance_groups:
+- name: db
+  jobs:
+  - (( delete postgresql ))
+  - (( append ))
+  - release: postgres
+    name: postgres
+    properties:
+      databases:
+        port: 5432
+        databases:
+        - name: atc
+        roles:
+        - name: atc
+          password: (( vault meta.vault "/database/atc:password" ))
+- name: web 
+  jobs:
+  - name: atc
+    properties:
+      postgresql_database: ~
+      postgresql:
+        database: atc
+        role:
+          name: atc
+          password: (( vault meta.vault "/database/atc:password" ))
