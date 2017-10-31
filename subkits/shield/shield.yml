@@ -9,8 +9,6 @@ instance_groups:
         agent:
           daemon_public_key: (( vault params.shield_key_vault_path ))
       daemon_public_key: (( vault params.shield_key_vault_path ))
-  - name: agent-pgtools
-    release: shield
 
 releases:
 - name: shield

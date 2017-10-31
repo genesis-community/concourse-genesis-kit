@@ -23,3 +23,10 @@ instance_groups:
         role:
           name: atc
           password: (( vault meta.vault "/database/atc:password" ))
+
+releases:
+- (( append ))
+- name: postgres
+  sha1: 3f378bcab294e20316171d4e656636df88763664
+  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=20
+  version: 20
