@@ -41,9 +41,13 @@ instance_groups:
       - release: concourse
         name: atc
         properties:
+          postgresql:
+            database: atc
+            role:
+              name: atc
+              password: (( vault meta.vault "/database/atc:password" ))
           bind_port: 8080
           publicly_viewable: true
-          postgresql_database: atc
           basic_auth_username: concourse
           basic_auth_password: (( vault meta.vault "/webui:password" ))
           external_url: (( grab params.external_url ))
@@ -58,21 +62,24 @@ instance_groups:
       static_ips: (( static_ips 3 ))
     persistent_disk_pool: (( grab params.concourse_disk_type ))
     jobs:
-      - release: concourse
-        name: postgresql
-        properties:
+    - name: postgres
+      release: postgres
+      properties:
+        databases:
+          port: 5432
           databases:
-            - name: atc
-              role: atc
-              password: (( vault meta.vault "/database/atc:password" ))
-      - name: locker
-        release: locker
-        properties:
-          locker:
-            user: locker
-            password: (( vault meta.vault "/locker/api:password" ))
-            ssl_cert: (( vault meta.vault "/locker/server:certificate" ))
-            ssl_key: (( vault meta.vault "/locker/server:key" ))
+          - name: atc
+          roles:
+          - name: atc
+            password: (( vault meta.vault "/database/atc:password" ))
+    - name: locker
+      release: locker
+      properties:
+        locker:
+          user: locker
+          password: (( vault meta.vault "/locker/api:password" ))
+          ssl_cert: (( vault meta.vault "/locker/server:certificate" ))
+          ssl_key: (( vault meta.vault "/locker/server:key" ))
 
   - name: worker
     instances: 3
@@ -112,9 +119,13 @@ update:
 
 releases:
 - name: concourse
-  sha1: 65a974b3831bb9908661a5ffffbe456e10185149
-  url: https://bosh.io/d/github.com/concourse/concourse?v=3.5.0
-  version: 3.5.0
+  sha1: 1257bdcd3181ab0a669bc9e34cd87aff584f007b
+  url: https://bosh.io/d/github.com/concourse/concourse?v=3.6.0
+  version: 3.6.0
+- name: postgres
+  sha1: 3f378bcab294e20316171d4e656636df88763664
+  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=20
+  version: 20
 - name: locker
   sha1: ccfcc48d63555a3733c3594d9429a5c1875a9dd2
   url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
@@ -124,9 +135,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=8.4.2
   version: 8.4.2
 - name: garden-runc
-  sha1: 58fbc64aff303e6d76899441241dd5dacef50cb7
-  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.6.0
-  version: 1.6.0
+  sha1: 9cccd7685ac075ad6956cba3ab5881e3435cd7e3
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.9.4
+  version: 1.9.4
 - name: slack-notification-resource
   sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
