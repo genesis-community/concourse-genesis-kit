@@ -165,6 +165,8 @@ credentials:
     tsa/host_key: ssh 2048 fixed
     tsa/worker_key: ssh 2048 fixed
 
+    atc/token_signing_key: rsa 2048 fixed
+
     locker/api:
       password: random 16
 

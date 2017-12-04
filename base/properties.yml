@@ -37,7 +37,9 @@ instance_groups:
           host_public_key: (( vault meta.vault "/tsa/host_key:public" ))
           authorized_keys:
           - (( vault meta.vault "/tsa/worker_key:public" ))
-          authorize_generated_worker_key: false
+          token_signing_key: 
+            public_key: (( vault meta.vault "/atc/token_signing_key:public" ))
+            private_key: (( vault meta.vault "/atc/token_signing_key:private" ))
       - release: concourse
         name: atc
         properties:
@@ -46,6 +48,9 @@ instance_groups:
             role:
               name: atc
               password: (( vault meta.vault "/database/atc:password" ))
+          token_signing_key:
+            public_key: (( vault meta.vault "/atc/token_signing_key:public" ))
+            private_key: (( vault meta.vault "/atc/token_signing_key:private" ))
           bind_port: 8080
           publicly_viewable: true
           basic_auth_username: concourse
@@ -119,9 +124,9 @@ update:
 
 releases:
 - name: concourse
-  sha1: 1257bdcd3181ab0a669bc9e34cd87aff584f007b
-  url: https://bosh.io/d/github.com/concourse/concourse?v=3.6.0
-  version: 3.6.0
+  sha1: 20e17e3ac079f1b1a5095329a4fb14de40317bb9
+  url: https://bosh.io/d/github.com/concourse/concourse?v=3.7.0
+  version: 3.7.0
 - name: postgres
   sha1: 3f378bcab294e20316171d4e656636df88763664
   url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=20
