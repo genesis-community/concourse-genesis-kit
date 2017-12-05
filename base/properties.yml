@@ -19,13 +19,12 @@ instance_groups:
             tcp:
             - name: web_http
               port: 80
-              backend_port: (( grab instance_groups.web.jobs.atc.bind_port ))
+              backend_port: (( grab instance_groups.web.jobs.atc.properties.bind_port ))
               backend_servers: (( grab instance_groups.web.networks.0.static_ips ))
             - name: web_https
               port: 443
-              backend_port: (( grab instance_groups.web.jobs.atc.tls_bind_port ))
+              backend_port: (( grab instance_groups.web.jobs.atc.properties.tls_bind_port ))
               backend_servers: (( grab instance_groups.web.networks.0.static_ips ))
-              backend_ssl: noverify
 
   - name: web
     instances: (( grab params.num_web_nodes ))
@@ -39,8 +38,9 @@ instance_groups:
       - release: concourse
         name: tsa
         properties:
-          host_key: (( vault meta.vault "/tsa/host_key:private" ))
-          host_public_key: (( vault meta.vault "/tsa/host_key:public" ))
+          host_key: 
+            private_key: (( vault meta.vault "/tsa/host_key:private" ))
+            public_key: (( vault meta.vault "/tsa/host_key:public" ))
           authorized_keys:
           - (( vault meta.vault "/tsa/worker_key:public" ))
           token_signing_key: (( grab params.token_signing_key ))
@@ -105,8 +105,9 @@ instance_groups:
         name: groundcrew
         properties:
           tsa:
-            private_key: (( vault meta.vault "/tsa/worker_key:private" ))
-            host_public_key: (( vault meta.vault "/tsa/host_key:public" ))
+            worker_key:
+              private_key: (( vault meta.vault "/tsa/worker_key:private" ))
+              public_key: (( vault meta.vault "/tsa/worker_key:public" ))
       - release: concourse
         name: baggageclaim
         properties: {}
