@@ -36,6 +36,11 @@ params:
         Do not include 'https://' in this value.
       param: external_domain
 
+    - ask: How many web frontend nodes would you like to deploy and load balance between?
+      description: The number of instances of web nodes to allocate.
+      param: num_web_nodes
+      validate: 1-5
+
   provided-cert:
     - ask: What is the SSL cert + key pair for Concourse?
       type: multi-line
