@@ -9,6 +9,8 @@ instance_groups:
         basic_auth_username: (( prune ))
         basic_auth_password: (( prune ))
         github_auth:
-          authorize:     (( grab params.authz_allowed_orgs ))
+          authorize:
+          - organization: (( grab params.authz_allowed_orgs ))
+            teams: all
           client_id:     (( vault meta.vault "/oauth:provider_key" ))
           client_secret: (( vault meta.vault "/oauth:provider_secret" ))

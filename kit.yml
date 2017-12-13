@@ -62,10 +62,10 @@ params:
         so that Concourse can then authorize users after they log into GitHub. GitHub refers
         to this as the `client_secret`. See https://developer.github.com/v3/oauth/ for more info.
       vault: oauth:provider_secret
-    - ask: What GitHub organizations do you want to grant access to Concourse?
+    - ask: Which GitHub organization do you want to grant access to Concourse?
       description: |
-        Concourse authorizes access based off of GitHub Organizations. Specify all the
-        orgs whose users will be given access to Concourse here.
+        Concourse authorizes access based off of GitHub Organizations. Specify
+        the Github organization you wish to grant access to Concourse
       param: authz_allowed_orgs
     - ask: What is the API URL for your GitHub?
       description: |
@@ -95,10 +95,10 @@ params:
         so that Concourse can then authorize users after they log into GitHub. GitHub refers
         to this as the `client_secret`. See https://developer.github.com/v3/oauth/ for more info.
       vault: oauth:provider_secret
-    - ask: What GitHub organizations do you want to grant access to Concourse?
+    - ask: Which GitHub organization do you want to grant access to Concourse?
       description: |
-        Concourse authorizes access based off of GitHub Organizations. Specify all the
-        orgs whose users will be given access to Concourse here.
+        Concourse authorizes access based off of GitHub Organizations. Specify
+        the Github organization you wish to grant access to Concourse
       param: authz_allowed_orgs
 
   cf-oauth:
@@ -115,7 +115,7 @@ params:
     - ask: What is your CF CA cert path?
       description: |
         The CF CA cert is used to authenticate Concourse to the UAA,
-        so that Concourse can then authorize users after they log into the UAA. 
+        so that Concourse can then authorize users after they log into the UAA.
         This is usually something like `secret/path/to/keys/for/haproxy/ssl:certificate`
         If you are unsure, use `safe tree` to find it. If you are terminating ssl on LBs or
         Go routers, you will need cert on those nodes.

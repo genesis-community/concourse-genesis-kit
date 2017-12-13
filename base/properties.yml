@@ -127,9 +127,9 @@ update:
 
 releases:
 - name: concourse
-  sha1: 20e17e3ac079f1b1a5095329a4fb14de40317bb9
-  url: https://bosh.io/d/github.com/concourse/concourse?v=3.7.0
-  version: 3.7.0
+  sha1: 99e134676df72e18c719ccfbd7977bd9449e6fd4
+  url: https://bosh.io/d/github.com/concourse/concourse?v=3.8.0
+  version: 3.8.0
 - name: postgres
   sha1: 3f378bcab294e20316171d4e656636df88763664
   url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=20
