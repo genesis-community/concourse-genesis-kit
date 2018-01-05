@@ -5,10 +5,12 @@ instance_groups:
   - name: shield-agent
     release: shield
     properties:
-      shield:
-        agent:
-          daemon_public_key: (( vault params.shield_key_vault_path ))
-      daemon_public_key: (( vault params.shield_key_vault_path ))
+      ip: (( grab params.static_ip ))
+      shield-url: (( grab params.shield_core_url ))
+      agent:
+        key: (( vault params.shield_key_vault_path ))
+      core:
+        ca: (( vault params.shield_ca_vault_path ))
 
 releases:
 - name: shield
