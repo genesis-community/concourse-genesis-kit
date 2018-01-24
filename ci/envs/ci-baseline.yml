@@ -1,0 +1,16 @@
+---
+kit:
+  subkits:
+    - self-signed-cert
+
+params:
+  env:   ci-baseline
+  vault: genesis-ci/concourse/ci/baseline
+  bosh:  genesis-ci
+
+  external_domain: concourse.example.com
+  num_web_nodes:   1
+
+  availability_zones:
+    - (( replace ))
+    - z1
