@@ -18,11 +18,14 @@ subkits:
         label: HTTP Basic Auth
 
   - prompt: Do you have an SSL certificate for Concourse, or do you need a self-signed cert?
+    type: ssl
     choices:
       - subkit: provided-cert
         label: I have my own certificate for Concourse
       - subkit: self-signed-cert
         label: Please have Genesis create a self-signed certificate for Concourse
+      - subkit: ~
+        label: No certificate (workers-only)
   - prompt: Are you deploying Concourse on Azure?
     subkit: azure
   - prompt: Do you want to install SHIELD on your Concourse for backups?

@@ -57,6 +57,15 @@ rather than zones, there is typically only one zone in play for networks/VMs,
 and the availability set would be defined by the Azure CPI automatically, or via
 `cloud_properties` in your Cloud Config.
 
+#### Workers-Only
+
+This subkit lets you deploy a just the worker instances of a full
+Concourse, provided that you have an upstream Concourse (the "main
+Concourse") to hook them up to.  This is useful for disconnected
+and sequestered environments, where a single Concourse would be
+unable to contact all of your different BOSH directors or Cloud
+Foundry instances.
+
 Params
 ------
 
@@ -111,6 +120,29 @@ Params
   This is used to authenticate the SHIELD daemon to the agent, when running tasks.
 
   For example: `secret/us/proto/shield/agent:public`
+
+#### workers-only Params
+
+Note that the workers-only subkit actively _removes_ parts of the
+Concourse deployment topology from the manifest, so a lot of the
+above subkits don't work with it, and a some of the base
+parameters (like `params.external_domain`) are no longer required.
+
+- **tsa_host** - The IP address of the main Concourse's TSA
+  instance.  This parameter is **required**.
+- **tsa_port** - The TCP port that the workers should contact the
+  main Concourse TSA node on.  Defaults to _2222_, which should
+  suffice for most deployments.
+- **tsa_key_path** - Where in the Vault can Genesis find the TSA
+  host key, to allow the worker to safely connect to the TSA.
+  This path is specified without the leading "secret/" path.
+  Usually, this is something like "my/env/concourse/tsa/host_key".
+  This parameter is **required**.
+- **worker_key_path** - Where in the Vault can Genesis find the
+  Concourse Worker key that is already trusted by the TSA?
+  This path is specified without the leading "secret/" path.
+  Usually, this is something like "my/env/concourse/tsa/worker_key".
+  This parameter is **required**.
 
 Cloud Config
 ------------
