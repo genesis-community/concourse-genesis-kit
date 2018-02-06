@@ -8,6 +8,7 @@ params:
   vault: genesis-ci/concourse/ci/baseline
   bosh:  genesis-ci
 
+  concourse_network: genesis-ci
   external_domain: concourse.example.com
   num_web_nodes:   1
 
