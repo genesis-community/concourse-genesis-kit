@@ -1,0 +1,27 @@
+---
+meta:
+  default:
+    tags: [(( grab params.env ))]
+
+params:
+  external_domain: (( empty string ))
+
+  tsa_host: (( param "Please specify the IP address of the TSA node" ))
+  tsa_port: 2222
+
+  tsa_key_path:    (( param "Please specify the path (in the Vault) to the TSA node's host key" ))
+  worker_key_path: (( param "Please specify the path (in the Vault) to the shared Concourse worker key" ))
+
+instance_groups:
+  - name: worker
+    jobs:
+      - name: groundcrew
+        properties:
+          tags: (( grab params.tags || meta.default.tags ))
+          tsa:
+            host: (( grab params.tsa_host ))
+            port: (( grab params.tsa_port ))
+            host_public_key: (( vault "secret/" params.tsa_key_path ":public" ))
+            worker_key:
+              private_key: (( vault "secret/" params.worker_key_path ":private" ))
+              public_key:  (( vault "secret/" params.worker_key_path ":public" ))

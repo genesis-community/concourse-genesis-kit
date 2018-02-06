@@ -1,0 +1,11 @@
+---
+instance_groups:
+  - (( delete haproxy ))
+  - (( delete web ))
+  - (( delete db ))
+
+releases:
+  - (( delete postgres ))
+  - (( delete locker ))
+  - (( delete haproxy ))
+  - (( delete slack-notification-resource ))
