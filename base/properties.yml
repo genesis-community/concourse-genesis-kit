@@ -129,6 +129,9 @@ instance_groups:
       - release: concourse
         name: groundcrew
         properties:
+          http_proxy_url:  (( grab params.http_proxy  || "" ))
+          https_proxy_url: (( grab params.https_proxy || "" ))
+          no_proxy:        (( grab params.no_proxy    || [] ))
           tsa:
             worker_key:
               private_key: (( vault meta.vault "/tsa/worker_key:private" ))

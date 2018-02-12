@@ -7,3 +7,12 @@
 
 - The new `worker_nodes` property allows operators to scale out
   the size of the Concourse by spinning up additional workers.
+
+- This kit now supports setting HTTP/HTTPS proxy settings for each
+  of the Garden containers that Concourse spins, via these new
+  parameters:
+
+    - `http_proxy` - URL of the proxy to use for HTTP requests.
+    - `https_proxy` - URL of the proxy to use for HTTPS requests.
+    - `no_proxy` - A list of IP addresses and names to skip
+      proxying for
