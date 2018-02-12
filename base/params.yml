@@ -1,18 +1,1 @@
----
-params:
-  external_domain:   (( param "Please specify the IP/DNS users will use to connect to Concourse" ))
-  num_web_nodes:     1
-  external_url:      (( concat "https://" params.external_domain ))
-  concourse_network: concourse
-  concourse_vm_type: small
-  concourse_disk_type: concourse
-  stemcell_os: ubuntu-trusty
-  stemcell_version: latest
-  token_signing_key:
-    public_key: (( vault meta.vault "/atc/token_signing_key:public" ))
-    private_key: (( vault meta.vault "/atc/token_signing_key:private" ))
-
-  availability_zones:
-  - z1
-  - z2
-  - z3
+--- {}
