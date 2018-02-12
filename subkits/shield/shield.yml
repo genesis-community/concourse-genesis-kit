@@ -1,7 +1,7 @@
 ---
 meta:
   shield:
-    no_proxy: (( grab params.no_proxy || [] ))
+    no_proxy: (( grab params.no_proxy || meta.default.no_proxy ))
 
 instance_groups:
 - name: db
