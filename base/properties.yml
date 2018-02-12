@@ -6,8 +6,10 @@ meta:
 
 params:
   external_domain:   (( param "Please specify the IP/DNS users will use to connect to Concourse" ))
-  num_web_nodes:     1
   external_url:      (( concat "https://" params.external_domain ))
+
+  num_web_nodes:     1
+  workers:           3
 
   concourse_network: concourse
   concourse_vm_type: small
@@ -114,7 +116,7 @@ instance_groups:
           ssl_key: (( vault meta.vault "/locker/server:key" ))
 
   - name: worker
-    instances: 3
+    instances: (( grab workers ))
     azs: (( grab params.availability_zones || meta.default.azs ))
     stemcell: default
     vm_type: (( grab params.concourse_vm_type ))
