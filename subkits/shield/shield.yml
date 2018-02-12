@@ -1,4 +1,8 @@
 ---
+meta:
+  shield:
+    no_proxy: (( grab params.no_proxy || [] ))
+
 instance_groups:
 - name: db
   jobs:
@@ -11,9 +15,9 @@ instance_groups:
       core:
         ca: (( vault params.shield_ca_vault_path ))
       env:
-        http_proxy: (( grab params.http_proxy || "" ))
+        http_proxy:  (( grab params.http_proxy  || "" ))
         https_proxy: (( grab params.https_proxy || "" ))
-        no_proxy: (( grab params.no_proxy || "" ))
+        no_proxy:    (( join "," meta.shield.no_proxy ))
 
 releases:
 - name: shield
