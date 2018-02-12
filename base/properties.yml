@@ -1,6 +1,8 @@
 ---
 meta:
   vault: (( concat "secret/" params.vault ))
+  default:
+    azs: [z1, z2, z3]
 
 params:
   external_domain:   (( param "Please specify the IP/DNS users will use to connect to Concourse" ))
@@ -18,15 +20,14 @@ params:
     public_key: (( vault meta.vault "/atc/token_signing_key:public" ))
     private_key: (( vault meta.vault "/atc/token_signing_key:private" ))
 
-  availability_zones:
-  - z1
-  - z2
-  - z3
+  # NOTE: we do not define a default for the `availability_zones` param,
+  # because we want to allow users to override the set of AZs wholesale,
+  # without resorting to silly spruce tricks like `(( replace ))`
 
 instance_groups:
   - name: haproxy
     instances: 1
-    azs: (( grab params.availability_zones ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
     stemcell: default
     vm_type: (( grab params.concourse_vm_type ))
     networks:
@@ -49,7 +50,7 @@ instance_groups:
 
   - name: web
     instances: (( grab params.num_web_nodes ))
-    azs: (( grab params.availability_zones ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
     stemcell: default
     vm_type: (( grab params.concourse_vm_type ))
     networks:
@@ -85,7 +86,7 @@ instance_groups:
 
   - name: db
     instances: 1
-    azs: (( grab params.availability_zones ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
     stemcell: default
     vm_type: (( grab params.concourse_vm_type ))
     networks:
@@ -114,7 +115,7 @@ instance_groups:
 
   - name: worker
     instances: 3
-    azs: (( grab params.availability_zones ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
     stemcell: default
     vm_type: (( grab params.concourse_vm_type ))
     networks:
