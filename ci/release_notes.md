@@ -16,3 +16,7 @@
     - `https_proxy` - URL of the proxy to use for HTTPS requests.
     - `no_proxy` - A list of IP addresses and names to skip
       proxying for
+
+- Garden and Baggage Claim now forward their registration
+  endpoints via their respective `forward_agent` properties, to
+  make remote workers easier to implement.

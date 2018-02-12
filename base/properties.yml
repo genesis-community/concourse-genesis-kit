@@ -139,11 +139,14 @@ instance_groups:
               public_key: (( vault meta.vault "/tsa/worker_key:public" ))
       - release: concourse
         name: baggageclaim
-        properties: {}
+        properties:
+          baggageclaim:
+            forward_address: 127.0.0.1:7788
       - release: garden-runc
         name: garden
         properties:
           garden:
+            forward_address: 127.0.0.1:7777
             listen_network: tcp
             listen_address: 0.0.0.0:7777
 
