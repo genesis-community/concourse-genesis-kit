@@ -116,7 +116,7 @@ instance_groups:
           ssl_key: (( vault meta.vault "/locker/server:key" ))
 
   - name: worker
-    instances: (( grab workers ))
+    instances: (( grab params.workers ))
     azs: (( grab params.availability_zones || meta.default.azs ))
     stemcell: default
     vm_type: (( grab params.concourse_vm_type ))
