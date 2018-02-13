@@ -94,7 +94,6 @@ instance_groups:
     vm_type: (( grab params.concourse_vm_type ))
     networks:
     - name: (( grab params.concourse_network ))
-      static_ips: (( static_ips 3 ))
     persistent_disk_pool: (( grab params.concourse_disk_type ))
     jobs:
     - name: postgres
