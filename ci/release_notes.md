@@ -20,3 +20,7 @@
 - Garden and Baggage Claim now forward their registration
   endpoints via their respective `forward_agent` properties, to
   make remote workers easier to implement.
+
+- The database VM (`db`) no longer utilizes a static IP, since
+  the Concourse ATC is more than capable of using BOSH links to
+  figure out where the database is.
