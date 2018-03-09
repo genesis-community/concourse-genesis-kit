@@ -72,9 +72,40 @@ Params
 #### Base Params
 
 - **params.external_url** - This is the external URL that users will use to access Concourse.
+
 - **SSL PEM** - Concourse requires an SSL certificate to be accessed using https. This should
   be a PEM file containing the SSL certificate + Private Key. The data will be stored in Vault
   under `secret/path/to/env/concourse/ssl:combined`.
+
+- **params.concourse_vm_type** - The `vm_type` to use for all
+  Concourse VMs, by default.  For any serious pipeline usage, you
+  will want to also set **params.worker_vm_type**, to get more
+  ephemeral disk for the workers.  Defaults to `concourse`.
+
+- **params.haproxy_vm_type** - The `vm_type` to use for haproxy
+  VMs, if you are deploying those.  Defaults to whatever
+  **params.concourse_vm_type** has been set to.
+
+- **params.web_vm_type** - The `vm_type` to use for web (TSA /
+  ATC) nodes.  Defaults to whatever **params.concourse_vm_type**
+  has been set to.
+
+- **params.db_vm_type** - The `vm_type` to use for the database
+  node.  Defaults to whatever **params.concourse_vm_type** has
+  been set to.
+
+- **params.worker_vm_type** - The `vm_type` to use for workers.
+  Defaults to whatever **params.concourse_vm_type** has been set
+  to, which may not be the best.
+
+- **params.concourse_network** - The name of the BOSH cloud-config
+  network that Concourse will be deployed into.  Defaults to
+  `concourse`.
+
+- **params.concourse_disk_type** - The `disk_type` is used only on
+  the database node, for sizing the persistent disk which will
+  house all of our build logs and pipeline output.
+
 
 #### github-oauth Params
 
