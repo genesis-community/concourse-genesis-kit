@@ -23,6 +23,8 @@ params:
     public_key: (( vault meta.vault "/atc/token_signing_key:public" ))
     private_key: (( vault meta.vault "/atc/token_signing_key:private" ))
 
+  volume_driver: detect
+
   # NOTE: we do not define a default for the `availability_zones` param,
   # because we want to allow users to override the set of AZs wholesale,
   # without resorting to silly spruce tricks like `(( replace ))`
@@ -63,7 +65,7 @@ instance_groups:
       - release: concourse
         name: tsa
         properties:
-          host_key: 
+          host_key:
             private_key: (( vault meta.vault "/tsa/host_key:private" ))
             public_key: (( vault meta.vault "/tsa/host_key:public" ))
           authorized_keys:
@@ -136,11 +138,12 @@ instance_groups:
             worker_key:
               private_key: (( vault meta.vault "/tsa/worker_key:private" ))
               public_key: (( vault meta.vault "/tsa/worker_key:public" ))
+          baggageclaim:
+            forward_address: 127.0.0.1:7788
       - release: concourse
         name: baggageclaim
         properties:
-          baggageclaim:
-            forward_address: 127.0.0.1:7788
+          driver: (( grab params.volume_driver ))
       - release: garden-runc
         name: garden
         properties:
@@ -158,9 +161,9 @@ update:
 
 releases:
 - name: concourse
-  sha1: 99e134676df72e18c719ccfbd7977bd9449e6fd4
-  url: https://bosh.io/d/github.com/concourse/concourse?v=3.8.0
-  version: 3.8.0
+  sha1: a0ebed14c296273f37ed2a7ec79b9a7814734e16
+  url: https://bosh.io/d/github.com/concourse/concourse?v=3.9.2
+  version: 3.9.2
 - name: postgres
   sha1: 3f378bcab294e20316171d4e656636df88763664
   url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=20
@@ -174,9 +177,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=8.4.2
   version: 8.4.2
 - name: garden-runc
-  sha1: 9cccd7685ac075ad6956cba3ab5881e3435cd7e3
-  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.9.4
-  version: 1.9.4
+  sha1: ed353e41eec34c3713d6d80c4cc890afc7291cca
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.12.1
+  version: 1.12.1
 - name: slack-notification-resource
   sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
