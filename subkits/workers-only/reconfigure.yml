@@ -15,7 +15,7 @@ params:
 instance_groups:
   - name: worker
     jobs:
-      - name: groundcrew
+      - name: worker
         properties:
           tags: (( grab params.tags || meta.default.tags ))
           tsa:
