@@ -8,7 +8,6 @@ meta:
 params:
   external_domain:   (( param "Please specify the IP/DNS users will use to connect to Concourse" ))
   external_url:      (( concat "https://" params.external_domain ))
-
   num_web_nodes:     1
   workers:           3
 
@@ -129,7 +128,7 @@ instance_groups:
       max_in_flight: (( grab instance_groups.worker.instances ))
     jobs:
       - release: concourse
-        name: groundcrew
+        name: worker
         properties:
           http_proxy_url:  (( grab params.http_proxy  || "" ))
           https_proxy_url: (( grab params.https_proxy || "" ))
@@ -161,9 +160,9 @@ update:
 
 releases:
 - name: concourse
-  sha1: a0ebed14c296273f37ed2a7ec79b9a7814734e16
-  url: https://bosh.io/d/github.com/concourse/concourse?v=3.9.2
-  version: 3.9.2
+  sha1: aaa4e4d42adb2293abc79422351ca71ed548f95c
+  url: https://bosh.io/d/github.com/concourse/concourse?v=3.13.0
+  version: 3.13.0
 - name: postgres
   sha1: 3f378bcab294e20316171d4e656636df88763664
   url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=20
@@ -177,9 +176,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=8.4.2
   version: 8.4.2
 - name: garden-runc
-  sha1: ed353e41eec34c3713d6d80c4cc890afc7291cca
-  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.12.1
-  version: 1.12.1
+  sha1: 54cbb89cae1be0708aa056185671665d7f4b2a4f
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.13.1
+  version: 1.13.1
 - name: slack-notification-resource
   sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
