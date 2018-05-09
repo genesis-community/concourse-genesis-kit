@@ -1,0 +1,271 @@
+#!/bin/bash
+
+dir="$1" name="$2" vault="$3"
+ymlfile="$dir/$name.yml"
+ymlparent="$dir/${name%%-*}.yml"
+declare -a features
+params="\nparams:\n  env:   $name\n  vault: $vault\n"
+
+describe \
+  "#W{Concourse CI/CD Genesis Kit}" \
+  "#W{---------------------------}" \
+  "" \
+  "Creating environment #C{$name} in #C{$dir}"
+
+prompt_for kit_type select \
+  "Is this a full Concourse deployment, or a worker deployment for an existing Concourse?" \
+  -o "[full]Full Concourse" \
+  -o "[workers]Workers"
+features+=($kit_type)
+if [[ "$kit_type" == "full" ]] ; then
+
+  prompt_for auth_backend_feature "select" \
+    "What authentication backend do you wish to use with Concourse?" \
+    -o "[github-oath]             GitHub OAuth Integration" \
+    -o "[github-enterprise-oauth] GitHub Enterprise OAuth Integration" \
+    -o "[cf-oauth]                UAA OAuth Integration" \
+    -o "[]                        HTTP Basic Auth"
+  if [[ -n $auth_backend_feature ]] ; then
+    features+=($auth_backend_feature)
+  fi
+
+  case "$auth_backend_feature" in
+    "github-oath")
+      describe \
+        'The GitHub OAuth Client Key is used to authenticate Concourse to GitHub,' \
+        'so that Concourse can then authorize users after they log into GitHub. GitHub refers' \
+        'to this as the `client_id`. See https://developer.github.com/v3/oauth/ for more info.'
+      prompt_for "$vault/oauth:provider_key" secret-line \
+        "What is your GitHub OAuth Client ID?"
+
+      describe \
+        'The GitHub OAuth Client Secret is used to authenticate Concourse to GitHub,' \
+        'so that Concourse can then authorize users after they log into GitHub. GitHub refers' \
+        'to this as the `client_secret`. See https://developer.github.com/v3/oauth/ for more info.'
+      prompt_for "$vault/oauth:provider_secret" secret-line \
+        "What is your GitHub OAuth Client Secret?"
+
+      describe_and_comment params \
+        "Concourse authorizes access based off of GitHub Organizations. Specify all the" \
+        "orgs whose users will be given access to Concourse here."
+      prompt_for authz_allowed_orgs multi-line \
+        "What GitHub organizations do you want to grant access to Concourse?" \
+        --min 1
+      param_entry params authz_allowed_orgs -a "${authz_allowed_orgs[@]}"
+      ;;
+
+    "github-enterprise-oauth")
+      describe \
+        'The GitHub OAuth Client Key is used to authenticate Concourse to GitHub,' \
+        'so that Concourse can then authorize users after they log into GitHub. GitHub refers' \
+        'to this as the `client_id`. See https://developer.github.com/v3/oauth/ for more info.'
+      prompt_for "$vault/oauth:provider_key" secret-line \
+        "What is your GitHub OAuth Client ID?"
+
+      describe \
+        'The GitHub OAuth Client Secret is used to authenticate Concourse to GitHub,' \
+        'so that Concourse can then authorize users after they log into GitHub. GitHub refers' \
+        'to this as the `client_secret`. See https://developer.github.com/v3/oauth/ for more info.'
+      prompt_for "$vault/oauth:provider_secret" secret-line
+        "What is your GitHub OAuth Client Secret?"
+
+      describe_and_comment params \
+        'Concourse authorizes access based off of GitHub Organizations. Specify all the' \
+        'orgs whose users will be given access to Concourse here.'
+      prompt_for authz_allowed_orgs multi-line \
+        "What GitHub organizations do you want to grant access to Concourse?" \
+        --min 1
+      param_entry params authz_allowed_orgs -a "${authz_allowed_orgs[@]}"
+
+      describe_and_comment params \
+        "This should be the URL for your GitHub Enteprise installation's API" \
+        "example: https://github.example.com/api/v3/"
+      prompt_for github_api_url line \
+        "What is the API URL for your GitHub?"
+      param_entry params github_api_url
+
+      describe_and_comment params \
+        "This should be the URL used by GitHub Enterprise to generate OAuth Tokens" \
+        "example: https://github.example.com/login/oauth/access_token"
+      prompt_for github_token_url line \
+        "What is the token URL for your GitHub Enterprise installation?"
+      param_entry params github_token_url
+
+      describe_and_comment params \
+        "This should be the URL used by GitHub Enterprise to authorize OAuth requests" \
+        "example: https://github.example.com/login/oauth/authorize"
+      prompt_for github_auth_url line \
+        "What is the Auth URL for your GitHub Enterprise installation?"
+      param_entry params github_auth_url
+      ;;
+
+    "cf-oauth" )
+      describe \
+        "The UAA client id is used to authenticate Concourse to the UAA," \
+        "so that Concourse can then authorize users after they log into the UAA."
+      prompt_for "$vault/oauth:provider_key" secret-line \
+        "What is your UAA Client ID?"
+
+      describe \
+        "The UAA client secret is used to authenticate Concourse to the UAA," \
+        "so that Concourse can then authorize users after they log into the UAA."
+      prompt_for "$vault/oauth:provider_secret" secret-line \
+        "What is your UAA Client Secret?"
+
+      describe_and_comment params \
+        "These are the URLs of the CF installation that will be used for UAA-based" \
+        "authentication.  Should be the same URL that is used to log in to the CF" \
+        "installation."
+      prompt_for cf_base_url line \
+        "What is the base url for your Cloud Foundry installation?" \
+        -V url
+      cf_scheme=${cf_base_url%%://*}
+      if [[ $cf_scheme == $cf_base_url ]] ; then
+        cf_scheme="https"
+      else 
+        cf_base_url="${cf_base_url#*://}"
+      fi
+      prompt_for cf_api_url line \
+        "What is the URL to your CF API?" \
+        --default "${cf_scheme}://api.system.${cf_base_url}" \
+        -V url
+      param_entry params cf_api_url
+
+      prompt_for uaa_token_url line \
+        "What is the UAA Token URL?" \
+        --default "${cf_scheme}://login.system.${cf_base_url}/oauth/token" \
+        -V url
+      param_entry params uaa_token_url
+
+      prompt_for uaa_auth_url line \
+        "What is the UAA Auth URL?" \
+        --default "${cf_scheme}://login.system.${cf_base_url}/oauth/authorize" \
+        -V url
+      param_entry params uaa_auth_url
+
+      describe_and_comment params \
+        "The CF CA cert is used to authenticate Concourse to the UAA," \
+        "so that Concourse can then authorize users after they log into the UAA." \
+        'This is usually something like `secret/path/to/keys/for/haproxy/ssl:certificate`' \
+        'If you are unsure, use `safe tree` to find it. If you are terminating ssl on LBs or' \
+        "Go routers, you will need cert on those nodes."
+      prompt_for cf_ca_cert_vault_path line \
+        "What is your CF CA cert path?" \
+        -V vault_path_and_key
+      param_entry params cf_ca_cert_vault_path
+
+      describe_and_comment params \
+        "List of space GUIDs for Cloud Foundry spaces whose developers" \
+        "will have access." 
+      prompt_for cf_spaces multi-line \
+        "What CF spaces do you want to grant access to Concourse?"
+      param_entry params cf_spaces -a "${cf_spaces[@]}"
+      ;;
+  esac
+
+  prompt_for ssl_cert_feature "select" \
+    "Do you have an SSL certificate for Concourse, or do you need a self-signed cert?" \
+    -o "[provided-cert]I have my own certificate for Concourse" \
+    -o "[self-signed-cert]Please have Genesis create a self-signed certificate for Concourse"
+  features+=($ssl_cert_feature)
+
+  case "$ssl_cert_feature" in
+    "provided-cert")
+      describe \
+        "Concoure will be running on https by default, and as such, needs an SSL cert/key" \
+        "specified. Please enter a combined pem-encoded private key + signed certificate."
+      prompt_for "$vault/ssl/server:combined" secret-block \
+        "What is the SSL cert + key pair for Concourse?"
+      ;;
+  esac
+
+  describe_and_comment params \
+    "The external domain for concourse is the IP/DNS entry users will use to access Concourse." \
+    "Do not include 'https://' in this value."
+  prompt_for external_domain line \
+    "What is the external domain for concourse?"
+  param_entry params external_domain
+
+  describe_and_comment params \
+    "The web nodes are used to provide the Web Interface for Concourse.  Usually one VM is" \
+    "sufficient, but you may want more if this Concourse is shared with many users"
+  prompt_for num_web_nodes line \
+    "How many web frontend nodes would you like to deploy and load balance between (1 to 5)?" \
+    -V "1-5" \
+    --default "1"
+  param_entry params num_web_nodes
+
+  prompt_for use_shield_feature boolean \
+    "Do you want to install SHIELD on your Concourse for backups?" \
+    --default "Y"
+  if [[ "$use_shield_feature" == "true" ]] ; then
+    features+=(shield)
+    describe_and_comment params \
+      'Vault path to your SHIELD Agent public key is usually something like' \
+      '`secret/path/to/keys/for/shield/agent:public`' \
+      'If you are unsure, use `safe tree` to find it.'
+    prompt_for shield_key_vault_path line \
+      "What is the Vault path to your SHIELD Agent public key?" \
+      -V vault_path_and_key
+    param_entry params shield_key_vault_path
+  fi
+fi
+
+describe_and_comment params \
+  "The worker VMs are exactly as you'd expect:  They perform all the tasks needed for" \
+  "Concourse to function."
+prompt_for worker_count line \
+  "How many worker instances do you want?" \
+  --default 3 \
+  -V "1-20"
+param_entry params worker_count
+
+describe_and_comment params \
+  "The worker VMs can be tagged to allow only tasks that specify one or more of those" \
+  "tags.  There must be at least one worker with no tag for running checks."
+prompt_for worker_tags multi-line \
+  "What is the external domain for concourse?" \
+  --min 0
+param_entry params worker_tags -a "${worker_tags[@]}"
+
+prompt_for use_azure_feature boolean \
+  "Are you deploying Concourse on Azure?" \
+  --default "N"
+[[ $use_azure_feature == "true" ]] && features+=(azure)
+
+# Defaults
+param_comment params \
+  "Concourse network, vm type and disk type specified in cloud-config"
+param_entry params concourse_network -d concourse
+param_entry params concourse_vm_type -d small
+param_entry params concourse_disk_type -d councourse
+
+param_comment params \
+  "Overwrite the following to use an explicit stemcell"
+param_entry params stemcell_os -d ubuntu-trusty
+param_entry params stemcell_version -d latest
+
+# Build environment file:
+printf >"$ymlfile" -- "---\nkit:\n"
+if [[ -f "$ymlparent" ]] ; then
+  if [[ "$(spruce json $ymlparent | jq -r ".kit.name")" != "$GENESIS_KIT_NAME" ]] ; then
+    describe "" \
+      "#{WARNING:} #C{$ymlparent} specifies a different kit -- explicitly stating '$GENESIS_KIT_NAME/$GENESIS_KIT_VERSION' for this environment"
+    printf  >>"$ymlfile" -- "  name:    $kit_name\n  version: $kit_version\n"
+  elif [[ "$(spruce json $ymlparent | jq -r ".kit.version")" != "$GENESIS_KIT_VERSION" ]] ; then
+    describe "" \
+      "#{WARNING:} #C{$ymlparent} specifies a different kit version -- explicitly stating version $GENESIS_KIT_VERSION' for this environment"
+    printf  >>"$ymlfile" -- "  version: $kit_version\n"
+  fi
+fi
+
+printf >>"$ymlfile" -- "  features:\n  - (( replace ))\n"
+for f in "${features[@]}" ; do
+  printf >>"$ymlfile" -- "  - $f\n"
+done
+
+# Params
+printf >>"$ymlfile" -- "$( echo "$params" | sed -e 's/%/%%/g')"
+
+describe "Wrote configuration to #C{$ymlfile}."
+exit 0
