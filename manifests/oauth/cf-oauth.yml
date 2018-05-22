@@ -1,10 +1,18 @@
 ---
+params:
+  cf_spaces: (( param "Please provide a list of CF space GUIDs whose developers can access Concourse" ))
+
+  cf_api_url:            (( param "Please provide the URL to your CF API" ))
+  uaa_token_url:         (( param "Please provide the URL to your UAA Token endpoint" ))
+  uaa_auth_url:          (( param "Please provide the URL to your UAA Auth endpoint" ))
+  cf_ca_cert_vault_path: (( param "Pleaes provide the Vault path that contains ca for the Cloud Foundry" ))
+
 instance_groups:
   - name: web
     jobs:
     - name: atc
       properties:
-        github_auth: (( prune ))
+        github_auth:  (( prune ))
         generic_auth: (( prune ))
         basic_auth_username: (( prune ))
         basic_auth_password: (( prune ))
@@ -12,8 +20,7 @@ instance_groups:
           cf_spaces:     (( grab params.cf_spaces ))
           client_id:     (( vault meta.vault "/oauth:provider_key" ))
           client_secret: (( vault meta.vault "/oauth:provider_secret" ))
-  
-          cf_api_url:   (( grab params.cf_api_url ))
-          auth_url:  (( grab params.uaa_auth_url ))
-          token_url: (( grab params.uaa_token_url ))
-          cf_ca_cert: (( vault params.cf_ca_cert_vault_path ))
+          cf_api_url:    (( grab params.cf_api_url ))
+          auth_url:      (( grab params.uaa_auth_url ))
+          token_url:     (( grab params.uaa_token_url ))
+          cf_ca_cert:    (( vault params.cf_ca_cert_vault_path ))

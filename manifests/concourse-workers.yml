@@ -1,0 +1,32 @@
+---
+meta:
+  default:
+    tags: [(( grab params.env ))]
+
+exodus:
+  tags: (( grab params.tags || meta.default.tags ))
+  host_env: (( grab params.tsa_host_env ))
+
+params:
+  external_domain: ""
+  external_url:    ""
+  workers:         3
+
+  volume_driver: detect
+
+  tsa_host_env: (( param "Please specify name of the Concourse environment containing the TSA node" ))
+
+instance_groups:
+  - name: worker
+    jobs:
+      - name: worker
+        properties:
+          tags: (( grab params.tags || meta.default.tags ))
+          tsa:
+            host: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_host" ))
+            port: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_port" ))
+            host_public_key: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_host_public_key" ))
+            worker_key:
+              private_key: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_worker_private_key" ))
+              public_key:  (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_worker_public_key" ))
+

@@ -1,0 +1,21 @@
+#!/bin/bash
+set -eu
+vault="secret/$GENESIS_VAULT_PREFIX"
+
+export CONCOURSE_URL=https://$(lookup params.external_domain 127.0.0.1)
+export CONCOURSE_PASSWORD="$(safe read $vault/webui:password)"
+
+if want_feature "workers" ; then
+    echo "This is a worker-only Concourse.  The workers in this deployment have"
+    echo "been tagged as:"
+    lookup --exodus worker_tags $(describe "#YI{not tagged}")
+    echo 
+describe "These workers connect to the Concourse environment #C{'$(lookup --exodus host_env $(describe "#RI{unknown}"))'}"
+else
+    
+describe "Web Client"\
+         "  URL:      #C{$CONCOURSE_URL}" \
+         "  username: #C{concourse}" \
+         "  password: #C{$CONCOURSE_PASSWORD}" 
+fi
+

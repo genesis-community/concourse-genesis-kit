@@ -1,0 +1,45 @@
+#!/bin/bash
+set -eu
+
+if [[ $GENESIS_DEPLOY_RC == 0 ]]; then
+
+  mode="Full"
+  want_feature worker-only && mode="Worker-Only"
+
+      echo; echo;
+  describe "#M{$GENESIS_ENVIRONMENT} Concourse ($mode) deployed!"
+      echo
+      echo "For details about the deployment, run"
+      echo
+  describe "  #G{genesis info $GENESIS_ENVIRONMENT}"
+      echo
+  describe "To download the '#C{fly}' CLI for the first time, run"
+      echo
+  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- download-fly /location/in/your/path}"
+      echo
+  describe "To update your current version of the '#C{fly}' CLI, run"
+      echo
+  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- download-fly --sync}"
+      echo
+      echo "To register this Concourse as a fly target, run"
+      echo
+  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- target}"
+      echo
+      echo "To log into this Concourse with fly, run"
+      echo
+  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- login}"
+      echo
+      echo "To run a fly command against this Concourse, run (without -t <target>)"
+      echo
+  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- fly [options and arguments]}"
+      echo
+  describe "  As an extra efficiency, if you run the '#C{fly}' addon above, it will" \
+           "  automatically create the target if one doesn't exist, and log you in if" \
+           "  you're not already logged in, before running your desired command."
+      echo
+      echo "Finally, to visit the Concourse Web Portal, run:"
+      echo
+  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- visit}"
+      echo
+
+fi

@@ -1,4 +1,7 @@
 ---
+params:
+  authz_allowed_orgs: (( param "Please provide a list of org/teams/users authorized for using Concourse" ))
+
 instance_groups:
   - name: web
     jobs:
