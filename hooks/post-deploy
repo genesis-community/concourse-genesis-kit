@@ -21,11 +21,7 @@ if [[ $GENESIS_DEPLOY_RC == 0 ]]; then
       echo
   describe "  #G{genesis do $GENESIS_ENVIRONMENT -- download-fly --sync}"
       echo
-      echo "To register this Concourse as a fly target, run"
-      echo
-  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- target}"
-      echo
-      echo "To log into this Concourse with fly, run"
+      echo "To target & log into this Concourse with fly, run"
       echo
   describe "  #G{genesis do $GENESIS_ENVIRONMENT -- login}"
       echo

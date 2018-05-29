@@ -24,7 +24,7 @@ get_host_param() {
 
 get_target() {
   url="$(get_host_param external_url)" || exit $?
-  fly targets | grep "^${host_env} "
+  fly targets | grep "^${host_env} " || true
 }
 
 needs_fly() {
@@ -106,19 +106,6 @@ has_target() {
   return 0
 }
 
-target() {
-  needs_fly
-  describe >&2 \
-    "" \
-    "Creating target for Concourse deployment #C{$host_env}." \
-    ""
-  fly target "$host_env" "$(get_host_param external_url)"
-  rc="$?"
-  [[ $rc -gt 0 ]] && describe >&2 \
-    "#R{[ERROR]} Failed to create target!"
-  return $rc
-}
-
 is_logged_in() {
   needs_fly
   fly -t "$host_env" status >/dev/null 2>&1
@@ -135,7 +122,11 @@ login() {
   host_pw="$(safe get "secret/$GENESIS_VAULT_PREFIX/webui:password")"
   insecure=""
   want_feature "self-signed-cert" && insecure="-k"
-  fly -t "$host_env" login --username="$host_user" --password="$host_pw" $insecure
+  if has_target ; then
+    fly -t "$host_env" login --username="$host_user" --password="$host_pw" $insecure
+  else
+    fly -t "$host_env" login --username="$host_user" --password="$host_pw" --concourse-url "$(get_host_param external_url)" $insecure 
+  fi
   rc="$?"
   [[ $rc -gt 0 ]] && describe >&2 \
     "#R{[ERROR]} Failed to log in!"
@@ -148,7 +139,6 @@ list() {
   echo "  visit                Open the Blacksmith Web Management Console"
   echo "                       in your browser (requires macOS)"
   echo "  download-fly         Get the version of fly compatible with this Concourse"
-  echo "  target               Setup fly target for this Concourse deployment"
   echo "  login                Login to this Concourse deployment with fly"
   echo "  logout               Logout of this Concourse deployment with fly"
   echo "  fly                  Run fly commands targetting this Concourse Deployment"
@@ -195,12 +185,7 @@ download-fly)
   exit 0
   ;;
 
-target)
-  target
-  ;;
-
 login)
-  has_target || target >/dev/null
   login
   ;;
 
