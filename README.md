@@ -95,8 +95,9 @@ Params
   been set to.
 
 - **params.worker_vm_type** - The `vm_type` to use for workers.
-  Defaults to whatever **params.concourse_vm_type** has been set
-  to, which may not be the best.
+  Defaults to VM type `concourse-worker`, which you can define 
+  in your cloud config. Recommended values are 8GB of RAM and 
+  60GB of disk.
 
 - **params.concourse_network** - The name of the BOSH cloud-config
   network that Concourse will be deployed into.  Defaults to
@@ -187,6 +188,7 @@ params:
   concourse_network:   concourse
   concourse_disk_pool: concourse # should be at least 10GB (used for the concourse DB)
   concourse_vm_type:   small # VMs should have at least 2 CPUs, and 4GB of memory
+  worker_vm_type:      concourse # VMs should have 8GB of memory and 60GB of disk.
 ```
 
 [1]: https://concourse.ci
