@@ -8,6 +8,7 @@ prefix="$GENESIS_VAULT_PREFIX"
 
 ymlfile="$dir/$name.yml"
 declare -a features
+features=()
 params="\\nparams:\\n  env:   $name\\n  vault: $prefix\\n"
 
 describe "" \
