@@ -21,6 +21,7 @@ if want_feature "full" ; then
   merge+=( "manifests/concourse-full.yml" )
 
   declare -a oauths
+  oauths=()
   for oauth in "github-oauth" "github-enterprise-oauth" "cf-oauth" ; do
     if want_feature "$oauth" ; then
       oauths+=( "$oauth" )
