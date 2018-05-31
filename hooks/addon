@@ -136,12 +136,17 @@ login() {
 list() {
   echo "The following addons are defined:"
   echo
-  echo "  visit                Open the Blacksmith Web Management Console"
-  echo "                       in your browser (requires macOS)"
+  echo "  visit                Open the Concourse Web User Interfoace in your browser"
+  echo "                       (requires macOS)"
+  echo
   echo "  download-fly         Get the version of fly compatible with this Concourse"
+  echo
   echo "  login                Login to this Concourse deployment with fly"
+  echo
   echo "  logout               Logout of this Concourse deployment with fly"
+  echo
   echo "  fly                  Run fly commands targetting this Concourse Deployment"
+  echo
 }
 
 # MAIN
