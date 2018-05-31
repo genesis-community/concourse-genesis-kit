@@ -6,6 +6,8 @@ authors:
 docs:   https://concourse.ci
 code:   https://github.com/genesis-community/concourse-genesis-kit
 
+genesis_min_version: 2.6.0
+
 certificates:
   base:
     locker:
