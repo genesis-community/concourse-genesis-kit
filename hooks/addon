@@ -136,7 +136,7 @@ login() {
 list() {
   echo "The following addons are defined:"
   echo
-  echo "  visit                Open the Concourse Web User Interfoace in your browser"
+  echo "  visit                Open the Concourse Web User Interface in your browser"
   echo "                       (requires macOS)"
   echo
   echo "  download-fly         Get the version of fly compatible with this Concourse"

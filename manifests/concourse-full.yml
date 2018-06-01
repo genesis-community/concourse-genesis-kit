@@ -20,13 +20,12 @@ params:
   external_domain:   (( param "Please specify the IP/DNS users will use to connect to Concourse" ))
   external_url:      (( concat "https://" params.external_domain ))
   num_web_nodes:     1
-  workers:           3
 
   token_signing_key:
     public_key: (( vault meta.vault "/atc/token_signing_key:public" ))
     private_key: (( vault meta.vault "/atc/token_signing_key:private" ))
 
-  volume_driver: detect
+  concourse_disk_type:      concourse
 
   # NOTE: we do not define a default for the `availability_zones` param,
   # because we want to allow users to override the set of AZs wholesale,

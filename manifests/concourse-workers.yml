@@ -8,12 +8,6 @@ exodus:
   host_env: (( grab params.tsa_host_env ))
 
 params:
-  external_domain: ""
-  external_url:    ""
-  workers:         3
-
-  volume_driver: detect
-
   tsa_host_env: (( param "Please specify name of the Concourse environment containing the TSA node" ))
 
 instance_groups:

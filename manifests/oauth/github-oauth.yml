@@ -1,14 +1,12 @@
 ---
 params:
-  authz_allowed_orgs: (( param "Please provide a list of org/teams/users authorized for using Concourse" ))
+  authz_allowed_orgs: (( param "Please provide the name of the organization authorized for using Concourse" ))
 
 instance_groups:
   - name: web
     jobs:
     - name: atc
       properties:
-        uaa_auth: (( prune ))
-        generic_auth: (( prune ))
         basic_auth_username: (( prune ))
         basic_auth_password: (( prune ))
         github_auth:
