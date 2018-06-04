@@ -79,7 +79,7 @@ defaults but can be modified in your environment YAML file.
 - `worker_vm_type` - The name of the vm type to be used by the concourse
   worker.  This typically needs more memory and diskspace than the rest of the
   concourse vms, and is recommended that it provides at least 8GB of RAM and
-  60GB of disk.
+  60GB of disk.  Defaults to `concourse-worker`
 
 - `stemcell_os` - This is kit is tested with Ubuntu 14.04 "Trusty" stemcells
   and we recommend against changing this from the default value of
@@ -88,15 +88,15 @@ defaults but can be modified in your environment YAML file.
 - `stemcell_version` - By default, this is set to `latest`, but if you need to
   lock to a specific version of the stemcell, set this value.
 
-- `volume_driver` - Specify Concourse's volume driver, defaults to 'detect'.
+- `volume_driver` - Specify Concourse's volume driver, defaults to `detect`.
   If you're planning to change this, you should already know what value you
   should use and why, otherwise, don't touch this.
 
 - `workers` - This is the number of worker instances you want to have.
-  Defaults to '3'
+  Defaults to `3`
 
 - `availability_zones` - List of availability zone names. By default, we
-  recommend deploying across three availability zones [z1, z2 and z3]  for any
+  recommend deploying across three availability zones `[z1, z2 and z3]`  for any
   instance groups that have multiple vms (workers, possibly web).  However
   some systems don't have multiple availability zones or you may want to
   restrict or expand your availabilty zones manually.
@@ -109,10 +109,13 @@ defaults but can be modified in your environment YAML file.
 
 - `no_proxy` - The list of addresses that are not proxied through the above
   proxies.  Each address must be specified; this does not accept CIDR
-  representation.
+  representation.  Default is `[127.0.0.1, localhost]`
 
 
-### Full Deployment Parameters
+### `full` Parameters
+
+The following parameters are used when deploying a "Full" Concourse
+deployment.
 
 - `external_domain` - The full domain (or IP address) of the Concourse haproxy
   vm.  This must be specified and is prompted for in the `genesis new` wizard.
@@ -137,10 +140,10 @@ defaults but can be modified in your environment YAML file.
 
 - `concourse_disk_type` - Persistent disk type used by the Concourse DB VM.
 
--  `token_signing_key.public_key` and
--  `token_signing_key.private_key` - These are the keys used by the tca and atc.
+### `worker` Parameters
 
-### Worker-only Deployment Parameters
+The following parameters are used when deploying a "Worker-Only" Concourse
+deployment.
 
 - `tsa_host_env` - The Genesis deployment environment name that will act as
   host to this worker-only deployment.  Note that this host environment must
@@ -154,41 +157,98 @@ defaults but can be modified in your environment YAML file.
 
   *Note*: tags cannot contain spaces in their name.
 
-#### github-oauth Params
+### `github-oauth` Parameters
+
+The following parameters are used when using the GitHub OAuth Authentication:
 
 - `authz_allowed_orgs` - The name of the organization in Github authorized to
   use Concourse.  For legacy reasons, it retains a pluralization of its name,
-  but only allows a single organization due to changes in Concourse.
+  but only allows a single organization due to changes in Concourse.  **Required**
 
-#### github-enterprise-oauth Params
+The following secrets will be pulled from the vault:
+
+- **OAUTH Provider Key** - One half of the key/secret provided by GitHub to
+  authenticate using OAuth.  It is stored in the vault under
+  `secret/$env/concourse/oauth:provider_key`
+
+- **OAUTH Provider Key** - The other half of the key/secret provided by GitHub to
+  authenticate using OAuth.  It is stored in the vault under
+  `secret/$env/concourse/oauth:client_secret`
+
+
+### github-enterprise-oauth Parameters
+
+The following parameters are used when using the GitHub Enterprise OAuth
+Authentication:
 
 - `github_api_uri` - The API URL for the GitHub Enterprise server that is used
-  for OAuth.  For example: `https://github.example.com/api/v3/`
+  for OAuth.  For example: `https://github.example.com/api/v3/`  **Required**
 
 - `github_token_uri` - The URL of the token API for the GitHub Enterprise server
   used for OAuth.  For example:  `https://github.example.com/login/oauth/access_token`
 
 - `github_auth_url` - The URL of the Auth API for the GitHub Enterprise server
   used for OAuth.  For example:  `https://github.example.com/login/oauth/authorize`
+  **Required**
 
 - `authz_allowed_orgs` - The name of the organization in Github authorized to
   use Concourse.  For legacy reasons, it retains a pluralization of its name,
-  but only allows a single organization due to changes in Concourse.
+  but only allows a single organization due to changes in Concourse.  **Required**
 
-#### cf-oauth Params
+The following secrets will be pulled from the vault:
+
+- **OAUTH Provider Key** - One half of the key/secret provided by GitHub to
+  authenticate using OAuth.  It is stored in the vault under
+  `secret/$env/concourse/oauth:provider_key`
+
+- **OAUTH Provide Secret** - The other half of the key/secret provided by GitHub to
+  authenticate using OAuth.  It is stored in the vault under
+  `secret/$env/concourse/oauth:client_secret`
+
+### `cf-oauth` Parameters
+
+The following parameters are used when using the Cloud Foundry UAA OAuth
+Authentication:
 
 - `cf_api_uri` - The API URL for the iCloud Foundry whose UAA will be used for
-  authentication.  For example: https://api.system.bosh-lite.com
+  authentication.  For example: https://api.system.bosh-lite.com  **Required**
 
 - `cf_token_uri` - The URL of the token API for the UAA used for OAuth.  For
-  example: `https://login.system.bosh-lite.com/oauth/token`
+  example: `https://login.system.bosh-lite.com/oauth/token`  **Required**
 
 - `github_auth_url` - The URL of the Auth API for the UAA used for OAuth.  For
-  example: `https://login.system.bosh-lite.com/oauth/authorize`
+  example: `https://login.system.bosh-lite.com/oauth/authorize`  **Required**
 
-- `cf_ca_cert_vault_path` - The Vault path that contains ca for the Cloud Foundry
+- `cf_spaces` - A list of CF space GUIDs whose developers can access
+  Concourse.  **Required**
 
-- `cf_spaces` - A list of CF space GUIDs whose developers can access Concourse
+- `cf_ca_cert_vault_path` - The Vault path that contains ca for the Cloud
+  Foundry.  **Required**
+
+The following secrets will be pulled from the vault:
+
+- **OAUTH Provider Key** - One half of the key/secret provided by UAA to
+  authenticate using OAuth.  It is stored in the vault under
+  `secret/$env/concourse/oauth:provider_key`
+
+- **OAUTH Provider Key** - The other half of the key/secret provided by UAA to
+  authenticate using OAuth.  It is stored in the vault under
+  `secret/$env/concourse/oauth:client_secret`
+
+### Basic Auth Parameters
+
+If not using one of the above Authentication features, the deployment will
+default to using basic authentication. While this takes no parameters, it does
+use the following secret from vault:
+
+  - **Basic Authentication Pasword** - the password used in basic auth,
+    stored in `secret/$env/concourse/webui:password`
+
+### `provided-cert` Params
+
+If providing your own TLS certificat for web ui and `fly` api endpoint, it
+will be stored under `secret/$env/concourse/ssl/server` with keys of
+`certificate`, `key`, and `combined`
 
 
 
@@ -242,7 +302,7 @@ params:
 
 
 
-### Examples
+## Examples
 
 To deploy a host Concourse with self-signed certificate, with load-balanced
 web nodes and two medium workers in a single availability zone.
@@ -295,3 +355,7 @@ params:
 
 
 
+## History
+
+Version 1.6.0 was the first version to support Genesis 2.6 hooks and exodus
+data for addon scripts and `genesis info`.
