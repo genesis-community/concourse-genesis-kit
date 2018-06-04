@@ -34,6 +34,10 @@ if want_feature "full" ; then
     echo >&2 "Please pick up to one (uses http basic auth if none selected)"
   fi
 
+  if want_feature self-signed-cert ; then
+    merge+=( "manifests/self-signed.yml" )
+  fi
+
 elif want_feature "workers" ; then
   merge+=( "manifests/concourse-workers.yml" )
 
