@@ -20,7 +20,6 @@ if want_feature "workers" ; then
     describe "This is a #Y{worker-only} Concourse.  The workers in this deployment have" \
       "not been tagged."
   else
-    tags+=( "$(echo "$worker_data" | jq -r '."tags[\(range([keys[]|select(startswith("tags"))]|length))]"')" )
     describe "This is a #Y{worker-only} Concourse.  The workers in this deployment have" \
       "been tagged with the following:"
     i=0
