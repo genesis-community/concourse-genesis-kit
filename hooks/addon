@@ -7,7 +7,8 @@ error() {
 }
 
 get_host_param() {
-  if ! param="$(echo "$exodus_data" | jq -r ".${1}" 2>/dev/null)" ; then
+  if ! param="$(echo "$exodus_data" | jq -r '."'"${1}"'"' 2>/dev/null)" ; then
+    if [[ -n "$2" ]] ; then echo "$2"; return 0; fi
     if [[ "$GENESIS_ENVIRONMENT" != "$host_env" ]] ; then
       error \
         "#R{[ERROR]} Cannot find '$1' in exodus data for host concourse environment" \
@@ -119,9 +120,9 @@ login() {
     "" \
     "Logging in to Concourse deployment #C{$host_env} as user '$host_user'." \
     ""
-  host_pw="$(safe get "secret/$GENESIS_VAULT_PREFIX/webui:password")"
+  host_pw="$(get_host_param password)"
   insecure=""
-  want_feature "self-signed-cert" && insecure="-k"
+  [[ "$(get_host_param self-signed no)" == "1" ]] && insecure="-k"
   if has_target ; then
     fly -t "$host_env" login --username="$host_user" --password="$host_pw" $insecure
   else
@@ -173,7 +174,7 @@ visit)
     error "#R{[ERROR]} The 'visit' addon script only works on macOS, currently."
   fi
   host_user="$(get_host_param user)"
-  host_pw="$(safe get "secret/$GENESIS_VAULT_PREFIX/webui:password")"
+  host_pw="$(get_host_param password)"
   describe "" \
     "You will need to enter the following credentials once the page opens:" \
     "#I{  username:} #C{$host_user}" \

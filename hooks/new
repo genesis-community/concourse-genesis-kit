@@ -175,26 +175,18 @@ if [[ "$kit_type" == "full" ]] ; then
   param_entry params num_web_nodes
 else
   describe "" \
-    "A worker-only Concourse deployment requires an existing full Concourse deployment" \
-    "for the workers to connect to."
-  prompt_for tsa_host line \
-    "Please specify the IP address of the Concourse TSA node"
-  param_entry params tsa_host
-  prompt_for concourse_prefix line \
-    "Please specify the vault prefix for the full Concourse deployment." \
-  concourse_prefix="${concourse_prefix#secret/}"
-  tsa_key_path="${concourse_prefix}/tsa/host_key"
-  worker_key_path="${concourse_prefix}/tsa/worker_key"
-  param_entry params tsa_host
-  param_entry params tsa_key_path
-  param_entry params worker_key_path
+    "A worker-only Concourse deployment requires an existing full host Concourse" \
+    "deployment for the workers to connect to."
+  prompt_for tsa_host_env line \
+    "Please specify environment name of the Concourse host deployment"
+  param_entry params tsa_host_env
 
-  if ! safe exists "secret/$tsa_key_path:private" ; then
-    echo >&2 "No private key found at 'secret/$tsa_key_path' - cannot continue"
-    exit 2
-  fi
-  if ! safe exists "secret/$worker_key_path:private" ; then
-    echo >&2 "No private key found at 'secret/$worker_key_path' - cannot continue"
+  if ! safe exists "secret/exodus/$tsa_host_env/concourse" ; then
+    decribe >&2 "" \
+      "#R{[ERROR]} No deployment details found for $tsa_host_env Concourse deployment." \
+      "Please ensure that it has been deployed first using Genesis v2.6 or greater and this" \
+      "version of the Concourse Genesis Kit" \
+      ""
     exit 2
   fi
 fi

@@ -8,7 +8,8 @@ meta:
 
 exodus:
   external_url:           (( grab params.external_url ))
-  user:                   (( grab params.main_user || meta.default.main_user ))
+  username:               (( grab params.main_user || meta.default.main_user ))
+  password:               (( vault meta.vault "/webui:password" ))
   tsa_host:               (( grab instance_groups.web.networks.0.static_ips.0 ))
   tsa_port:               2222
   tsa_host_public_key:    (( vault meta.vault "/tsa/host_key:public" ))
