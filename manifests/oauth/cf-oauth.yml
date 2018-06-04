@@ -12,8 +12,6 @@ instance_groups:
     jobs:
     - name: atc
       properties:
-        github_auth:  (( prune ))
-        generic_auth: (( prune ))
         basic_auth_username: (( prune ))
         basic_auth_password: (( prune ))
         uaa_auth:
