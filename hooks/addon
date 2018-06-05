@@ -1,0 +1,226 @@
+#!/bin/bash
+set -eu
+
+error() {
+  describe >&2 "" "$@" ""
+  exit 2
+}
+
+get_host_param() {
+  if ! param="$(echo "$exodus_data" | jq -r '."'"${1}"'"' 2>/dev/null)" ; then
+    if [[ -n "$2" ]] ; then echo "$2"; return 0; fi
+    if [[ "$GENESIS_ENVIRONMENT" != "$host_env" ]] ; then
+      error \
+        "#R{[ERROR]} Cannot find '$1' in exodus data for host concourse environment" \
+        "        '#C{$host_env}' -- please redeploy it before using this addon."
+    else
+      error \
+        "#R{[ERROR]} Cannot find '$1' in exodus data -- please redeploy this" \
+        "        environment before using this addon."
+    fi
+  fi
+  echo "$param"
+  return 0
+}
+
+get_target() {
+  url="$(get_host_param external_url)" || exit $?
+  fly targets | grep "^${host_env} " || true
+}
+
+needs_fly() {
+  if ! command -v fly > /dev/null ; then
+    error "#R{[ERROR]} Cannot find '#C{fly}' command -- use download-fly addon to download it" \
+          "        to somewhere in your path"
+  fi
+}  
+
+download_fly() {
+  [[ -z "$GENESIS_CALLER_DIR" ]] && error "#R{[ERROR]} Calling scope not found -- internal Genesis error"
+  cd "$GENESIS_CALLER_DIR"
+
+  path=""
+  platform=""
+  sync=""
+  url="$(get_host_param external_url)"
+  while [[ $# -gt 0 ]]; do
+    arg="$1"; shift
+    case "$arg" in
+      "-p") platform="$1"; shift ;;
+      "--sync")
+        [[ -n "$path" ]]             && error "#R{[ERROR]} Can't specify a path and use --sync option"
+        path="$(which fly 2>/dev/null)"
+        sync=1
+        [[ $? -gt 0 || -z "$path" ]] && error "#R{[ERROR]} No fly found in path -- cannot use --sync option"
+        [[ ! -w "$path" ]]           && error "#R{[ERROR]} No write permission to $path -- cannot use --sync option"
+        ;;
+      "-*")                             error "#R{[ERROR]} Invalid option $arg" ;;
+      *)
+        [[ -n "$sync" ]]             && error "#R{[ERROR]} Can't specify a path and use --sync option"
+        [[ -n "$path" ]]             && error "#R{[ERROR]} Can't specify multiple paths"
+        path="$arg"
+        ;;
+    esac
+  done
+
+  case "${platform:-$OSTYPE}" in 
+    darwin*|mac) platform='darwin' ;;
+    linux*)      platform='linux' ;;
+    cygwin|win*) platform='windows' ;;
+    *)
+      if [[ -n "$platform" ]] ; then
+        error "#R{[ERROR]} Unknown platform type '$platform': expecting one of darwin, linux or windows"
+      else 
+        error "#R{[ERROR]} Cannot determine platform type: please specify one of darwin, linux or" \
+              "        windows using the -t option"
+      fi
+      ;;
+  esac
+
+  [[ -z "$path" ]] && path="."
+  [[ -d "$path" ]] && path="$path/fly"
+
+      echo ""
+  describe "Downloading #C{$platform/amd64} version of fly from #C{${url}}..." ""
+  STATUSCODE="$(curl -o "$path" -w "%{http_code}" -Lk "$url/api/v1/cli?arch=amd64&platform=$platform")"
+  [[ $? -gt 0 || $STATUSCODE != '200' ]] && error "#R{[ERROR]} Failed to download fly (Status: $STATUSCODE):" "$(cat $path)"
+  chmod a+x "$path"
+
+      echo
+  describe "#G{Download successful - written to} #C{$path}"
+      echo 
+  exit 0
+}
+
+has_target() {
+  needs_fly
+
+  url="$(get_host_param external_url)" || exit $?
+  target="$(get_target)" || exit $?
+  [[ $? -gt 0 || -z "$target" ]] && return 1
+
+  target_url="$( echo "$target" | awk '{print $2}')"
+  if [[ "$url" != "$target_url" ]] ; then
+    error "#R{[ERROR]} Target mismatch in URL from expected ($url) and current ($target_url)." \
+          "        Cannot continue."
+  fi
+  return 0
+}
+
+is_logged_in() {
+  needs_fly
+  fly -t "$host_env" status >/dev/null 2>&1
+  return $?
+}
+
+login() {
+  needs_fly
+  host_user="$(get_host_param user)"
+  describe >&2 \
+    "" \
+    "Logging in to Concourse deployment #C{$host_env} as user '$host_user'." \
+    ""
+  host_pw="$(get_host_param password)"
+  insecure=""
+  [[ "$(get_host_param self-signed no)" == "1" ]] && insecure="-k"
+  if has_target ; then
+    fly -t "$host_env" login --username="$host_user" --password="$host_pw" $insecure
+  else
+    fly -t "$host_env" login --username="$host_user" --password="$host_pw" --concourse-url "$(get_host_param external_url)" $insecure 
+  fi
+  rc="$?"
+  [[ $rc -gt 0 ]] && describe >&2 \
+    "#R{[ERROR]} Failed to log in!"
+  return $rc
+}
+
+list() {
+  echo "The following addons are defined:"
+  echo
+  echo "  visit                Open the Concourse Web User Interface in your browser"
+  echo "                       (requires macOS)"
+  echo
+  echo "  download-fly         Get the version of fly compatible with this Concourse"
+  echo
+  echo "  login                Login to this Concourse deployment with fly"
+  echo
+  echo "  logout               Logout of this Concourse deployment with fly"
+  echo
+  echo "  fly                  Run fly commands targetting this Concourse Deployment"
+  echo
+}
+
+# MAIN
+
+if [[ "$GENESIS_ADDON_SCRIPT" == "list" ]] ; then
+  list
+  exit 0
+fi
+
+# Initialization of Exodus data lookup for efficiency
+if ! safe exists "secret/exodus/$GENESIS_ENVIRONMENT/concourse" ; then
+  error "#R{[ERROR]} Cannot find exodus data for #C{$GENESIS_ENVIRONMENT}.  Please redeploy" \
+        "        before using addons."
+fi
+if ! host_env="$(safe get "secret/exodus/${GENESIS_ENVIRONMENT}/concourse:host_env" 2>/dev/null)" ; then
+  host_env="$GENESIS_ENVIRONMENT"
+fi
+exodus_data="$(safe get "secret/exodus/${host_env}/concourse" | spruce json)"
+
+# Process requested addon script
+case $GENESIS_ADDON_SCRIPT in
+visit)
+  if ! command -v open >/dev/null 2>&1; then
+    error "#R{[ERROR]} The 'visit' addon script only works on macOS, currently."
+  fi
+  host_user="$(get_host_param user)"
+  host_pw="$(get_host_param password)"
+  describe "" \
+    "You will need to enter the following credentials once the page opens:" \
+    "#I{  username:} #C{$host_user}" \
+    "#I{  password:} #C{$host_pw}" \
+    ""
+  host="$(get_host_param external_url)"
+
+  read -n 1 -s -r -p "Press any key to open the web console..."
+  open "${host}/teams/main/login"
+  ;;
+
+download-fly)
+  download_fly "$@"
+  exit 0
+  ;;
+
+login)
+  login
+  ;;
+
+logout)
+  echo 
+  if ! has_target ; then
+    describe "No target set for #C{'$host_env'}"
+  elif ! is_logged_in ; then 
+    describe "Not logged in to target #C{'$host_env'}"
+  else
+    fly -t "$host_env" logout
+  fi
+  echo
+  ;;
+
+fly)
+  is_logged_in || login
+  describe >&2 \
+    "" \
+    "Running fly against #C{$host_env}"\
+    ""
+  fly -t "$host_env" "$@"
+  echo
+  exit $?
+  ;;
+
+*)
+  echo "Unrecognized Concourse Genesis Kit addon."
+  list
+  exit 1
+  ;;
+esac

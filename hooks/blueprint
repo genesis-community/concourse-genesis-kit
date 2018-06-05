@@ -1,0 +1,72 @@
+#!/bin/bash
+set -eu
+
+declare -a merge
+merge=( "manifests/concourse-base.yml" )
+
+validate_features \
+  azure shield                                  \
+  workers full                                  \
+  provided-cert self-signed-cert                \
+  github-oauth github-enterprise-oauth cf-oauth
+
+if [[ "$(bosh_cpi)" == "azure" ]]; then
+  merge+=( "manifests/azure.yml" )
+fi
+if want_feature "full" ; then
+  if want_feature "workers" ; then
+    echo >&2 "Can only have one of 'full' or 'workers' as a feature."
+    exit 1
+  fi
+  merge+=( "manifests/concourse-full.yml" )
+
+  declare -a oauths
+  oauths=()
+  for oauth in "github-oauth" "github-enterprise-oauth" "cf-oauth" ; do
+    if want_feature "$oauth" ; then
+      oauths+=( "$oauth" )
+      merge+=( "manifests/oauth/${oauth}.yml" )
+    fi
+  done
+  if [[ "${#oauths[@]}" -gt 1 ]] ; then
+    echo >&2 "You have requested multiple oauth systems:"
+    echo >&2 "  ${oauths[*]}"
+    echo >&2 "Please pick up to one (uses http basic auth if none selected)"
+  fi
+
+  if want_feature self-signed-cert ; then
+    merge+=( "manifests/self-signed.yml" )
+  elif ! want_feature provided-cert ; then
+    echo >&2 "Concourse needs to be configured with 'provide-cert' or 'self-signed-cert'.  If"
+    echo >&2 "upgrading, please add 'self-signed-cert' to your environment's list of features"
+    echo >&2 "and run 'genesis add-secrets' to generate the certificate."
+    exit 1
+  fi
+
+elif want_feature "workers" ; then
+  merge+=( "manifests/concourse-workers.yml" )
+
+  for want in ${GENESIS_REQUESTED_FEATURES}; do
+    case "$want" in
+      provided-cert|self-signed-cert|github-oauth|github-enterprise-oauth|cf-oauth)
+        describe >&2 "#Y{[WARNING]} $want feature has no effect on worker-only deployment, and will be ignored"
+        ;;
+    esac
+  done
+
+else 
+  echo >&2 "Concourse needs to be configured as 'full' or 'workers'.  If upgrading,"
+  echo >&2 "please add 'full' to your environment's list of features"
+  exit 1
+fi
+
+if want_feature "shield"; then
+  echo >&2 "The 'shield' feature is no longer supported.  Instead, please add the"
+  echo >&2 "shield agent to your runtime configuration."
+fi
+if want_feature "azure"; then
+  echo >&2 "The 'azure' feature is no longer necessary - azure CPI will be detected"
+  echo >&2 "automatically at deployment time."
+fi
+
+echo "${merge[@]}"

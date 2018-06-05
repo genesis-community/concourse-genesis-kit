@@ -1,0 +1,40 @@
+#!/bin/bash
+set -eu
+
+host_data="$(safe get "secret/exodus/${GENESIS_ENVIRONMENT}/concourse" | spruce json)"
+worker_data=""
+host_env="$(echo "$host_data" | jq -r '.host_env // ""' 2>/dev/null)"
+if [[ -n "$host_env" ]] ; then
+  worker_data="$host_data"
+  host_data="$(safe get "secret/exodus/${host_env}/concourse" | spruce json)"
+else
+  host_env="$GENESIS_ENVIRONMENT"
+fi
+
+if want_feature "workers" ; then
+  if [[ -z "$worker_data" ]] ; then
+    describe "#R{[ERROR]} Missing data on this worker-only deploy.  Please redeploy with Genesis v2.6 or later"
+    exit 2
+  fi
+  if [[ "$(echo "$worker_data" | jq -r 'has("tags[0]")')" != 'true' ]] ; then
+    describe "This is a #Y{worker-only} Concourse.  The workers in this deployment have" \
+      "not been tagged."
+  else
+    describe "This is a #Y{worker-only} Concourse.  The workers in this deployment have" \
+      "been tagged with the following:"
+    i=0
+    while [[ "$(echo "$worker_data" | jq -r 'has("tags['"$i"']")')" == 'true' ]] ; do
+      tag="$(echo "$worker_data" | jq -r '."tags['"$i"']"')"
+      describe "  - #C{$tag}"
+      ((i++))
+    done
+  fi
+  describe "" "These workers connect to the host Concourse environment #C{$host_env}"
+else
+  missing="$(describe "#RI{missing}")"
+describe "Web Client"\
+         "  URL:      #C{$(echo "$host_data" | jq -r '.external_url // "127.0.0.1"')}" \
+         "  username: #C{$(echo "$host_data" | jq -r '.username // "'"$missing"'"')}" \
+         "  password: #C{$(echo "$host_data" | jq -r '.password // "'"$missing"'"')}" 
+fi
+

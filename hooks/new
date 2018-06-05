@@ -1,0 +1,223 @@
+#!/bin/bash
+# shellcheck disable=2016
+set -eu
+
+dir="$GENESIS_ROOT"
+name="$GENESIS_ENVIRONMENT"
+prefix="$GENESIS_VAULT_PREFIX"
+
+ymlfile="$dir/$name.yml"
+declare -a features
+features=()
+params="\\nparams:\\n  env:   $name\\n  vault: $prefix\\n"
+
+describe "" \
+  "#G{Concourse CI/CD Genesis Kit}" \
+  "#G{---------------------------}" \
+  "" \
+  "Creating environment #C{$name} in #C{$dir}"
+
+prompt_for kit_type select \
+  "Is this a full Concourse deployment, or a worker deployment for an existing Concourse?" \
+  -o "[full]Full Concourse" \
+  -o "[workers]Workers"
+
+features+=("$kit_type")
+
+if [[ "$kit_type" == "full" ]] ; then
+
+  prompt_for auth_backend_feature "select" \
+    "What authentication backend do you wish to use with Concourse?" \
+    -o "[github-oath]             GitHub OAuth Integration" \
+    -o "[github-enterprise-oauth] GitHub Enterprise OAuth Integration" \
+    -o "[cf-oauth]                UAA OAuth Integration" \
+    -o "[]                        HTTP Basic Auth"
+  if [[ -n "$auth_backend_feature" ]] ; then
+    features+=("$auth_backend_feature")
+  fi
+
+  case "$auth_backend_feature" in
+    "github-oath")
+      describe "" \
+        'The GitHub OAuth Client ID and Client Secret are needed to authenticate Concourse' \
+        'to GitHub, so that Concourse can then authorize users after they log into GitHub.' \
+        'See https://developer.github.com/v3/oauth/ for more info.'
+
+      prompt_for client_id line "GitHub OAuth Client ID:" -i
+      prompt_for client_secret line "GitHub OAuth Client Secret:" -i
+      safe set --quiet "secret/$prefix/oauth" provider_key="$client_id" provider_secret="$client_secret"
+
+      describe "" \
+        "Concourse authorizes access based off of GitHub Organizations"
+      prompt_for authz_allowed_orgs line \
+        "Which GitHub organization do you want to grant access to Concourse?" \
+      param_entry params authz_allowed_orgs
+      ;;
+
+    "github-enterprise-oauth")
+      describe "" \
+        'The GitHub OAuth Client ID and Client Secret are needed to authenticate Concourse' \
+        'to GitHub, so that Concourse can then authorize users after they log into GitHub.' \
+        'See https://developer.github.com/v3/oauth/ for more info.'
+
+      prompt_for client_id line "GitHub OAuth Client ID:" -i
+      prompt_for client_secret line "GitHub OAuth Client Secret:" -i
+      safe set --quiet "secret/$prefix/oauth" provider_key="$client_id" provider_secret="$client_secret"
+
+      prompt_for authz_allowed_orgs line \
+        "Which GitHub organization do you want to grant access to Concourse?" \
+      param_entry params authz_allowed_orgs
+
+      describe "" \
+        "What is the API URL for your GitHub Enteprise installation?" \
+        "example: https://github.example.com/api/v3/"
+      prompt_for github_api_url line "GitHub Enterprise API URL:" -i
+      param_entry params github_api_url
+
+      describe "" \
+        "What is the URL used by GitHub Enterprise to generate OAuth Tokens?" \
+        "example: https://github.example.com/login/oauth/access_token"
+      prompt_for github_token_url line "GitHub Enterprise token URL:" -i
+      param_entry params github_token_url
+
+      describe "" \
+        "What is the URL used by GitHub Enterprise to authorize OAuth requests?" \
+        "example: https://github.example.com/login/oauth/authorize"
+      prompt_for github_auth_url line "GitHub Enterprise auth URL:" -i
+      param_entry params github_auth_url
+      ;;
+
+    "cf-oauth" )
+      describe "" \
+        "The UAA client id and secret is needed to authenticate Concourse to the UAA," \
+        "so that Concourse can then authorize users after they log into the UAA."
+      prompt_for client_id line "UAA Client ID:" -i
+      prompt_for client_secret line "UAA Client Secret:" -i
+      safe set --quiet "secret/$prefix/oauth" provider_key="$client_id" provider_secret="$client_secret"
+
+      describe "" \
+        "What is the URL of the CF installation that will be used for UAA-based" \
+        "authentication.  Should be the same URL that is used to log in to the CF" \
+        "installation."
+      prompt_for cf_base_url line \
+        "Cloud Foundry Base URL:" -i \
+        -V url
+      cf_scheme=${cf_base_url%%://*}
+      if [[ "$cf_scheme" == "$cf_base_url" ]] ; then
+        cf_scheme="https"
+      else 
+        cf_base_url="${cf_base_url#*://}"
+      fi
+      prompt_for cf_api_url line \
+        "Cloud Foundry API URL:" -i \
+        --default "${cf_scheme}://api.system.${cf_base_url}" \
+        -V url
+      param_entry params cf_api_url
+
+      prompt_for uaa_token_url line \
+        "Cloud Foundry UAA Token URL:" -i \
+        --default "${cf_scheme}://login.system.${cf_base_url}/oauth/token" \
+        -V url
+      param_entry params uaa_token_url
+
+      prompt_for uaa_auth_url line \
+        "Cloud Foundry UAA Auth URL:" -i \
+        --default "${cf_scheme}://login.system.${cf_base_url}/oauth/authorize" \
+        -V url
+      param_entry params uaa_auth_url
+
+      describe "" \
+        "The Cloud Foundry CA cert is used to authenticate Concourse to the UAA," \
+        "so that Concourse can then authorize users after they log into the UAA." \
+        'This is usually something like `secret/path/to/keys/for/haproxy/ssl:certificate`' \
+        'If you are unsure, use `safe tree` to find it. If you are terminating ssl on LBs or' \
+        "Go routers, you will need cert on those nodes."
+      prompt_for cf_ca_cert_vault_path line \
+        "What is your CF CA cert path?" \
+        -V vault_path_and_key
+      param_entry params cf_ca_cert_vault_path
+
+      prompt_for cf_spaces multi-line \
+        "What CF spaces do you want to grant access to Concourse?"
+      param_entry params cf_spaces -a "${cf_spaces[@]}"
+      ;;
+  esac
+
+  describe "" \
+    "Concoure will be running on https, and as such, needs an SSL cert/key."
+  prompt_for ssl_cert_feature "select" \
+    "Do you have an SSL certificate for Concourse, or do you need a self-signed cert?" \
+    -o "[provided-cert]I have my own certificate for Concourse" \
+    -o "[self-signed-cert]Please have Genesis create a self-signed certificate for Concourse"
+  features+=("$ssl_cert_feature")
+
+  case "$ssl_cert_feature" in
+    "provided-cert")
+      prompt_for "$prefix/ssl/server:certificate" secret-block \
+        "What is the SSL certificate for Concourse?"
+
+      prompt_for "$prefix/ssl/server:key" secret-block \
+        "What is the SSL key for Concourse?"
+      ;;
+  esac
+
+  describe "" \
+    "The external domain for concourse is the DNS entry users will use to access" \
+    "Concourse.  You can specify the IP address if you don't have a DNS entry.  Do" \
+    "not include 'https://' in this value."
+  prompt_for external_domain line "External Domain or IP:" -i
+  param_entry params external_domain
+
+  describe "" \
+    "The web VMs are used to provide the Web Interface for Concourse.  Usually one VM is" \
+    "sufficient, but you may want more if this Concourse is shared with many users"
+  prompt_for num_web_nodes line \
+    "How many web frontend VMs would you like - between 1 and 5?" \
+    -V "1-5" \
+    --default "1"
+  param_entry params num_web_nodes
+else
+  describe "" \
+    "A worker-only Concourse deployment requires an existing full host Concourse" \
+    "deployment for the workers to connect to."
+  prompt_for tsa_host_env line \
+    "Please specify environment name of the Concourse host deployment"
+  param_entry params tsa_host_env
+
+  if ! safe exists "secret/exodus/$tsa_host_env/concourse" ; then
+    decribe >&2 "" \
+      "#R{[ERROR]} No deployment details found for $tsa_host_env Concourse deployment." \
+      "Please ensure that it has been deployed first using Genesis v2.6 or greater and this" \
+      "version of the Concourse Genesis Kit" \
+      ""
+    exit 2
+  fi
+fi
+
+describe "" \
+  "The worker VMs perform all the tasks in the Concourse pipelines"
+prompt_for worker_count line \
+  "How many worker instances do you want - between 1 and 20?"\
+  --default 3 \
+  -V "1-20"
+param_entry params worker_count
+
+
+# Build environment file:
+cat >"$ymlfile" -- <<EOF
+---
+kit:
+  name:    $GENESIS_KIT_NAME
+  version: $GENESIS_KIT_VERSION
+  features:
+    - (( replace ))
+EOF
+for f in "${features[@]}" ; do
+  printf >>"$ymlfile" -- '    - %s\n' "$f"
+done
+
+# Params
+printf >>"$ymlfile" -- "$( echo "$params" | sed -e 's/%/%%/g')"
+
+describe "" "Wrote configuration to #C{$ymlfile}." ""
+exit 0
