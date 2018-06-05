@@ -1,6 +1,7 @@
 ---
 kit:
   subkits:
+    - full
     - self-signed-cert
 
 params:
