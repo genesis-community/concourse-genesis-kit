@@ -40,4 +40,14 @@ deployments, and worker tags for worker-only deployments.
 Better control over creation and deployment processes using the new Genesis
 v2.6 hooks.
 
+## Improved Documentation:
+
+The new MANUAL.md file contains all the features and parameters used by this
+kit, as well as all the add-ons and example environment files.
+
+# BREAKING CHANGE
+
+There is one minor breaking change moving to 2.0.0.  You need to specify that
+the environment is a full deploy (feature: full) or a worker-only deploy
+(feature: workers).
 

@@ -73,7 +73,7 @@ The following secrets will be pulled from the vault:
 
 The following parameters are used when deploying a Concourse environment with the `workers` feature.
 
-- `tsa_host_env` - The Genesis deployment environment name that will act as host to this worker-only deployment.  Note that this host environment must have been deployed by using Genesis v2.6 or later, and using v1.6.0 of this kit.
+- `tsa_host_env` - The Genesis deployment environment name that will act as host to this worker-only deployment.  Note that this host environment must have been deployed by using Genesis v2.6 or later, and using v2.0.0 of this kit.
 
 - `tags` - A list of tags to associate with this worker pool.  Tags are used to displatch tagged pipeline jobs to the appropriate pool of workers.  If you're using Genesis generated deployment pipelines, this should work without modification: By default, it will be a single tag matching the environment name.  If you want no tags, specify `tags` as an empty list. 
 
@@ -204,7 +204,7 @@ web nodes and two medium workers in a single availability zone.
 ---
 kit:
   name:    concourse
-  version: 1.6.0
+  version: 2.0.0
   features:
   ⦙ - (( replace ))
   ⦙ - full
@@ -228,7 +228,7 @@ by the above deployment, with bigger workers and more of them:
 ---
 kit:
   name:    concourse
-  version: 1.6.0
+  version: 2.0.0
   features:
   ⦙ - (( replace ))
   ⦙ - workers
@@ -250,4 +250,4 @@ params:
 
 ## History
 
-1.6.0 - the first version to support Genesis 2.6 hooks and exodus data for addon scripts and `genesis info`.
+2.0.0 - the first version to support Genesis 2.6 hooks and exodus data for addon scripts and `genesis info`.
