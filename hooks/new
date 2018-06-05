@@ -153,8 +153,11 @@ if [[ "$kit_type" == "full" ]] ; then
 
   case "$ssl_cert_feature" in
     "provided-cert")
-      prompt_for "$prefix/ssl/server:combined" secret-block \
-        "What is the SSL cert + key pair for Concourse?"
+      prompt_for "$prefix/ssl/server:certificate" secret-block \
+        "What is the SSL certificate for Concourse?"
+
+      prompt_for "$prefix/ssl/server:key" secret-block \
+        "What is the SSL key for Concourse?"
       ;;
   esac
 

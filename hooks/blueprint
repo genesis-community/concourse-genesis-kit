@@ -36,6 +36,11 @@ if want_feature "full" ; then
 
   if want_feature self-signed-cert ; then
     merge+=( "manifests/self-signed.yml" )
+  elif ! want_feature provided-cert ; then
+    echo >&2 "Concourse needs to be configured with 'provide-cert' or 'self-signed-cert'.  If"
+    echo >&2 "upgrading, please add 'self-signed-cert' to your environment's list of features"
+    echo >&2 "and run 'genesis add-secrets' to generate the certificate."
+    exit 1
   fi
 
 elif want_feature "workers" ; then
