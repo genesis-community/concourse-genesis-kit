@@ -115,7 +115,7 @@ is_logged_in() {
 
 login() {
   needs_fly
-  host_user="$(get_host_param user)"
+  host_user="$(get_host_param username)"
   describe >&2 \
     "" \
     "Logging in to Concourse deployment #C{$host_env} as user '$host_user'." \
@@ -173,7 +173,7 @@ visit)
   if ! command -v open >/dev/null 2>&1; then
     error "#R{[ERROR]} The 'visit' addon script only works on macOS, currently."
   fi
-  host_user="$(get_host_param user)"
+  host_user="$(get_host_param username)"
   host_pw="$(get_host_param password)"
   describe "" \
     "You will need to enter the following credentials once the page opens:" \
