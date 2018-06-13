@@ -1,6 +1,5 @@
 ---
 meta:
-  vault: (( concat "secret/" params.vault ))
   default:
     azs:       [z1, z2, z3]
     no_proxy:  [localhost, 127.0.0.1]
