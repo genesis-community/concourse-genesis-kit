@@ -46,7 +46,7 @@ instance_groups:
               public_key: (( vault meta.vault "/tsa/worker_key:public" ))
           baggageclaim:
             forward_address: 127.0.0.1:7788
-          gargen:
+          garden:
             forward_address: 127.0.0.1:7777
       - release: concourse
         name: baggageclaim
