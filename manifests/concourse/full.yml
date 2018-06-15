@@ -14,7 +14,6 @@ exodus:
   tsa_host_public_key:    (( vault meta.vault "/tsa/host_key:public" ))
   tsa_worker_public_key:  (( vault meta.vault "/tsa/worker_key:public" ))
   tsa_worker_private_key: (( vault meta.vault "/tsa/worker_key:private" ))
-  
 
 params:
   external_domain:   (( param "Please specify the IP/DNS users will use to connect to Concourse" ))
@@ -38,22 +37,18 @@ instance_groups:
     stemcell: default
     vm_type: (( grab params.haproxy_vm_type || params.concourse_vm_type ))
     networks:
-    - name: (( grab params.concourse_network ))
-      static_ips: (( static_ips 0 ))
+      - name: (( grab params.concourse_network ))
+        static_ips: (( static_ips 0 ))
     jobs:
       - release: haproxy
         name: haproxy
         properties:
           ha_proxy:
             tcp:
-            - name: web_http
-              port: 80
-              backend_port: (( grab instance_groups.web.jobs.atc.properties.bind_port ))
-              backend_servers: (( grab instance_groups.web.networks.0.static_ips ))
-            - name: web_https
-              port: 443
-              backend_port: (( grab instance_groups.web.jobs.atc.properties.tls_bind_port ))
-              backend_servers: (( grab instance_groups.web.networks.0.static_ips ))
+              - name: web_http
+                port: 80
+                backend_port: (( grab instance_groups.web.jobs.atc.properties.bind_port ))
+                backend_servers: (( grab instance_groups.web.networks.0.static_ips ))
 
   - name: web
     instances: (( grab params.num_web_nodes ))
@@ -61,8 +56,8 @@ instance_groups:
     stemcell: default
     vm_type: (( grab params.web_vm_type || params.concourse_vm_type ))
     networks:
-    - name: (( grab params.concourse_network ))
-      static_ips: (( static_ips 1, 2, 4, 5, 6 ))
+      - name: (( grab params.concourse_network ))
+        static_ips: (( static_ips 1, 2, 4, 5, 6 ))
     jobs:
       - release: concourse
         name: tsa
@@ -83,9 +78,6 @@ instance_groups:
               password: (( vault meta.vault "/database/atc:password" ))
           token_signing_key: (( grab params.token_signing_key ))
           bind_port: 8080
-          tls_bind_port: 4443
-          tls_cert: (( vault meta.vault "/ssl/server:certificate" ))
-          tls_key:  (( vault meta.vault "/ssl/server:key" ))
           publicly_viewable: true
           basic_auth_username: (( grab params.main_user || meta.default.main_user ))
           basic_auth_password: (( vault meta.vault "/webui:password" ))
@@ -132,4 +124,3 @@ releases:
   sha1: 8ebad4c8e57fac2fba9da07536f61efe8141be6f
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=8.4.2
   version: 8.4.2
-

@@ -19,8 +19,8 @@ describe "" \
 
 prompt_for kit_type select \
   "Is this a full Concourse deployment, or a worker deployment for an existing Concourse?" \
-  -o "[full]Full Concourse" \
-  -o "[workers]Workers"
+  -o "[full]     Full Concourse" \
+  -o "[workers]  Satellite Concourse"
 
 features+=("$kit_type")
 
@@ -144,11 +144,13 @@ if [[ "$kit_type" == "full" ]] ; then
   esac
 
   describe "" \
-    "Concoure will be running on https, and as such, needs an SSL cert/key."
+    "Concourse should be protected by TLS, since build logs may contain" \
+    "sensitive information (like IPs, usernames, etc.)."
   prompt_for ssl_cert_feature "select" \
-    "Do you have an SSL certificate for Concourse, or do you need a self-signed cert?" \
-    -o "[provided-cert]I have my own certificate for Concourse" \
-    -o "[self-signed-cert]Please have Genesis create a self-signed certificate for Concourse"
+    "How would you like to configure Concourse TLS?" \
+    -o "[provided-cert]    I have my own certificate for Concourse" \
+    -o "[self-signed-cert] Please have Genesis create a self-signed certificate for Concourse" \
+    -o "[no-tls]           Do not; an upstream proxy / load balancer is handling TLS"
   features+=("$ssl_cert_feature")
 
   case "$ssl_cert_feature" in
@@ -168,14 +170,6 @@ if [[ "$kit_type" == "full" ]] ; then
   prompt_for external_domain line "External Domain or IP:" -i
   param_entry params external_domain
 
-  describe "" \
-    "The web VMs are used to provide the Web Interface for Concourse.  Usually one VM is" \
-    "sufficient, but you may want more if this Concourse is shared with many users"
-  prompt_for num_web_nodes line \
-    "How many web frontend VMs would you like - between 1 and 5?" \
-    -V "1-5" \
-    --default "1"
-  param_entry params num_web_nodes
 else
   describe "" \
     "A worker-only Concourse deployment requires an existing full host Concourse" \
@@ -193,14 +187,6 @@ else
     exit 2
   fi
 fi
-
-describe "" \
-  "The worker VMs perform all the tasks in the Concourse pipelines"
-prompt_for worker_count line \
-  "How many worker instances do you want - between 1 and 20?"\
-  --default 3 \
-  -V "1-20"
-param_entry params worker_count
 
 
 # Build environment file:

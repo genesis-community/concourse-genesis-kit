@@ -5,12 +5,12 @@ meta:
     no_proxy: [localhost, 127.0.0.1]
 
 params:
-  concourse_network:        concourse
-  concourse_vm_type:        small
-  worker_vm_type:           concourse-worker
-  workers:                  3
+  concourse_network: concourse
+  concourse_vm_type: small
+  worker_vm_type:    concourse-worker
+  workers:           3
 
-  stemcell_os: ubuntu-trusty
+  stemcell_os:      ubuntu-trusty
   stemcell_version: latest
 
   volume_driver: detect

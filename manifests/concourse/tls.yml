@@ -1,0 +1,21 @@
+---
+instance_groups:
+  - name: haproxy
+    jobs:
+      - name: haproxy
+        properties:
+          ha_proxy:
+            tcp:
+              - name: web_https
+                port: 443
+                backend_port:    (( grab instance_groups.web.jobs.atc.properties.tls_bind_port ))
+                backend_servers: (( grab instance_groups.web.networks.0.static_ips ))
+
+
+  - name: web
+    jobs:
+      - name: atc
+        properties:
+          tls_bind_port: 4443
+          tls_cert:      (( vault meta.vault "/ssl/server:certificate" ))
+          tls_key:       (( vault meta.vault "/ssl/server:key" ))
