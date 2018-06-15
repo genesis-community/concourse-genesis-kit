@@ -50,7 +50,7 @@ if [[ "$kit_type" == "full" ]] ; then
       describe "" \
         "Concourse authorizes access based off of GitHub Organizations"
       prompt_for authz_allowed_orgs line \
-        "Which GitHub organization do you want to grant access to Concourse?" \
+        "Which GitHub organization do you want to grant access to Concourse?"
       param_entry params authz_allowed_orgs
       ;;
 
@@ -65,7 +65,7 @@ if [[ "$kit_type" == "full" ]] ; then
       safe set --quiet "secret/$prefix/oauth" provider_key="$client_id" provider_secret="$client_secret"
 
       prompt_for authz_allowed_orgs line \
-        "Which GitHub organization do you want to grant access to Concourse?" \
+        "Which GitHub organization do you want to grant access to Concourse?"
       param_entry params authz_allowed_orgs
 
       describe "" \
