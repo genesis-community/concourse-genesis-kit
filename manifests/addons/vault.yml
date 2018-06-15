@@ -1,0 +1,19 @@
+---
+params:
+  vault_url: (( param "Please specify the URL of the Vault for Concourse to pull credentials from" ))
+  vault_token: (( param "Please specify the token that Concourse should use to authenticate with Vault" ))
+
+
+
+instance_groups:
+- name: web
+  jobs:
+  - name: atc
+    properties:
+      vault:
+        url: (( grab params.vault_url ))
+        path_prefix: (( grab params.vault_path_prefix || "/concourse" ))
+        tls:
+          insecure_skip_verify: (( grab params.vault_insecure_skip_verify || false ))
+        auth:
+          client_token: (( grab params.vault_token ))

@@ -201,6 +201,28 @@ the following configuration parameters:
     Concourse.  By default, the environment name is applied as the sole tag.
     Tags cannot contain interior whitespace.
 
+# Setting Up Vault Integration For Pipelines
+
+The ATC can be configured to pull credentials for pipeline configurations using
+Vault. The pipelines can specify properties wrapped in double parentheses to
+pull these credentials dynamically from that Vault. For more information, see
+https://concourse-ci.org/creds.html.
+
+To add this functionality, specify the `vault` feature and provide the
+following configuration parameters.
+
+  - `vault_url` - The URL of the Vault api to contact
+
+  - `vault_path_prefix` - The path prefix to look for paths
+  under. For example, if `((example))` is given in a pipeline
+  definition, it would look at `<vault_path_prefix>/example`
+  in the vault. Defaults to `/concourse`.
+
+  - `vault_insecure_skip_verify` - Whether to skip validation of
+  the cert presented by the Vault API. Defaults to `false`
+
+  - `vault_token` - The token to present as authentication to the Vault API.
+
 # Cloud Configuration
 
 By default, Concourse uses the following VM types/networks from your cloud

@@ -8,7 +8,8 @@ validate_features \
   azure shield                                  \
   workers full                                  \
   no-tls provided-cert self-signed-cert         \
-  github-oauth github-enterprise-oauth cf-oauth
+  github-oauth github-enterprise-oauth cf-oauth \
+  vault
 
 if [[ "$(bosh_cpi)" == "azure" ]]; then
   merge+=( "manifests/addons/azure.yml" )
@@ -49,6 +50,12 @@ if want_feature "full" ; then
     fi
   fi
 
+  if want_feature "vault"; then
+    merge+=( "manifests/addons/vault.yml" )
+  fi
+  # If credhub support is added later it should probably if elsif'd here, under vault
+
+
 elif want_feature "workers" ; then
   merge+=( "manifests/concourse/workers.yml" )
 
@@ -60,7 +67,7 @@ elif want_feature "workers" ; then
     esac
   done
 
-else 
+else
   echo >&2 "Concourse needs to be configured as 'full' or 'workers'.  If upgrading,"
   echo >&2 "please add 'full' to your environment's list of features"
   exit 1
@@ -70,9 +77,11 @@ if want_feature "shield"; then
   echo >&2 "The 'shield' feature is no longer supported.  Instead, please add the"
   echo >&2 "shield agent to your runtime configuration."
 fi
+
 if want_feature "azure"; then
   echo >&2 "The 'azure' feature is no longer necessary - azure CPI will be detected"
   echo >&2 "automatically at deployment time."
 fi
+
 
 echo "${merge[@]}"
