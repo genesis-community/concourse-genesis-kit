@@ -8,7 +8,7 @@ validate_features \
   azure shield                                  \
   workers full                                  \
   no-tls provided-cert self-signed-cert         \
-  github-oauth github-enterprise-oauth cf-oauth
+  github-oauth github-enterprise-oauth cf-oauth \
   vault
 
 if [[ "$(bosh_cpi)" == "azure" ]]; then
