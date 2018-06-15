@@ -109,6 +109,11 @@ provide the following parameters:
     For legacy reasons, it retains a pluralization of its name, but only
     allows a single organization.  This parameter is **required**.
 
+  - `github_authz` - A list of authorizations to determine who is
+    allowed to authenticate. This supersedes `authz_allowed_orgs`,
+    and lets you grant individual teams and users access,
+    regardless of their org memberships.
+
 The following secrets will be pulled from the vault:
 
   - **Oauth2 Client ID and Secret** - The Client ID and secret of the Github
