@@ -16,4 +16,4 @@ instance_groups:
         tls:
           insecure_skip_verify: (( grab params.vault_insecure_skip_verify || false ))
         auth:
-          client_token: (( grab params.vault_token))
+          client_token: (( grab params.vault_token ))
