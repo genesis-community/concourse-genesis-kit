@@ -2,6 +2,12 @@
 params:
   authz_allowed_orgs: (( param "Please provide the name of the organization authorized for using Concourse" ))
 
+meta:
+  default:
+    github_authz:
+      - organization: (( grab params.authz_allowed_orgs ))
+        teams:        all
+
 instance_groups:
   - name: web
     jobs:
@@ -10,8 +16,6 @@ instance_groups:
         basic_auth_username: (( prune ))
         basic_auth_password: (( prune ))
         github_auth:
-          authorize:
-          - organization: (( grab params.authz_allowed_orgs ))
-            teams: all
           client_id:     (( vault meta.vault "/oauth:provider_key" ))
           client_secret: (( vault meta.vault "/oauth:provider_secret" ))
+          authorize:     (( grab params.github_authz || meta.default.github_authz ))
