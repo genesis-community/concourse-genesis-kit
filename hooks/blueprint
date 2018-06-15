@@ -2,23 +2,23 @@
 set -eu
 
 declare -a merge
-merge=( "manifests/concourse-base.yml" )
+merge=( "manifests/concourse/base.yml" )
 
 validate_features \
   azure shield                                  \
   workers full                                  \
-  provided-cert self-signed-cert                \
+  no-tls provided-cert self-signed-cert         \
   github-oauth github-enterprise-oauth cf-oauth
 
 if [[ "$(bosh_cpi)" == "azure" ]]; then
-  merge+=( "manifests/azure.yml" )
+  merge+=( "manifests/addons/azure.yml" )
 fi
 if want_feature "full" ; then
   if want_feature "workers" ; then
     echo >&2 "Can only have one of 'full' or 'workers' as a feature."
     exit 1
   fi
-  merge+=( "manifests/concourse-full.yml" )
+  merge+=( "manifests/concourse/full.yml" )
 
   declare -a oauths
   oauths=()
@@ -34,17 +34,23 @@ if want_feature "full" ; then
     echo >&2 "Please pick up to one (uses http basic auth if none selected)"
   fi
 
-  if want_feature self-signed-cert ; then
-    merge+=( "manifests/self-signed.yml" )
-  elif ! want_feature provided-cert ; then
-    echo >&2 "Concourse needs to be configured with 'provide-cert' or 'self-signed-cert'.  If"
-    echo >&2 "upgrading, please add 'self-signed-cert' to your environment's list of features"
-    echo >&2 "and run 'genesis add-secrets' to generate the certificate."
-    exit 1
+  if ! want_feature no-tls ; then
+    merge+=( "manifests/concourse/tls.yml" )
+    if want_feature self-signed-cert ; then
+      merge+=( "manifests/addons/self-signed.yml" )
+    elif ! want_feature provided-cert ; then
+      echo >&2 "Concourse needs to be configured with 'no-tls', 'provided-cert' or"
+      echo >&2 "'self-signed-cert'."
+      echo >&2
+      echo >&2 "If upgrading, please add 'self-signed-cert' to your environment's list of"
+      echo >&2 "features and run 'genesis add-secrets' to generate the certificate."
+      echo >&2
+      exit 1
+    fi
   fi
 
 elif want_feature "workers" ; then
-  merge+=( "manifests/concourse-workers.yml" )
+  merge+=( "manifests/concourse/workers.yml" )
 
   for want in ${GENESIS_REQUESTED_FEATURES}; do
     case "$want" in
