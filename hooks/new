@@ -28,7 +28,7 @@ if [[ "$kit_type" == "full" ]] ; then
 
   prompt_for auth_backend_feature "select" \
     "What authentication backend do you wish to use with Concourse?" \
-    -o "[github-oath]             GitHub OAuth Integration" \
+    -o "[github-oauth]            GitHub OAuth Integration" \
     -o "[github-enterprise-oauth] GitHub Enterprise OAuth Integration" \
     -o "[cf-oauth]                UAA OAuth Integration" \
     -o "[]                        HTTP Basic Auth"
@@ -37,7 +37,7 @@ if [[ "$kit_type" == "full" ]] ; then
   fi
 
   case "$auth_backend_feature" in
-    "github-oath")
+    "github-oauth")
       describe "" \
         'The GitHub OAuth Client ID and Client Secret are needed to authenticate Concourse' \
         'to GitHub, so that Concourse can then authorize users after they log into GitHub.' \
