@@ -36,5 +36,13 @@ describe "Web Client"\
          "  URL:      #C{$(echo "$host_data" | jq -r '.external_url // "127.0.0.1"')}" \
          "  username: #C{$(echo "$host_data" | jq -r '.username // "'"$missing"'"')}" \
          "  password: #C{$(echo "$host_data" | jq -r '.password // "'"$missing"'"')}" 
+
+  if want_feature shout; then
+    echo
+    describe "Shout! Integration" \
+             "  URL:   #G{$(exodus shout_url)}" \
+             "  Admin: $(exodus shout_admin_username)/#C{$(exodus shout_admin_password)}" \
+             "  Ops:   $(exodus shout_ops_username)/#C{$(exodus shout_ops_password)}"
+  fi
 fi
 
