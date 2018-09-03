@@ -79,6 +79,20 @@ the following configuration parameters:
 - `external_url` - The full HTTP(S) URL for this Concourse.  By default,
   this will be constructed from the chosen `external_domain`.
 
+## Shout! A Programmable Notification Gateway
+
+If you want to handle notification with some style, enable the
+`shout` addon, and specify your Shout! rules in the `shout_rules`
+parameter.
+
+For details on why and how to do this, see the [Shout!][shout]
+documentation.
+
+[shout]: https://github.com/jhunt/shout/blob/master/README.md
+
+The Shout! server will be accessible to your Concourse pipelines,
+on port 7109, at the first web node.
+
 
 ## HTTP Basic Authentication (Default)
 
@@ -326,5 +340,7 @@ params:
 
 ## History
 
-2.0.0 was  the first version to support Genesis 2.6 hooks and exodus data
+2.0.0 was the first version to support Genesis 2.6 hooks and exodus data
 for addon scripts and `genesis info`.
+
+2.2.1 was the first version to incorporate Shout!

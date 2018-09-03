@@ -9,7 +9,7 @@ validate_features \
   workers full                                  \
   no-tls provided-cert self-signed-cert         \
   github-oauth github-enterprise-oauth cf-oauth \
-  vault
+  vault shout
 
 if [[ "$(bosh_cpi)" == "azure" ]]; then
   merge+=( "manifests/addons/azure.yml" )
@@ -54,6 +54,10 @@ if want_feature "full" ; then
     merge+=( "manifests/addons/vault.yml" )
   fi
   # If credhub support is added later it should probably if elsif'd here, under vault
+
+  if want_feature "shout"; then
+    merge+=( "manifests/addons/shout.yml" )
+  fi
 
 
 elif want_feature "workers" ; then

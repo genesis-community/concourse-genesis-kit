@@ -34,3 +34,9 @@ credentials:
 
     webui:
       password: random 16
+
+  shout:
+    shout/ops:
+      password: random 16
+    shout/admin:
+      password: random 32
