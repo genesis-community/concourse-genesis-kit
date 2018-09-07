@@ -3,19 +3,25 @@
 # Cloud Config checks
 if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   if ! want_feature proto; then
-    cloud_config_needs vm_type    $(lookup params.concourse_vm_type small)
+    cloud_config_needs network    $(lookup params.concourse_network concourse)
     cloud_config_needs vm_type    $(lookup params.worker_vm_type    concourse-worker)
-    if lookup --defined params.web_vm_type ; then
-      cloud_config_needs vm_type  $(lookup params.web_vm_type)
+
+    if ! want_feature workers; then
+      # without the 'workers' feature, this is a FULL concourse
+      cloud_config_needs vm_type    $(lookup params.concourse_vm_type   small)
+      cloud_config_needs disk_type  $(lookup params.concourse_disk_type concourse)
+
+      if lookup --defined params.web_vm_type ; then
+        cloud_config_needs vm_type  $(lookup params.web_vm_type)
+      fi
+      if lookup --defined params.db_vm_type ; then
+        cloud_config_needs vm_type  $(lookup params.db_vm_type)
+      fi
+      if lookup --defined params.haproxy_vm_type ; then
+        cloud_config_needs vm_type  $(lookup params.haproxy_vm_type)
+      fi
     fi
-    if lookup --defined params.db_vm_type ; then
-      cloud_config_needs vm_type  $(lookup params.db_vm_type)
-    fi
-    if lookup --defined params.haproxy_vm_type ; then
-      cloud_config_needs vm_type  $(lookup params.haproxy_vm_type)
-    fi
-    cloud_config_needs network    $(lookup params.vault_network     concourse)
-    cloud_config_needs disk_type  $(lookup params.vault_disk_type   concourse)
+
     check_cloud_config && describe "  cloud-config [#G{OK}]"
   fi
 fi
