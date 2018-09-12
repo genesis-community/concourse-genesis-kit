@@ -1,5 +1,6 @@
 #!/bin/bash
 set -eu
+vault="secret/$GENESIS_VAULT_PREFIX"
 
 error() {
   describe >&2 "" "$@" ""
@@ -148,6 +149,9 @@ list() {
   echo
   echo "  fly                  Run fly commands targetting this Concourse Deployment"
   echo
+  echo "  setup-approle        Create the necessary Vault AppRole and policy for Genesis"
+  echo "                       Concourse deployments."
+  echo
 }
 
 # MAIN
@@ -216,6 +220,51 @@ fly)
   fly -t "$host_env" "$@"
   echo
   exit $?
+  ;;
+
+setup-approle)
+  # If AppRole is already enabled in this Vault, it'll return a 400 error with "path already in use". This is OK.
+  if [[ ! $(safe vault auth enable approle 2>&1) =~ (Success\! Enabled approle auth method)|(path is already in use) ]] ; then
+    echo "Failed to enable AppRole on your targeted Vault. Womp womp :("
+    exit 1
+  fi
+
+  if ! safe exists "secret/exodus/$GENESIS_ENVIRONMENT/concourse" ; then
+    error "#R{[ERROR]} Cannot find exodus data for #C{$GENESIS_ENVIRONMENT}.  Please redeploy" \
+          "        before using addons."
+  fi
+
+  # Create AppRole Role named "genesis-piplines" with the following parameters:
+  # - 90 minute TTL (Some BOSH deployments could take awhile, and then the Exodus write-back could fail if TTL is too short)
+  # - unlimited token use
+  safe --quiet set auth/approle/role/genesis-pipelines \
+    secret_id_ttl=90m \
+    token_num_uses=0 \
+    token_ttl=90m \
+    token_max_ttl=90m \
+    secret_id_num_uses=0
+  role_id=$(safe get auth/approle/role/genesis-pipelines/role-id:role_id)
+  # generate a secret key for the newly minted role
+  approle_secret=$(safe vault write -field=secret_id -f auth/approle/role/genesis-pipelines/secret-id)
+
+
+  # write info to exodus
+  safe --quiet set $vault/genesis_pipelines approle_id=$role_id
+  safe --quiet set $vault/genesis_pipelines approle_secret=$approle_secret
+
+  safe --quiet vault policy write genesis-pipelines -<<EOF
+# Allow the pipelines to read all items within Vault, and write to secret/exodus (for genesis exodus data)
+path "secret/*" {
+  capabilities = ["read", "list"]
+}
+
+path "secret/exodus/*" {
+    capabilities = ["create", "read", "update", "list", "delete"]
+}
+EOF
+
+  safe --quiet set auth/approle/role/genesis-pipelines policies=default,genesis-pipelines
+  exit 0
   ;;
 
 *)
