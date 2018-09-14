@@ -4,10 +4,10 @@ set -eu
 if [[ $GENESIS_DEPLOY_RC == 0 ]]; then
 
   mode="Full"
-  want_feature worker-only && mode="Worker-Only"
+  want_feature workers && mode="Satellite (workers only)"
 
       echo; echo;
-  describe "#M{$GENESIS_ENVIRONMENT} Concourse ($mode) deployed!"
+  describe "#M{$GENESIS_ENVIRONMENT} $mode Concourse deployed!"
       echo
       echo "For details about the deployment, run"
       echo
