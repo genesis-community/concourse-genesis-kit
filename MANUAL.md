@@ -344,3 +344,6 @@ params:
 for addon scripts and `genesis info`.
 
 2.2.1 was the first version to incorporate Shout!
+
+2.2.2 added an addon command to setup an AppRole and policy for Genesis
+Concourse deployments.
