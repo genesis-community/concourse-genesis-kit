@@ -249,8 +249,8 @@ setup-approle)
 
 
   # write info to exodus
-  safe --quiet set secret/exodus/ci/genesis_pipelines approle_id=$role_id
-  safe --quiet set secret/exodus/ci/genesis_pipelines approle_secret=$approle_secret
+  safe --quiet set secret/exodus/ci/genesis-pipelines approle-id=$role_id
+  safe --quiet set secret/exodus/ci/genesis-pipelines approle-secret=$approle_secret
 
   safe --quiet vault policy write genesis-pipelines -<<EOF
 # Allow the pipelines to read all items within Vault, and write to secret/exodus (for genesis exodus data)
