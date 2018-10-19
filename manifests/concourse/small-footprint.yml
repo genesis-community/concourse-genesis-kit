@@ -1,0 +1,49 @@
+---
+instance_groups:
+  - name: concourse
+    instances: 1
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    vm_type: (( grab params.haproxy_vm_type || params.concourse_vm_type ))
+    networks:
+      - name: (( grab params.concourse_network ))
+        static_ips: (( static_ips 0 ))
+    jobs:
+    - (( grab meta.jobs.postgres ))
+    - (( grab meta.jobs.locker   ))
+    - (( grab meta.jobs.tsa      ))
+    - .: (( inject meta.jobs.atc ))
+      properties:
+        bind_port: 80
+
+
+meta:
+  default:
+    azs:       [z1, z2, z3]
+    no_proxy:  [localhost, 127.0.0.1]
+    main_user: concourse
+
+exodus:
+  external_url:           (( grab params.external_url ))
+  username:               (( grab params.main_user || meta.default.main_user ))
+  password:               (( vault meta.vault "/webui:password" ))
+  tsa_host:               (( grab instance_groups.concourse.networks.0.static_ips.0 ))
+  tsa_port:               2222
+  tsa_host_public_key:    (( vault meta.vault "/tsa/host_key:public" ))
+  tsa_worker_public_key:  (( vault meta.vault "/tsa/worker_key:public" ))
+  tsa_worker_private_key: (( vault meta.vault "/tsa/worker_key:private" ))
+  mode:                   "small-footprint"
+
+params:
+  external_domain:   (( param "Please specify the IP/DNS users will use to connect to Concourse" ))
+  external_url:      (( concat "https://" params.external_domain ))
+  workers:           1
+  token_signing_key:
+    public_key:      (( vault meta.vault "/atc/token_signing_key:public" ))
+    private_key:     (( vault meta.vault "/atc/token_signing_key:private" ))
+
+releases:
+- (( append ))
+- (( grab meta.releases.postgres ))
+- (( grab meta.releases.locker   ))
+- (( grab meta.releases.haproxy  ))

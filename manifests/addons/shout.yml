@@ -5,8 +5,12 @@ params:
        (when *
          (remind 24 hours))))
 
+
+meta:
+  vm_ip: (( grab instance_groups.web.networks[0].static_ips[0] || instance_groups.concourse.networks[0].static_ips[0] ))
+
 exodus:
-  shout_url:            (( concat "http://" instance_groups.web.networks[0].static_ips[0] ":7109" ))
+  shout_url:            (( concat "http://"  meta.vm_ip ":7109" ))
   shout_admin_username: admin
   shout_admin_password: (( vault meta.vault "/shout/admin:password" ))
   shout_ops_username:   ops
@@ -27,7 +31,5 @@ instance_groups:
           rules: (( grab params.shout_rules ))
 
 releases:
-  - name:   shout
-    version: 0.1.0
-    sha1:    73c5c0161730a655c03f5a6ceb1c8b2e33403874
-    url:     https://github.com/jhunt/shout-boshrelease/releases/download/v0.1.0/shout-0.1.0.tar.gz
+- (( append ))
+- (( grab meta.releases.shout))

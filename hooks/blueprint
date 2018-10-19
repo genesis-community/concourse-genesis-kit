@@ -1,12 +1,14 @@
 #!/bin/bash
-set -eu
+#set -eu
 
 declare -a merge
 merge=( "manifests/concourse/base.yml" )
+merge+=( "manifests/concourse/releases.yml")
+merge+=( "manifests/concourse/jobs.yml")
 
 validate_features \
   azure shield                                  \
-  workers full                                  \
+  workers full small-footprint                  \
   no-tls provided-cert self-signed-cert         \
   github-oauth github-enterprise-oauth cf-oauth \
   vault shout
@@ -14,12 +16,29 @@ validate_features \
 if [[ "$(bosh_cpi)" == "azure" ]]; then
   merge+=( "manifests/addons/azure.yml" )
 fi
-if want_feature "full" ; then
-  if want_feature "workers" ; then
-    echo >&2 "Can only have one of 'full' or 'workers' as a feature."
-    exit 1
+
+# Make sure we're only merging one of the major feature flags
+declare -i maj_feat=0
+for __feature in $GENESIS_REQUESTED_FEATURES; do
+  if [[ $__feature == "full" || $__feature == "workers" || $__feature == "small-footprint" ]]; then
+    (( maj_feat++ ))
   fi
-  merge+=( "manifests/concourse/full.yml" )
+done
+
+if [[ $maj_feat != 1 ]]; then
+    echo >&2 "Can only have one of 'full', workers', or 'small-footprint' as a feature."
+    exit 1
+fi
+
+
+
+if want_feature "full" || want_feature "small-footprint"; then
+  if want_feature "full" ; then
+    merge+=( "manifests/concourse/full.yml" )
+  fi
+  if want_feature "small-footprint" ; then
+    merge+=( "manifests/concourse/small-footprint.yml" )
+  fi
 
   declare -a oauths
   oauths=()
@@ -86,6 +105,5 @@ if want_feature "azure"; then
   echo >&2 "The 'azure' feature is no longer necessary - azure CPI will be detected"
   echo >&2 "automatically at deployment time."
 fi
-
 
 echo "${merge[@]}"
