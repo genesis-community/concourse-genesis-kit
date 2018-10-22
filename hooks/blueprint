@@ -1,5 +1,5 @@
 #!/bin/bash
-#set -eu
+set -eu
 
 declare -a merge
 merge=( "manifests/concourse/base.yml" )
@@ -19,11 +19,15 @@ fi
 
 # Make sure we're only merging one of the major feature flags
 declare -i maj_feat=0
-for __feature in $GENESIS_REQUESTED_FEATURES; do
-  if [[ $__feature == "full" || $__feature == "workers" || $__feature == "small-footprint" ]]; then
-    (( maj_feat++ ))
-  fi
-done
+if want_feature "full" ; then
+  (( maj_feat++ ))
+fi
+if want_feature "workers" ; then
+  (( maj_feat++ ))
+fi
+if want_feature "small-footprint" ; then
+  (( maj_feat++ ))
+fi
 
 if [[ $maj_feat != 1 ]]; then
     echo >&2 "Can only have one of 'full', workers', or 'small-footprint' as a feature."

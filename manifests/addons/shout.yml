@@ -10,7 +10,7 @@ meta:
   vm_ip: (( grab instance_groups.web.networks[0].static_ips[0] || instance_groups.concourse.networks[0].static_ips[0] ))
 
 exodus:
-  shout_url:            (( concat "http://"  meta.vm_ip ":7109" ))
+  shout_url:            (( concat "http://" meta.vm_ip ":7109" ))
   shout_admin_username: admin
   shout_admin_password: (( vault meta.vault "/shout/admin:password" ))
   shout_ops_username:   ops
