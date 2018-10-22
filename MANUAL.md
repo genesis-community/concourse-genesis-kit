@@ -356,7 +356,14 @@ params:
 2.0.0 was the first version to support Genesis 2.6 hooks and exodus data
 for addon scripts and `genesis info`.
 
-2.3 added an addon command to setup an AppRole and policy for Genesis
+2.1.0 added parameters for fine-grain control of GitHub OAuth2 config, added
+`no-tls` feature to disable HTTPS, and some bug fixes.
+
+2.2.0 upgraded Concourse to 3.14.1 and Garden to 1.14.0, as well as adding
+Vault feature, which can hook up an externally deployed Vault to the ATC
+for credential storage.
+
+2.3.0 added an addon command to setup an AppRole and policy for Genesis
 Concourse deployments. Also added Shout! support.
 
 2.3.1 added a `small-footprint` feature to place all non-worker software
