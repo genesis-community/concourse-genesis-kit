@@ -11,10 +11,9 @@ meta:
       - organization: (( grab params.authz_allowed_orgs ))
         teams:        all
 
-instance_groups:
-  - name: web
-    jobs:
-    - name: atc
+meta:
+  jobs:
+    atc:
       properties:
         basic_auth_username: (( prune ))
         basic_auth_password: (( prune ))

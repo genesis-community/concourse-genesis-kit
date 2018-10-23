@@ -1,11 +1,13 @@
 ---
 meta:
+  jobs: (( empty map )) # Necessary to not have Spruce evaluate the other jobs
   default:
     tags: [(( grab params.env ))]
 
 exodus:
   tags: (( grab params.tags || meta.default.tags ))
   host_env: (( grab params.tsa_host_env ))
+  mode:     "worker"
 
 params:
   tsa_host_env: (( param "Please specify name of the Concourse environment containing the TSA node" ))
@@ -13,14 +15,14 @@ params:
 instance_groups:
   - name: worker
     jobs:
-      - name: worker
-        properties:
-          tags: (( grab params.tags || meta.default.tags ))
-          tsa:
-            host: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_host" ))
-            port: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_port" ))
-            host_public_key: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_host_public_key" ))
-            worker_key:
-              private_key: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_worker_private_key" ))
-              public_key:  (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_worker_public_key" ))
+    - name: worker
+      properties:
+        tags: (( grab params.tags || meta.default.tags ))
+        tsa:
+          host: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_host" ))
+          port: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_port" ))
+          host_public_key: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_host_public_key" ))
+          worker_key:
+            private_key: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_worker_private_key" ))
+            public_key:  (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_worker_public_key" ))
 

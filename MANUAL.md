@@ -215,6 +215,19 @@ the following configuration parameters:
     Concourse.  By default, the environment name is applied as the sole tag.
     Tags cannot contain interior whitespace.
 
+
+# Deploying a Smaller Footprint Concourse
+
+A _small footprint_ Concourse consists of placing all non-worker software into
+a single VM. This is useful for low-traffic, low-concurrent-tasks deployments
+and operators wish to save on resources. Workers still remain as separate VMs.
+
+To enable this feature, specify the `small-footprint` feature instead of `full`
+
+A `small-footprint` deployment cannot be scaled up to a full-size deployment,
+or vice-versa. Any feature flags that work on the `full` deployment will work
+on `small-footprint` deployment.
+
 # Setting Up Vault Integration For Pipelines
 
 The ATC can be configured to pull credentials for pipeline configurations using
@@ -343,7 +356,15 @@ params:
 2.0.0 was the first version to support Genesis 2.6 hooks and exodus data
 for addon scripts and `genesis info`.
 
-2.2.1 was the first version to incorporate Shout!
+2.1.0 added parameters for fine-grain control of GitHub OAuth2 config, added
+`no-tls` feature to disable HTTPS, and some bug fixes.
 
-2.2.2 added an addon command to setup an AppRole and policy for Genesis
-Concourse deployments.
+2.2.0 upgraded Concourse to 3.14.1 and Garden to 1.14.0, as well as adding
+Vault feature, which can hook up an externally deployed Vault to the ATC
+for credential storage.
+
+2.3.0 added an addon command to setup an AppRole and policy for Genesis
+Concourse deployments. Also added Shout! support.
+
+2.3.1 added a `small-footprint` feature to place all non-worker software
+on a single VM.

@@ -1,0 +1,41 @@
+---
+meta:
+  releases:
+    concourse:
+      name:    concourse
+      version: 3.14.1
+      sha1:    6be91b70ecc7ce233d2aff5d03ed28c8eab3d132
+      url:     https://bosh.io/d/github.com/concourse/concourse?v=3.14.1
+    garden:
+      name:    garden-runc
+      version: 1.14.0
+      sha1:    be5e6d6a263be1437d99dc5e818deeb8ab2a03a4
+      url:     https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.14.0
+    slack-notifications:
+      name:    slack-notification-resource
+      version: 9
+      sha1:    a64c65d1f23ea089746e698f29dbe522dd716c1b
+      url:     https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
+    shout:
+      name:    shout
+      version: 0.1.0
+      sha1:    73c5c0161730a655c03f5a6ceb1c8b2e33403874
+      url:     https://github.com/jhunt/shout-boshrelease/releases/download/v0.1.0/shout-0.1.0.tar.gz
+    postgres:
+      name:    postgres
+      version: 20
+      sha1:    3f378bcab294e20316171d4e656636df88763664
+      url:     https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=20
+    locker:
+      name:    locker
+      version: 0.2.1
+      sha1:    ccfcc48d63555a3733c3594d9429a5c1875a9dd2
+      url:     https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz  
+    haproxy:
+      name:    haproxy
+      version: 8.4.2
+      sha1:    8ebad4c8e57fac2fba9da07536f61efe8141be6f
+      url:     https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=8.4.2
+  
+
+

@@ -14,6 +14,7 @@ exodus:
   tsa_host_public_key:    (( vault meta.vault "/tsa/host_key:public" ))
   tsa_worker_public_key:  (( vault meta.vault "/tsa/worker_key:public" ))
   tsa_worker_private_key: (( vault meta.vault "/tsa/worker_key:private" ))
+  mode:                   "full"
 
 params:
   external_domain:   (( param "Please specify the IP/DNS users will use to connect to Concourse" ))
@@ -21,14 +22,9 @@ params:
   num_web_nodes:     1
 
   token_signing_key:
-    public_key: (( vault meta.vault "/atc/token_signing_key:public" ))
+    public_key:  (( vault meta.vault "/atc/token_signing_key:public" ))
     private_key: (( vault meta.vault "/atc/token_signing_key:private" ))
-
   concourse_disk_type:      concourse
-
-  # NOTE: we do not define a default for the `availability_zones` param,
-  # because we want to allow users to override the set of AZs wholesale,
-  # without resorting to silly spruce tricks like `(( replace ))`
 
 instance_groups:
   - name: haproxy
@@ -40,16 +36,7 @@ instance_groups:
       - name: (( grab params.concourse_network ))
         static_ips: (( static_ips 0 ))
     jobs:
-      - release: haproxy
-        name: haproxy
-        properties:
-          ha_proxy:
-            tcp:
-              - name: web_http
-                port: 80
-                backend_port: (( grab instance_groups.web.jobs.atc.properties.bind_port ))
-                backend_servers: (( grab instance_groups.web.networks.0.static_ips ))
-
+      - (( grab meta.jobs.haproxy ))
   - name: web
     instances: (( grab params.num_web_nodes ))
     azs: (( grab params.availability_zones || meta.default.azs ))
@@ -59,30 +46,8 @@ instance_groups:
       - name: (( grab params.concourse_network ))
         static_ips: (( static_ips 1, 2, 4, 5, 6 ))
     jobs:
-      - release: concourse
-        name: tsa
-        properties:
-          host_key:
-            private_key: (( vault meta.vault "/tsa/host_key:private" ))
-            public_key: (( vault meta.vault "/tsa/host_key:public" ))
-          authorized_keys:
-          - (( vault meta.vault "/tsa/worker_key:public" ))
-          token_signing_key: (( grab params.token_signing_key ))
-      - release: concourse
-        name: atc
-        properties:
-          postgresql:
-            database: atc
-            role:
-              name: atc
-              password: (( vault meta.vault "/database/atc:password" ))
-          token_signing_key: (( grab params.token_signing_key ))
-          bind_port: 8080
-          publicly_viewable: true
-          basic_auth_username: (( grab params.main_user || meta.default.main_user ))
-          basic_auth_password: (( vault meta.vault "/webui:password" ))
-          external_url: (( grab params.external_url ))
-
+      - (( grab meta.jobs.atc ))
+      - (( grab meta.jobs.tsa ))
   - name: db
     instances: 1
     azs: (( grab params.availability_zones || meta.default.azs ))
@@ -92,35 +57,11 @@ instance_groups:
     - name: (( grab params.concourse_network ))
     persistent_disk_pool: (( grab params.concourse_disk_type ))
     jobs:
-    - name: postgres
-      release: postgres
-      properties:
-        databases:
-          port: 5432
-          databases:
-          - name: atc
-          roles:
-          - name: atc
-            password: (( vault meta.vault "/database/atc:password" ))
-    - name: locker
-      release: locker
-      properties:
-        locker:
-          user: locker
-          password: (( vault meta.vault "/locker/api:password" ))
-          ssl_cert: (( vault meta.vault "/locker/server:certificate" ))
-          ssl_key: (( vault meta.vault "/locker/server:key" ))
+      - (( grab meta.jobs.postgres ))
+      - (( grab meta.jobs.locker   ))
 
 releases:
-- name: postgres
-  sha1: 3f378bcab294e20316171d4e656636df88763664
-  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=20
-  version: 20
-- name: locker
-  sha1: ccfcc48d63555a3733c3594d9429a5c1875a9dd2
-  url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
-  version: 0.2.1
-- name: haproxy
-  sha1: 8ebad4c8e57fac2fba9da07536f61efe8141be6f
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=8.4.2
-  version: 8.4.2
+- (( append ))
+- (( grab meta.releases.postgres ))
+- (( grab meta.releases.locker   ))
+- (( grab meta.releases.haproxy  ))

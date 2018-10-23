@@ -7,10 +7,11 @@ params:
   uaa_auth_url:          (( param "Please provide the URL to your UAA Auth endpoint" ))
   cf_ca_cert_vault_path: (( param "Pleaes provide the Vault path that contains ca for the Cloud Foundry" ))
 
-instance_groups:
-  - name: web
-    jobs:
-    - name: atc
+
+
+meta:
+  jobs:
+    atc:
       properties:
         basic_auth_username: (( prune ))
         basic_auth_password: (( prune ))
