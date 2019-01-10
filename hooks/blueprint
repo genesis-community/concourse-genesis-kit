@@ -20,13 +20,13 @@ fi
 # Make sure we're only merging one of the major feature flags
 declare -i maj_feat=0
 if want_feature "full" ; then
-  (( maj_feat++ ))
+  (( maj_feat+=1 ))
 fi
 if want_feature "workers" ; then
-  (( maj_feat++ ))
+  (( maj_feat+=1 ))
 fi
 if want_feature "small-footprint" ; then
-  (( maj_feat++ ))
+  (( maj_feat+=1 ))
 fi
 
 if [[ $maj_feat != 1 ]]; then
