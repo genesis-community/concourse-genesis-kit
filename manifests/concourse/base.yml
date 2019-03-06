@@ -43,6 +43,7 @@ instance_groups:
         https_proxy_url: (( grab params.https_proxy || "" ))
         no_proxy:        (( grab params.no_proxy    || meta.default.no_proxy ))
         tsa:
+          registration_mode: forward
           worker_key:
             private_key: (( vault meta.vault "/tsa/worker_key:private" ))
             public_key: (( vault meta.vault "/tsa/worker_key:public" ))

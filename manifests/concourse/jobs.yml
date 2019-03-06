@@ -25,8 +25,13 @@ meta:
         token_signing_key: (( grab params.token_signing_key ))
         bind_port: 8080
         publicly_viewable: true
-        basic_auth_username: (( grab params.main_user || meta.default.main_user ))
-        basic_auth_password: (( vault meta.vault "/webui:password" ))
+        main_team:
+          auth:
+            local:
+              users:
+                - (( grab params.main_user || meta.default.main_user ))
+        add_local_users:
+          - (( concat meta.jobs.atc.properties.main_team.auth.local.users.0 ":" meta.http_auth_password ))
         external_url: (( grab params.external_url ))
     tsa:
       release: concourse
@@ -66,6 +71,7 @@ meta:
         https_proxy_url: (( grab params.https_proxy || "" ))
         no_proxy:        (( grab params.no_proxy    || meta.default.no_proxy ))
         tsa:
+          registration_mode: forward
           worker_key:
             private_key: (( vault meta.vault "/tsa/worker_key:private" ))
             public_key: (( vault meta.vault "/tsa/worker_key:public" ))
@@ -73,3 +79,6 @@ meta:
           forward_address: 127.0.0.1:7788
         garden:
           forward_address: 127.0.0.1:7777
+
+
+  http_auth_password: (( vault meta.vault "/webui:password" ))

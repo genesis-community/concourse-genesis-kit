@@ -12,9 +12,13 @@ meta:
   jobs:
     atc:
       properties:
-        basic_auth_username: (( prune ))
-        basic_auth_password: (( prune ))
+        add_local_users: (( prune ))
+        main_team:
+          auth:
+            local: (( prune ))
+            github:
+              orgs: [(( grab params.authz_allowed_orgs || params.github.orgs ))]
+
         github_auth:
           client_id:     (( vault meta.vault "/oauth:provider_key" ))
           client_secret: (( vault meta.vault "/oauth:provider_secret" ))
-          authorize:     (( grab params.github_authz || meta.default.github_authz ))

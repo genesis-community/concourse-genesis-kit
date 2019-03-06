@@ -1,9 +1,7 @@
 ---
 params:
   authz_allowed_orgs: (( param "Please provide a list of org/teams/users authorized for using Concourse" ))
-  github_api_url:     (( param "Please provide the URL to your GitHub Enterprise API (requires trailing slash" ))
-  github_token_url:   (( param "Please provide the URL to your GitHub Enterprise token endpoint" ))
-  github_auth_url:    (( param "Please provide the URL to your GitHub Enterprise OAuth endpoint" ))
+  github_host:        (( param "Please provide the domain to your GitHub Enterprise installation"))
 
 meta:
   default:
@@ -15,12 +13,14 @@ meta:
   jobs:
     atc:
       properties:
-        basic_auth_username: (( prune ))
-        basic_auth_password: (( prune ))
+        add_local_users: (( prune ))
+        main_team:
+          auth:
+            local: (( prune ))
+            github:
+              orgs: (( grab params.authz_allowed_orgs || params.github.orgs ))
+
         github_auth:
+          host:          (( grab params.github_host))
           client_id:     (( vault meta.vault "/oauth:provider_key" ))
           client_secret: (( vault meta.vault "/oauth:provider_secret" ))
-          authorize:     (( grab params.github_authz || meta.default.github_authz ))
-          api_url:       (( grab params.github_api_url ))
-          auth_url:      (( grab params.github_auth_url ))
-          token_url:     (( grab params.github_token_url ))
