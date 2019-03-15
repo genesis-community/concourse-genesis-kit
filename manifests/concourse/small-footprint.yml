@@ -43,7 +43,9 @@ params:
     private_key:     (( vault meta.vault "/atc/token_signing_key:private" ))
 
 releases:
-- (( append ))
-- (( grab meta.releases.postgres ))
-- (( grab meta.releases.locker   ))
-- (( grab meta.releases.haproxy  ))
+  - name: postgres
+    .: (( inject meta.releases.postgres ))
+  - name: locker
+    .: (( inject meta.releases.locker   ))
+  - name: haproxy
+    .: (( inject meta.releases.haproxy  ))

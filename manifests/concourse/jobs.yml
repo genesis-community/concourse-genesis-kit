@@ -4,7 +4,6 @@
 meta:
   jobs:
     haproxy:  
-      name: haproxy
       release: haproxy
       properties:
         ha_proxy:
@@ -15,7 +14,6 @@ meta:
               backend_servers: (( grab instance_groups.web.networks.0.static_ips || instance_groups.concourse.networks.0.static_ips ))
     atc:
       release: concourse
-      name: atc
       properties:
         postgresql:
           database: atc
@@ -35,7 +33,6 @@ meta:
         external_url: (( grab params.external_url ))
     tsa:
       release: concourse
-      name: tsa
       properties:
         host_key:
           private_key: (( vault meta.vault "/tsa/host_key:private" ))
@@ -44,7 +41,6 @@ meta:
         - (( vault meta.vault "/tsa/worker_key:public" ))
         token_signing_key: (( grab params.token_signing_key ))
     postgres:
-      name: postgres
       release: postgres
       properties:
         databases:
@@ -55,7 +51,6 @@ meta:
           - name: atc
             password: (( vault meta.vault "/database/atc:password" ))
     locker:
-      name: locker
       release: locker
       properties:
         locker:
@@ -65,7 +60,6 @@ meta:
           ssl_key: (( vault meta.vault "/locker/server:key" ))
     worker:
       release: concourse
-      name: worker
       properties:
         http_proxy_url:  (( grab params.http_proxy  || "" ))
         https_proxy_url: (( grab params.https_proxy || "" ))
