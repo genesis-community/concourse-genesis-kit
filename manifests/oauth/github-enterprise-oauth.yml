@@ -1,26 +1,11 @@
 ---
 params:
-  authz_allowed_orgs: (( param "Please provide a list of org/teams/users authorized for using Concourse" ))
-  github_host:        (( param "Please provide the domain to your GitHub Enterprise installation"))
-
-meta:
-  default:
-    github_authz:
-      - organization: (( grab params.authz_allowed_orgs ))
-        teams:        all
+  github_host: (( param "Please provide the domain to your GitHub Enterprise installation"))
 
 meta:
   jobs:
     atc:
       properties:
-        add_local_users: (( prune ))
-        main_team:
-          auth:
-            local: (( prune ))
-            github:
-              orgs: (( grab params.authz_allowed_orgs || params.github.orgs ))
-
         github_auth:
-          host:          (( grab params.github_host))
-          client_id:     (( vault meta.vault "/oauth:provider_key" ))
-          client_secret: (( vault meta.vault "/oauth:provider_secret" ))
+          #ca_cert: "SPECIFY THIS IF YOU NEED IT"
+          host:     (( grab params.github_host))

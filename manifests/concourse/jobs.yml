@@ -75,4 +75,4 @@ meta:
           forward_address: 127.0.0.1:7777
 
 
-  http_auth_password: (( vault meta.vault "/webui:password" ))
+  http_auth_password: (( vault meta.vault "/webui:password-bcrypt" ))

@@ -3,9 +3,9 @@ meta:
   releases:
     concourse:
       name:    concourse
-      version: 4.2.2
-      sha1:    4107747823b7056c58620c34457746dcedb98cc5
-      url:     https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=4.2.2
+      version: 4.2.3
+      sha1:    915ab6a3ea9fa8e611887e51630c7a4947dcd8c1
+      url:     https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=4.2.3
     garden:
       name:    garden-runc
       version: 1.16.3

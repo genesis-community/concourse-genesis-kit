@@ -12,10 +12,8 @@ meta:
   jobs:
     atc:
       properties:
-        add_local_users: (( prune ))
         main_team:
           auth:
-            local: (( prune ))
             github:
               orgs: [(( grab params.authz_allowed_orgs || params.github.orgs ))]
 

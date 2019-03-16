@@ -33,7 +33,7 @@ credentials:
       password: random 64
 
     webui:
-      password: random 16
+      password: random 16 fmt bcrypt
 
   shout:
     shout/ops:
