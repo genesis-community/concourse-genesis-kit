@@ -36,7 +36,8 @@ instance_groups:
       - name: (( grab params.concourse_network ))
         static_ips: (( static_ips 0 ))
     jobs:
-      - (( grab meta.jobs.haproxy ))
+      - name: haproxy
+        .: (( inject meta.jobs.haproxy ))
   - name: web
     instances: (( grab params.num_web_nodes ))
     azs: (( grab params.availability_zones || meta.default.azs ))

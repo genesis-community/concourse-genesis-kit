@@ -9,10 +9,14 @@ instance_groups:
       - name: (( grab params.concourse_network ))
         static_ips: (( static_ips 0 ))
     jobs:
-    - (( grab meta.jobs.postgres ))
-    - (( grab meta.jobs.locker   ))
-    - (( grab meta.jobs.tsa      ))
-    - .: (( inject meta.jobs.atc ))
+    - name: postgres
+      .: (( grab meta.jobs.postgres ))
+    - name: locker
+      .: (( grab meta.jobs.locker   ))
+    - name: tsa
+      .: (( grab meta.jobs.tsa      ))
+    - name: atc
+      .: (( inject meta.jobs.atc ))
       properties:
         bind_port: 80
 
@@ -47,5 +51,3 @@ releases:
     .: (( inject meta.releases.postgres ))
   - name: locker
     .: (( inject meta.releases.locker   ))
-  - name: haproxy
-    .: (( inject meta.releases.haproxy  ))
