@@ -8,9 +8,9 @@ meta:
       url:     https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=4.2.3
     garden:
       name:    garden-runc
-      version: 1.16.3
-      sha1:    2a7c813e7e4d862e19334addf022916fb6b91eb0
-      url:     https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.16.3
+      version: 1.18.3
+      sha1:    1aa15e644c6c0c6c7ec072bf668fe5d9bcc4c632
+      url:     https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.18.3
     slack-notifications:
       name:    slack-notification-resource
       version: 9
