@@ -9,10 +9,14 @@ instance_groups:
       - name: (( grab params.concourse_network ))
         static_ips: (( static_ips 0 ))
     jobs:
-    - (( grab meta.jobs.postgres ))
-    - (( grab meta.jobs.locker   ))
-    - (( grab meta.jobs.tsa      ))
-    - .: (( inject meta.jobs.atc ))
+    - name: postgres
+      .: (( grab meta.jobs.postgres ))
+    - name: locker
+      .: (( grab meta.jobs.locker   ))
+    - name: tsa
+      .: (( grab meta.jobs.tsa      ))
+    - name: atc
+      .: (( inject meta.jobs.atc ))
       properties:
         bind_port: 80
 
@@ -43,7 +47,7 @@ params:
     private_key:     (( vault meta.vault "/atc/token_signing_key:private" ))
 
 releases:
-- (( append ))
-- (( grab meta.releases.postgres ))
-- (( grab meta.releases.locker   ))
-- (( grab meta.releases.haproxy  ))
+  - name: postgres
+    .: (( inject meta.releases.postgres ))
+  - name: locker
+    .: (( inject meta.releases.locker   ))

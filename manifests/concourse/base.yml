@@ -36,20 +36,8 @@ instance_groups:
       serial: true
       max_in_flight: (( grab instance_groups.worker.instances ))
     jobs:
-    - release: concourse
-      name: worker
-      properties:
-        http_proxy_url:  (( grab params.http_proxy  || "" ))
-        https_proxy_url: (( grab params.https_proxy || "" ))
-        no_proxy:        (( grab params.no_proxy    || meta.default.no_proxy ))
-        tsa:
-          worker_key:
-            private_key: (( vault meta.vault "/tsa/worker_key:private" ))
-            public_key: (( vault meta.vault "/tsa/worker_key:public" ))
-        baggageclaim:
-          forward_address: 127.0.0.1:7788
-        garden:
-          forward_address: 127.0.0.1:7777
+    - name: worker
+      .: (( inject meta.jobs.worker ))
     - release: concourse
       name: baggageclaim
       properties:
@@ -62,10 +50,12 @@ instance_groups:
           listen_address: 0.0.0.0:7777
 
 releases:
-- (( prepend ))
-- (( grab meta.releases.concourse ))
-- (( grab meta.releases.garden ))
-- (( grab meta.releases.slack-notifications ))
+  - name: concourse
+    .: (( inject meta.releases.concourse ))
+  - name: garden-runc
+    .: (( inject meta.releases.garden ))
+  - name: slack-notification-resource
+    .: (( inject meta.releases.slack-notifications ))
 
 stemcells:
 - alias: default

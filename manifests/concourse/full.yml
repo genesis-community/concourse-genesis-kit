@@ -36,7 +36,8 @@ instance_groups:
       - name: (( grab params.concourse_network ))
         static_ips: (( static_ips 0 ))
     jobs:
-      - (( grab meta.jobs.haproxy ))
+      - name: haproxy
+        .: (( inject meta.jobs.haproxy ))
   - name: web
     instances: (( grab params.num_web_nodes ))
     azs: (( grab params.availability_zones || meta.default.azs ))
@@ -46,8 +47,10 @@ instance_groups:
       - name: (( grab params.concourse_network ))
         static_ips: (( static_ips 1, 2, 4, 5, 6 ))
     jobs:
-      - (( grab meta.jobs.atc ))
-      - (( grab meta.jobs.tsa ))
+      - name: atc
+        .: (( inject meta.jobs.atc ))
+      - name: tsa
+        .: (( inject meta.jobs.tsa ))
   - name: db
     instances: 1
     azs: (( grab params.availability_zones || meta.default.azs ))
@@ -57,11 +60,15 @@ instance_groups:
     - name: (( grab params.concourse_network ))
     persistent_disk_pool: (( grab params.concourse_disk_type ))
     jobs:
-      - (( grab meta.jobs.postgres ))
-      - (( grab meta.jobs.locker   ))
+      - name: postgres
+        .: (( inject meta.jobs.postgres ))
+      - name: locker
+        .: (( inject meta.jobs.locker ))
 
 releases:
-- (( append ))
-- (( grab meta.releases.postgres ))
-- (( grab meta.releases.locker   ))
-- (( grab meta.releases.haproxy  ))
+  - name: postgres
+    .: (( inject meta.releases.postgres ))
+  - name: locker
+    .: (( inject meta.releases.locker   ))
+  - name: haproxy
+    .: (( inject meta.releases.haproxy  ))

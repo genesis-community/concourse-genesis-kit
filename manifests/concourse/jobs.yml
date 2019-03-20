@@ -4,7 +4,6 @@
 meta:
   jobs:
     haproxy:  
-      name: haproxy
       release: haproxy
       properties:
         ha_proxy:
@@ -15,7 +14,6 @@ meta:
               backend_servers: (( grab instance_groups.web.networks.0.static_ips || instance_groups.concourse.networks.0.static_ips ))
     atc:
       release: concourse
-      name: atc
       properties:
         postgresql:
           database: atc
@@ -25,12 +23,16 @@ meta:
         token_signing_key: (( grab params.token_signing_key ))
         bind_port: 8080
         publicly_viewable: true
-        basic_auth_username: (( grab params.main_user || meta.default.main_user ))
-        basic_auth_password: (( vault meta.vault "/webui:password" ))
+        main_team:
+          auth:
+            local:
+              users:
+                - (( grab params.main_user || meta.default.main_user ))
+        add_local_users:
+          - (( concat meta.jobs.atc.properties.main_team.auth.local.users.0 ":" meta.http_auth_password ))
         external_url: (( grab params.external_url ))
     tsa:
       release: concourse
-      name: tsa
       properties:
         host_key:
           private_key: (( vault meta.vault "/tsa/host_key:private" ))
@@ -39,7 +41,6 @@ meta:
         - (( vault meta.vault "/tsa/worker_key:public" ))
         token_signing_key: (( grab params.token_signing_key ))
     postgres:
-      name: postgres
       release: postgres
       properties:
         databases:
@@ -50,7 +51,6 @@ meta:
           - name: atc
             password: (( vault meta.vault "/database/atc:password" ))
     locker:
-      name: locker
       release: locker
       properties:
         locker:
@@ -60,12 +60,12 @@ meta:
           ssl_key: (( vault meta.vault "/locker/server:key" ))
     worker:
       release: concourse
-      name: worker
       properties:
         http_proxy_url:  (( grab params.http_proxy  || "" ))
         https_proxy_url: (( grab params.https_proxy || "" ))
         no_proxy:        (( grab params.no_proxy    || meta.default.no_proxy ))
         tsa:
+          registration_mode: forward
           worker_key:
             private_key: (( vault meta.vault "/tsa/worker_key:private" ))
             public_key: (( vault meta.vault "/tsa/worker_key:public" ))
@@ -73,3 +73,6 @@ meta:
           forward_address: 127.0.0.1:7788
         garden:
           forward_address: 127.0.0.1:7777
+
+
+  http_auth_password: (( vault meta.vault "/webui:password-bcrypt" ))

@@ -3,14 +3,14 @@ meta:
   releases:
     concourse:
       name:    concourse
-      version: 3.14.1
-      sha1:    6be91b70ecc7ce233d2aff5d03ed28c8eab3d132
-      url:     https://bosh.io/d/github.com/concourse/concourse?v=3.14.1
+      version: 4.2.3
+      sha1:    915ab6a3ea9fa8e611887e51630c7a4947dcd8c1
+      url:     https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=4.2.3
     garden:
       name:    garden-runc
-      version: 1.14.0
-      sha1:    be5e6d6a263be1437d99dc5e818deeb8ab2a03a4
-      url:     https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.14.0
+      version: 1.18.3
+      sha1:    1aa15e644c6c0c6c7ec072bf668fe5d9bcc4c632
+      url:     https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.18.3
     slack-notifications:
       name:    slack-notification-resource
       version: 9
@@ -23,9 +23,9 @@ meta:
       url:     https://github.com/jhunt/shout-boshrelease/releases/download/v0.1.0/shout-0.1.0.tar.gz
     postgres:
       name:    postgres
-      version: 20
-      sha1:    3f378bcab294e20316171d4e656636df88763664
-      url:     https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=20
+      version: 31
+      sha1:    bbe4151f4000f349c2ffaf72412aac9cc0a3c741
+      url:     https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=31
     locker:
       name:    locker
       version: 0.2.1

@@ -44,18 +44,18 @@ if want_feature "full" || want_feature "small-footprint"; then
     merge+=( "manifests/concourse/small-footprint.yml" )
   fi
 
-  declare -a oauths
-  oauths=()
-  for oauth in "github-oauth" "github-enterprise-oauth" "cf-oauth" ; do
+  for oauth in "github-oauth" "cf-oauth" ; do
     if want_feature "$oauth" ; then
-      oauths+=( "$oauth" )
       merge+=( "manifests/oauth/${oauth}.yml" )
     fi
   done
-  if [[ "${#oauths[@]}" -gt 1 ]] ; then
-    echo >&2 "You have requested multiple oauth systems:"
-    echo >&2 "  ${oauths[*]}"
-    echo >&2 "Please pick up to one (uses http basic auth if none selected)"
+
+  if want_feature "github-enterprise-oauth"; then
+    # github enterprise oauth just adds the host param to github oauth
+    if ! want_feature "github-oauth"; then
+      merge+=( "manifests/oauth/github-oauth.yml" )
+    fi
+    merge+=( "manifests/oauth/github-enterprise-oauth.yml" )
   fi
 
   if ! want_feature no-tls ; then
