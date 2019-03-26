@@ -38,10 +38,6 @@ instance_groups:
     jobs:
     - name: worker
       .: (( inject meta.jobs.worker ))
-    - release: concourse
-      name: baggageclaim
-      properties:
-        driver: (( grab params.volume_driver ))
 
 releases:
   - name: concourse
