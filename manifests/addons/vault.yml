@@ -5,7 +5,7 @@ params:
 
 meta:
   jobs:
-    atc:
+    web:
       properties:
         vault:
           url: (( grab params.vault_url ))
