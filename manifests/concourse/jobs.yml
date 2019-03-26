@@ -12,9 +12,19 @@ meta:
               port: 80
               backend_port: 8080
               backend_servers: (( grab instance_groups.web.networks.0.static_ips || instance_groups.concourse.networks.0.static_ips ))
-    atc:
+
+    bpm:
+      release: bpm
+
+    web:
       release: concourse
       properties:
+        worker_gateway:
+          host_key:
+            private_key: (( vault meta.vault "/tsa/host_key:private" ))
+            public_key: (( vault meta.vault "/tsa/host_key:public" ))
+          authorized_keys:
+          - (( vault meta.vault "/tsa/worker_key:public" ))
         postgresql:
           database: atc
           role:
@@ -29,17 +39,9 @@ meta:
               users:
                 - (( grab params.main_user || meta.default.main_user ))
         add_local_users:
-          - (( concat meta.jobs.atc.properties.main_team.auth.local.users.0 ":" meta.http_auth_password ))
+          - (( concat meta.jobs.web.properties.main_team.auth.local.users.0 ":" meta.http_auth_password ))
         external_url: (( grab params.external_url ))
-    tsa:
-      release: concourse
-      properties:
-        host_key:
-          private_key: (( vault meta.vault "/tsa/host_key:private" ))
-          public_key: (( vault meta.vault "/tsa/host_key:public" ))
-        authorized_keys:
-        - (( vault meta.vault "/tsa/worker_key:public" ))
-        token_signing_key: (( grab params.token_signing_key ))
+        
     postgres:
       release: postgres
       properties:
@@ -64,15 +66,12 @@ meta:
         http_proxy_url:  (( grab params.http_proxy  || "" ))
         https_proxy_url: (( grab params.https_proxy || "" ))
         no_proxy:        (( grab params.no_proxy    || meta.default.no_proxy ))
-        tsa:
+        worker_gateway:
           registration_mode: forward
           worker_key:
             private_key: (( vault meta.vault "/tsa/worker_key:private" ))
             public_key: (( vault meta.vault "/tsa/worker_key:public" ))
         baggageclaim:
-          forward_address: 127.0.0.1:7788
-        garden:
-          forward_address: 127.0.0.1:7777
-
+          driver: (( grab params.volume_driver ))
 
   http_auth_password: (( vault meta.vault "/webui:password-bcrypt" ))

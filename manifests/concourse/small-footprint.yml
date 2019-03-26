@@ -13,10 +13,10 @@ instance_groups:
       .: (( grab meta.jobs.postgres ))
     - name: locker
       .: (( grab meta.jobs.locker   ))
-    - name: tsa
-      .: (( grab meta.jobs.tsa      ))
-    - name: atc
-      .: (( inject meta.jobs.atc ))
+    - name: web
+      .: (( inject meta.jobs.web ))
+    - name: bpm
+      .: (( inject meta.jobs.bpm ))
       properties:
         bind_port: 80
 
@@ -51,3 +51,5 @@ releases:
     .: (( inject meta.releases.postgres ))
   - name: locker
     .: (( inject meta.releases.locker   ))
+  - name: bpm
+    .: (( inject meta.releases.bpm ))

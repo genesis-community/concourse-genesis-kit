@@ -4,8 +4,8 @@ params:
 
 meta:
   jobs:
-    atc:
+    web:
       properties:
         github_auth:
           #ca_cert: "SPECIFY THIS IF YOU NEED IT"
-          host:     (( grab params.github_host))
+          host:     (( grab params.github_host ))

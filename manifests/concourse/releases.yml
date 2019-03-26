@@ -3,19 +3,19 @@ meta:
   releases:
     concourse:
       name:    concourse
-      version: 4.2.3
-      sha1:    915ab6a3ea9fa8e611887e51630c7a4947dcd8c1
-      url:     https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=4.2.3
-    garden:
-      name:    garden-runc
-      version: 1.18.3
-      sha1:    1aa15e644c6c0c6c7ec072bf668fe5d9bcc4c632
-      url:     https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.18.3
+      version: 5.0.1
+      sha1:    122b2775423cbed5dfc147ed771c864940a19bb3
+      url:     https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=5.0.1
     slack-notifications:
       name:    slack-notification-resource
       version: 9
       sha1:    a64c65d1f23ea089746e698f29dbe522dd716c1b
       url:     https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
+    bpm:
+      name:    bpm
+      version: 1.0.3
+      sha1:    2875a69cae225fa97fe3faae1e9fbacff61e2dc5
+      url:     https://bosh.io/d/github.com/cloudfoundry-incubator/bpm-release?v=1.0.3
     shout:
       name:    shout
       version: 0.1.0

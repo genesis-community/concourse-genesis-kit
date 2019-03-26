@@ -3,6 +3,9 @@ meta:
   jobs: (( empty map )) # Necessary to not have Spruce evaluate the other jobs
   default:
     tags: [(( grab params.env ))]
+  tsa:
+    host: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_host" ))
+    port: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_port" )) 
 
 exodus:
   tags: (( grab params.tags || meta.default.tags ))
@@ -18,9 +21,9 @@ instance_groups:
     - name: worker
       properties:
         tags: (( grab params.tags || meta.default.tags ))
-        tsa:
-          host: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_host" ))
-          port: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_port" ))
+        worker_gateway:
+          hosts: 
+          - (( concat meta.tsa.host ":" meta.tsa.port ))
           host_public_key: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_host_public_key" ))
           worker_key:
             private_key: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_worker_private_key" ))

@@ -47,10 +47,10 @@ instance_groups:
       - name: (( grab params.concourse_network ))
         static_ips: (( static_ips 1, 2, 4, 5, 6 ))
     jobs:
-      - name: atc
-        .: (( inject meta.jobs.atc ))
-      - name: tsa
-        .: (( inject meta.jobs.tsa ))
+      - name: web
+        .: (( inject meta.jobs.web ))
+      - name: bpm
+        .: (( inject meta.jobs.bpm ))
   - name: db
     instances: 1
     azs: (( grab params.availability_zones || meta.default.azs ))
@@ -72,3 +72,5 @@ releases:
     .: (( inject meta.releases.locker   ))
   - name: haproxy
     .: (( inject meta.releases.haproxy  ))
+  - name: bpm
+    .: (( inject meta.releases.bpm ))

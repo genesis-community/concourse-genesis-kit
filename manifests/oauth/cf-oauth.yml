@@ -11,7 +11,7 @@ params:
 
 meta:
   jobs:
-    atc:
+    web:
       properties:
         main_team:
           auth:

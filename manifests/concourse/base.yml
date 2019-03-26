@@ -42,18 +42,10 @@ instance_groups:
       name: baggageclaim
       properties:
         driver: (( grab params.volume_driver ))
-    - release: garden-runc
-      name: garden
-      properties:
-        garden:
-          listen_network: tcp
-          listen_address: 0.0.0.0:7777
 
 releases:
   - name: concourse
     .: (( inject meta.releases.concourse ))
-  - name: garden-runc
-    .: (( inject meta.releases.garden ))
   - name: slack-notification-resource
     .: (( inject meta.releases.slack-notifications ))
 
