@@ -1,12 +1,12 @@
 ---
 name: Concourse CI/CD
 authors:
-  James Hunt  <jhunt@starkandwayne.com>
-  Dennis Bell <dbell@starkandwayne.com>
+- James Hunt  <jhunt@starkandwayne.com>
+- Dennis Bell <dbell@starkandwayne.com>
 docs:   https://concourse.ci
 code:   https://github.com/genesis-community/concourse-genesis-kit
 
-genesis_min_version: 2.6.0
+genesis_version_min: 2.6.0
 
 certificates:
   base:
