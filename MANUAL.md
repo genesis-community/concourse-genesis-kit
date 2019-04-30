@@ -138,17 +138,8 @@ To hook up to an Enterprise Github installation, enable the
 `github-enterprise-oauth` feature flag, and provide the following
 parameters (above and beyond those required by `github-oauth`):
 
-  - `github_api_uri` - URL of the Github Enterprise API; something like
-    `https://github.example.com/api/v3/`.  This parameter is **required**.
-
-  - `github_token_uri` - URL of the Github Entperprise Token API, for
-    OAuth2; i.e.: `https://github.example.com/login/oauth/access_token`.
-    This parameter is **required**.
-
-  - `github_auth_url` - URL of the Github Enterprise Authorization API,
-    i.e.: `https://github.example.com/login/oauth/authorize`.
-    This parameter is **required**.
-
+  - `github_host` - Domain of the Github Enterprise installation; something like
+    `https://github.example.com`.  This parameter is **required**.
 
 ## Cloud Foundry UAA OAuth2-based Authentication
 
