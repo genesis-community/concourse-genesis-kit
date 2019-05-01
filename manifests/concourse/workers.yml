@@ -1,6 +1,14 @@
 ---
 meta:
-  jobs: (( empty map )) # Necessary to not have Spruce evaluate the other jobs
+  # Necessary to not have Spruce evaluate the other jobs
+  jobs: 
+    haproxy: ~
+    bpm: ~
+    web: ~
+    postgres: ~
+    locker: ~
+    worker: {}
+
   default:
     tags: [(( grab params.env ))]
   tsa:
@@ -17,6 +25,7 @@ params:
 
 instance_groups:
   - name: worker
+    release: concourse
     jobs:
     - name: worker
       properties:

@@ -4,6 +4,12 @@
 * Bumped Postgres to 35 (PostgreSQL 11.1)
 * Bumped bpm to 1.0.4.
 
+# Bug Fixes
+
+* Fixed Spruce merge bug that could occur when deploying only workers. If you
+	used to see something like `(( meta.jobs )) is not a map`, then its fixed
+	here.
+
 # Upgrading
 
 This version bumps Postgres up to 11.1, from a previous 9.6.10. Please upgrade
