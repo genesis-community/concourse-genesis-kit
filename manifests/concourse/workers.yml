@@ -30,6 +30,7 @@ instance_groups:
       release: concourse
       properties:
         tags: (( grab params.tags || meta.default.tags ))
+        no_proxy: ["localhost", "127.0.0.1"]
         worker_gateway:
           hosts: 
           - (( concat meta.tsa.host ":" meta.tsa.port ))
