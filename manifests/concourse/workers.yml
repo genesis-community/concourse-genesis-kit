@@ -25,9 +25,9 @@ params:
 
 instance_groups:
   - name: worker
-    release: concourse
     jobs:
     - name: worker
+      release: concourse
       properties:
         tags: (( grab params.tags || meta.default.tags ))
         worker_gateway:
