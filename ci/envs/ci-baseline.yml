@@ -10,6 +10,7 @@ params:
   bosh:  genesis-ci
 
   concourse_network: genesis-ci-concourse
+  concourse_vm_type: medium
   external_domain: concourse.example.com
   num_web_nodes:   1
 
