@@ -69,22 +69,9 @@ if [[ "$kit_type" == "full" ]] ; then
       param_entry params authz_allowed_orgs
 
       describe "" \
-        "What is the API URL for your GitHub Enteprise installation?" \
-        "example: https://github.example.com/api/v3/"
-      prompt_for github_api_url line "GitHub Enterprise API URL:" -i
-      param_entry params github_api_url
-
-      describe "" \
-        "What is the URL used by GitHub Enterprise to generate OAuth Tokens?" \
-        "example: https://github.example.com/login/oauth/access_token"
-      prompt_for github_token_url line "GitHub Enterprise token URL:" -i
-      param_entry params github_token_url
-
-      describe "" \
-        "What is the URL used by GitHub Enterprise to authorize OAuth requests?" \
-        "example: https://github.example.com/login/oauth/authorize"
-      prompt_for github_auth_url line "GitHub Enterprise auth URL:" -i
-      param_entry params github_auth_url
+        "What is the GitHub Enterprise hostname? example: github.example.com"
+      prompt_for github_host line "GitHub Enterprise Hostname:" -i
+      param_entry params github_host
       ;;
 
     "cf-oauth" )

@@ -139,7 +139,8 @@ To hook up to an Enterprise Github installation, enable the
 parameters (above and beyond those required by `github-oauth`):
 
   - `github_host` - Domain of the Github Enterprise installation; something like
-    `https://github.example.com`.  This parameter is **required**.
+    `github.example.com`. No scheme, no trailing slash. This parameter is
+    **required**.
 
 ## Cloud Foundry UAA OAuth2-based Authentication
 
