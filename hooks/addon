@@ -258,9 +258,13 @@ path "secret/*" {
   capabilities = ["read", "list"]
 }
 
-path "secret/exodus/*" {
+path "secret/data/exodus/*" {
     capabilities = ["create", "read", "update", "list", "delete"]
 }
+path "secret/metadata/exodus/*" {
+    capabilities = ["create", "update", "read", "list", "delete"]
+}
+
 EOF
 
   safe --quiet set auth/approle/role/genesis-pipelines policies=default,genesis-pipelines
