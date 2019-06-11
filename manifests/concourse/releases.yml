@@ -3,9 +3,9 @@ meta:
   releases:
     concourse:
       name:    concourse
-      version: 5.2.0
-      sha1:    e7c813d35e70e1a3a5334b977136ba736fae05e1
-      url:     https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=5.2.0
+      version: 5.3.0
+      sha1:    97410a92b3c2385b728a7414ad34520491701d4e
+      url:     https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=5.3.0
     slack-notifications:
       name:    slack-notification-resource
       version: 9
@@ -13,9 +13,9 @@ meta:
       url:     https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
     bpm:
       name:    bpm
-      version: 1.0.4
-      sha1:    41df19697d6a69d2552bc2c132928157fa91abe0
-      url:     https://bosh.io/d/github.com/cloudfoundry-incubator/bpm-release?v=1.0.4
+      version: 1.1.0
+      sha1:    82e83a5e8ebd6e07f6ca0765e94eb69e03324a19
+      url:     https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.0
     shout:
       name:    shout
       version: 0.1.0
@@ -23,9 +23,9 @@ meta:
       url:     https://github.com/jhunt/shout-boshrelease/releases/download/v0.1.0/shout-0.1.0.tar.gz
     postgres:
       name:    postgres
-      version: 36
-      sha1:    3dd10b417b21cfa3257f1cc891e9e46f02fefe16
-      url:     https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=36
+      version: 37
+      sha1:    0bffec6b98df81219a18ec8da0e19721be799eed
+      url:     https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=37
     locker:
       name:    locker
       version: 0.2.1
@@ -33,9 +33,9 @@ meta:
       url:     https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz  
     haproxy:
       name:    haproxy
-      version: 8.4.2
-      sha1:    8ebad4c8e57fac2fba9da07536f61efe8141be6f
-      url:     https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=8.4.2
+      version: 9.6.0
+      sha1:    d41444d7f6a18756128c4cd91692163ee80ded28
+      url:     https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=9.6.0
   
 
 
