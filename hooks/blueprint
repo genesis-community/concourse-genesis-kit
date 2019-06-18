@@ -11,7 +11,7 @@ validate_features \
   workers full small-footprint                  \
   no-tls provided-cert self-signed-cert         \
   github-oauth github-enterprise-oauth cf-oauth \
-  vault shout
+  vault vault-approle shout
 
 if [[ "$(bosh_cpi)" == "azure" ]]; then
   merge+=( "manifests/addons/azure.yml" )
