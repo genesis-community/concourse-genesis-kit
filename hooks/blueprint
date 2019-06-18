@@ -76,6 +76,14 @@ if want_feature "full" || want_feature "small-footprint"; then
   if want_feature "vault"; then
     merge+=( "manifests/addons/vault.yml" )
   fi
+
+  if want_feature "vault-approle"; then
+    if ! want_feature "vault"; then
+      echo >&2 "Cannot use 'vault-approle' feature without 'vault' feature"
+      exit 1
+    fi
+    merge+=( "manifests/addons/vault-approle.yml" )
+  fi
   # If credhub support is added later it should probably if elsif'd here, under vault
 
   if want_feature "shout"; then

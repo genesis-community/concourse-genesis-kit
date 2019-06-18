@@ -13,4 +13,5 @@ meta:
           tls:
             insecure_skip_verify: (( grab params.vault_insecure_skip_verify || false ))
           auth:
+            backend_max_ttl: (( grab params.vault_backend_max_ttl || ~ ))
             client_token: (( grab params.vault_token ))
