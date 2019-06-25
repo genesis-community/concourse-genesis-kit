@@ -38,6 +38,8 @@ instance_groups:
     jobs:
       - name: haproxy
         .: (( inject meta.jobs.haproxy ))
+      - name: bpm 
+        .: (( inject meta.jobs.bpm ))
   - name: web
     instances: (( grab params.num_web_nodes ))
     azs: (( grab params.availability_zones || meta.default.azs ))
