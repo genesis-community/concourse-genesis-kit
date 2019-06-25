@@ -6,14 +6,10 @@ kit:
 
 params:
   env:   ci-baseline
-  vault: genesis-ci/concourse/ci/baseline
   bosh:  genesis-ci
 
-  concourse_network: genesis-ci-concourse
   concourse_vm_type: large
-  external_domain: concourse.example.com
-  num_web_nodes:   1
+  external_domain:   concourse.example.com
+  num_web_nodes:     1
 
-  availability_zones:
-    - (( replace ))
-    - z1
+  availability_zones: [z1]
