@@ -1,0 +1,25 @@
+---
+# This file contains patterns for generating links to upstream release notes,
+# for constituent releases.
+
+core:
+  - name:  concourse
+    notes: https://github.com/concourse/concourse/releases/tag/v${version}
+
+  - name:  slack-notification-resource
+    notes: https://github.com/cloudfoundry-community/slack-notification-resource-boshrelease/releases/tag/v${version}
+
+  - name:  shout
+    notes: https://github.com/jhunt/shout-boshrelease/releases/tag/v${version}
+
+  - name:  postgres
+    notes: https://github.com/cloudfoundry/postgres-release/releases/tag/v${version}
+
+  - name:  haproxy
+    notes: https://github.com/cloudfoundry-incubator/haproxy-boshrelease/releases/tag/v${version}
+
+  - name:  locker
+    notes: https://github.com/cloudfoundry-community/locker-boshrelease/releases/tag/v${version}
+
+  - name:  bpm
+    notes: https://github.com/cloudfoundry/bpm-release/releases/tag/v${version}

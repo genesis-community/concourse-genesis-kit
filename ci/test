@@ -1,5 +1,6 @@
 #!/bin/bash
 set -eu
+KIT=concourse
 
 header() {
 	echo
@@ -21,23 +22,19 @@ cleanup() {
 	done
 }
 
-header "Validating BOSH_* environment variables..."
-set | grep BOSH_ || true
-
 header "Checking previous deployments on ${BOSH_ENVIRONMENT}..."
 $BOSH deployments
 
 header "Cleaning up from any previous deployments (if necessary)..."
-cleanup ci-baseline-concourse
-safe rm -rf secret/genesis-ci/concourse
-# ci-baseline doesn't rely on external secrets
-#safe cp -rf secret/genesis-ci/static/concourse secret/genesis-ci/concourse/ci/baseline
+cleanup ci-baseline-${KIT}
+safe rm -rf secret/ci/baseline/${KIT}
 
 header "Deploying BASELINE environment to verify functionality..."
 cd dev
-genesis compile-kit --name concourse -v 9.9.9 --force # make sure hooks are executable before screaming at shipit for failing.
+# make sure hooks are executable before screaming at shipit for failing.
+genesis compile-kit --name $KIT -v 9.9.9 --force
 cd ..
-genesis secrets add ci-baseline
-genesis deploy -n ci-baseline
-$BOSH -d ci-baseline-concourse instances --ps
-cleanup ci-baseline-concourse
+genesis add-secrets ci-baseline
+genesis deploy -y ci-baseline
+$BOSH -d ci-baseline-${KIT} instances --ps
+cleanup ci-baseline-${KIT}

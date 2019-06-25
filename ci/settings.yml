@@ -2,8 +2,8 @@
 meta:
   kit:     concourse
   release: Concourse Genesis Kit
-  target:  buf
-  url:     https://10.200.131.2.netip.cc
+  target:  genesis@pipes
+  url:     https://pipes.starkandwayne.com
 
   initial_version: 1.3.0
 
@@ -14,9 +14,8 @@ meta:
     cacert:   ((bosh.ca))
 
   vault:
-    url:       https://10.128.4.4
-    role_id:   ((vault.role_id))
-    secret_id: ((vault.secret_id))
+    url:       ((vault.url))
+    token:     ((vault.token))
 
   aws:
     access_key: ((aws.access_key_id))
@@ -29,8 +28,7 @@ meta:
     private_key:  ((github.private_key))
     access_token: ((github.access_token))
 
-  slack:
-    webhook:  ((slack.webhook))
-    channel:  '#botspam'
-    username: starkandwayne-ci
-    icon:     https://www.starkandwayne.com/assets/images/shield-blue-50x50.png
+  shout:
+    url:      ((shout.url)
+    username: ((shout.username))
+    password: ((shout.password))
