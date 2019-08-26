@@ -93,6 +93,16 @@ documentation.
 The Shout! server will be accessible to your Concourse pipelines,
 on port 7109, at the first web node.
 
+## Prometheus Integration
+
+To expose a Prometheus exporter endpoint in Concourse, enable
+the `prometheus` addon. This only works if you're deploying a
+`full` Concourse.
+
+Parameters:
+
+- `prometheus_metrics_port`: The port to listen for metrics on. Defaults to
+	9391.
 
 ## HTTP Basic Authentication (Default)
 

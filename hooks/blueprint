@@ -11,7 +11,7 @@ validate_features \
   workers full small-footprint                  \
   no-tls provided-cert self-signed-cert         \
   github-oauth github-enterprise-oauth cf-oauth \
-  vault vault-approle shout
+  vault vault-approle shout prometheus
 
 if [[ "$(bosh_cpi)" == "azure" ]]; then
   merge+=( "manifests/addons/azure.yml" )
@@ -90,6 +90,9 @@ if want_feature "full" || want_feature "small-footprint"; then
     merge+=( "manifests/addons/shout.yml" )
   fi
 
+  if want_feature "prometheus"; then
+    merge+=( "manifests/addons/prometheus.yml" )
+  fi
 
 elif want_feature "workers" ; then
   merge+=( "manifests/concourse/workers.yml" )
