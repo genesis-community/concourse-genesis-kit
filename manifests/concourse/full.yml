@@ -60,7 +60,7 @@ instance_groups:
     vm_type: (( grab params.db_vm_type || params.concourse_vm_type ))
     networks:
     - name: (( grab params.concourse_network ))
-    persistent_disk_pool: (( grab params.concourse_disk_type ))
+    persistent_disk_type: (( grab params.concourse_disk_type ))
     jobs:
       - name: postgres
         .: (( inject meta.jobs.postgres ))
