@@ -3,9 +3,9 @@ meta:
   releases:
     concourse:
       name:    concourse
-      version: 5.5.1
-      sha1:    4213070d9a08847cda64c5c1e51d462ab9671299
-      url:     https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=5.5.1
+      version: 5.6.0
+      sha1:    013f78504c3acb3ddfdc3f2192bedaa4c26192b5
+      url:     https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=5.6.0
     slack-notifications:
       name:    slack-notification-resource
       version: 9
@@ -33,6 +33,6 @@ meta:
       url:     https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz  
     haproxy:
       name:    haproxy
-      version: 9.7.1
-      sha1:    a5bc4f04f212a26bbe8f36f339a751d7773eb223
-      url:     https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=9.7.1
+      version: 9.8.0
+      sha1:    71959d17235a1ce8c9ee58da136b7c04c74e3b31
+      url:     https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=9.8.0
