@@ -238,7 +238,7 @@ setup-approle)
   # - 90 minute TTL (Some BOSH deployments could take awhile, and then the Exodus write-back could fail if TTL is too short)
   # - unlimited token use
   safe --quiet set auth/approle/role/genesis-pipelines \
-    secret_id_ttl=90m \
+    secret_id_ttl=0 \
     token_num_uses=0 \
     token_ttl=90m \
     token_max_ttl=90m \
