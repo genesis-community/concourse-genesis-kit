@@ -253,7 +253,10 @@ setup-approle)
   safe --quiet set secret/exodus/ci/genesis-pipelines approle-secret=$approle_secret
 
   safe --quiet vault policy write genesis-pipelines -<<EOF
-# Allow the pipelines to read all items within Vault, and write to secret/exodus (for genesis exodus data)
+# Allow the pipelines to read all items within Vault, and write to 
+#secret/data/exodus and secret/metadata/exodus for v2 backend; 
+#secret/exodus for v1 backend (for genesis exodus data)
+
 path "secret/*" {
   capabilities = ["read", "list"]
 }
@@ -262,6 +265,10 @@ path "secret/data/exodus/*" {
     capabilities = ["create", "read", "update", "list", "delete"]
 }
 path "secret/metadata/exodus/*" {
+    capabilities = ["create", "update", "read", "list", "delete"]
+}
+
+path "secret/exodus/*" {
     capabilities = ["create", "update", "read", "list", "delete"]
 }
 
