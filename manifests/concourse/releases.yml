@@ -3,9 +3,9 @@ meta:
   releases:
     concourse:
       name:    concourse
-      version: 5.7.2
-      sha1:    367ddfd92fb0bab315c13039ca4a5a9fd154e164
-      url:     https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=5.7.2
+      version: 5.8.0
+      sha1:    66b8a0d51b0436bd615eb9b99fc5d3963dd87efa
+      url:     https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=5.8.0
     slack-notifications:
       name:    slack-notification-resource
       version: 9
@@ -13,9 +13,9 @@ meta:
       url:     https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
     bpm:
       name:    bpm
-      version: 1.1.5
-      sha1:    e612e88543012ae5d376dd3746159d5abe748076
-      url:     https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.5
+      version: 1.1.6
+      sha1:    5bad6161dbbcf068830a100b6a76056fe3b99bc8
+      url:     https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.6
     shout:
       name:    shout
       version: 0.1.0
@@ -23,9 +23,9 @@ meta:
       url:     https://github.com/jhunt/shout-boshrelease/releases/download/v0.1.0/shout-0.1.0.tar.gz
     postgres:
       name:    postgres
-      version: 39
-      sha1:    8ff395540e77a461322a01c41aa68973c10f1ffb
-      url:     https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=39
+      version: 40
+      sha1:    343f04f1594c57ecea65638802e94e311cd72688
+      url:     https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=40
     locker:
       name:    locker
       version: 0.2.1
