@@ -162,10 +162,6 @@ the `cf-oauth` feature flag, and provide the following parameters:
     For example: `https://api.sys.your-cf.com`.
     This parameter is **required**.
 
-  - `cf_token_uri` - The UAA Token URL, which is usually something like
-    `https://login.sys.your-cf.com/oauth/token`
-    This parameter is **required**.
-
   - `cf_spaces` - A list of Cloud Foundry space GUIDs.  Developers in those
     spaces, will be given access to Concourse.
     This parameter is **required**.
