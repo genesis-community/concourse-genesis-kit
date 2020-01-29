@@ -19,4 +19,5 @@ meta:
           client_id:     (( vault meta.vault "/oauth:provider_key" ))
           client_secret: (( vault meta.vault "/oauth:provider_secret" ))
           api_url:       (( grab params.cf_api_url ))
-          ca_cert:       (( vault params.cf_ca_cert_vault_path ))
+          ca_cert:
+            certificate: (( vault params.cf_ca_cert_vault_path ))
