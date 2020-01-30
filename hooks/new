@@ -101,18 +101,6 @@ if [[ "$kit_type" == "full" ]] ; then
         -V url
       param_entry params cf_api_url
 
-      prompt_for uaa_token_url line \
-        "Cloud Foundry UAA Token URL:" -i \
-        --default "${cf_scheme}://login.system.${cf_base_url}/oauth/token" \
-        -V url
-      param_entry params uaa_token_url
-
-      prompt_for uaa_auth_url line \
-        "Cloud Foundry UAA Auth URL:" -i \
-        --default "${cf_scheme}://login.system.${cf_base_url}/oauth/authorize" \
-        -V url
-      param_entry params uaa_auth_url
-
       describe "" \
         "The Cloud Foundry CA cert is used to authenticate Concourse to the UAA," \
         "so that Concourse can then authorize users after they log into the UAA." \

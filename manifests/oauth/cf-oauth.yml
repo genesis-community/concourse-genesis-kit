@@ -3,8 +3,6 @@ params:
   cf_spaces: (( param "Please provide a list of CF space GUIDs whose developers can access Concourse" ))
 
   cf_api_url:            (( param "Please provide the URL to your CF API" ))
-  uaa_token_url:         (( param "Please provide the URL to your UAA Token endpoint" ))
-  uaa_auth_url:          (( param "Please provide the URL to your UAA Auth endpoint" ))
   cf_ca_cert_vault_path: (( param "Please provide the Vault path that contains ca for the Cloud Foundry" ))
 
 
@@ -16,9 +14,10 @@ meta:
         main_team:
           auth:
             cf:
-              spaces: (( grab params.cf_spaces ))
+              spaces_with_developer_role: (( grab params.cf_spaces ))
         cf_auth:
           client_id:     (( vault meta.vault "/oauth:provider_key" ))
           client_secret: (( vault meta.vault "/oauth:provider_secret" ))
           api_url:       (( grab params.cf_api_url ))
-          ca_cert:       (( vault params.cf_ca_cert_vault_path ))
+          ca_cert:
+            certificate: (( vault params.cf_ca_cert_vault_path ))

@@ -162,16 +162,13 @@ the `cf-oauth` feature flag, and provide the following parameters:
     For example: `https://api.sys.your-cf.com`.
     This parameter is **required**.
 
-  - `cf_token_uri` - The UAA Token URL, which is usually something like
-    `https://login.sys.your-cf.com/oauth/token`
-    This parameter is **required**.
-
   - `cf_spaces` - A list of Cloud Foundry space GUIDs.  Developers in those
-    spaces, will be given access to Concourse.
+    spaces, will be given access to Concourse. In the form `ORG:SPACE`.
     This parameter is **required**.
 
   - `cf_ca_cert_vault_path` - The path, in the Vault, to the Cloud Foundry
-    CA certificate.
+    CA certificate. This is usually something like
+    `secret/path/to/keys/for/haproxy/ssl:certificate`
     This parameter is **required**.
 
 The following secrets will be pulled from the vault:
