@@ -1,3 +1,8 @@
+# Changes
+
+* Replaced the deprecated parameter `auth.cf.spaces` with
+  `main_team.auth.cf.spaces_with_developer_role` in Cf OAuth.
+
 # Bug Fixes
 
 * Removed unused params `uaa_token_url` and `uaa_auth_url` from the CF OAuth 

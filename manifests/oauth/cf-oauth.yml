@@ -14,7 +14,7 @@ meta:
         main_team:
           auth:
             cf:
-              spaces: (( grab params.cf_spaces ))
+              spaces_with_developer_role: (( grab params.cf_spaces ))
         cf_auth:
           client_id:     (( vault meta.vault "/oauth:provider_key" ))
           client_secret: (( vault meta.vault "/oauth:provider_secret" ))
