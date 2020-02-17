@@ -162,9 +162,9 @@ the `cf-oauth` feature flag, and provide the following parameters:
     For example: `https://api.sys.your-cf.com`.
     This parameter is **required**.
 
-  - `cf_spaces` - A list of Cloud Foundry space GUIDs.  Developers in those
-    spaces, will be given access to Concourse. In the form `ORG:SPACE`.
-    This parameter is **required**.
+  - `cf_spaces` - A list of Cloud Foundry spaces in the form `ORG:SPACE`.
+    Developers in those spaces will be given access to Concourse. This
+    parameter is **required**.
 
   - `cf_ca_cert_vault_path` - The path, in the Vault, to the Cloud Foundry
     CA certificate. This is usually something like
