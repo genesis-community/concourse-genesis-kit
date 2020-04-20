@@ -34,5 +34,5 @@ meta:
     haproxy:
       name:    haproxy
       version: 10.0.0
-      sha1:    5aa23123d76fbe33a78cc32d205a213a52e6b7a
+      sha1:    5aa23123d76fbe33a78cc32d205a213a52e6b72a
       url:     https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=10.0.0
