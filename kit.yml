@@ -1,5 +1,6 @@
 ---
-name: Concourse CI/CD
+name: concourse
+version: 3.13.0
 authors:
 - James Hunt  <jhunt@starkandwayne.com>
 - Dennis Bell <dbell@starkandwayne.com>
