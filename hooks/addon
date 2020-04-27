@@ -1,10 +1,44 @@
 #!/bin/bash
-set -eu
-vault="secret/$GENESIS_VAULT_PREFIX"
+# shellcheck disable=2181
+set -u
+
+#Version check
+min_version="2.7.6"
+genesis_version="$(genesis -v 2>&1 | grep '^Genesis v' | sed -e 's/Genesis v\(.*\) (.*$/\1/')"
+if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_version" ; then
+  describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
+  exit 1
+fi
+set -e
+
+list() {
+  describe "" "$(cat <<END_OF_LIST
+The following addons are defined for #C{$GENESIS_KIT_ID} kit:
+
+  #G{visit}                Open the Concourse Web User Interface in your browser
+                       (requires macOS)
+
+  #G{download-fly}         Get the version of fly compatible with this Concourse
+
+  #G{login}                Login to this Concourse deployment with fly
+
+  #G{logout}               Logout of this Concourse deployment with fly
+
+  #G{fly}                  Run fly commands targetting this Concourse Deployment
+
+  #G{setup-approle}        Create the necessary Vault AppRole and policy for Genesis
+                       Concourse deployments.
+END_OF_LIST
+  )" ""
+}
+
+if [[ "$GENESIS_ADDON_SCRIPT" == "list" ]] ; then
+  list
+  exit 0
+fi
 
 error() {
-  describe >&2 "" "$@" ""
-  exit 2
+  bail "" "$@" ""
 }
 
 get_host_param() {
@@ -24,6 +58,23 @@ get_host_param() {
   return 0
 }
 
+visit() {
+  if ! command -v open >/dev/null 2>&1; then
+    error "#R{[ERROR]} The 'visit' addon script only works on macOS, currently."
+  fi
+  host_user="$(get_host_param username)"
+  host_pw="$(get_host_param password)"
+  describe "" \
+    "You will need to enter the following credentials once the page opens:" \
+    "#I{  username:} #C{$host_user}" \
+    "#I{  password:} #C{$host_pw}" \
+    ""
+  host="$(get_host_param external_url)"
+
+  read -n 1 -s -r -p "Press any key to open the web console..."
+  open "${host}/teams/main/login"
+}
+
 get_target() {
   url="$(get_host_param external_url)" || exit $?
   fly targets | grep "^${host_env} " || true
@@ -34,7 +85,7 @@ needs_fly() {
     error "#R{[ERROR]} Cannot find '#C{fly}' command -- use download-fly addon to download it" \
           "        to somewhere in your path"
   fi
-}  
+}
 
 download_fly() {
   [[ -z "$GENESIS_CALLER_DIR" ]] && error "#R{[ERROR]} Calling scope not found -- internal Genesis error"
@@ -50,7 +101,7 @@ download_fly() {
       "-p") platform="$1"; shift ;;
       "--sync")
         [[ -n "$path" ]]             && error "#R{[ERROR]} Can't specify a path and use --sync option"
-        path="$(which fly 2>/dev/null)"
+        path="$(command -v fly 2>/dev/null)"
         sync=1
         [[ $? -gt 0 || -z "$path" ]] && error "#R{[ERROR]} No fly found in path -- cannot use --sync option"
         [[ ! -w "$path" ]]           && error "#R{[ERROR]} No write permission to $path -- cannot use --sync option"
@@ -64,14 +115,14 @@ download_fly() {
     esac
   done
 
-  case "${platform:-$OSTYPE}" in 
+  case "${platform:-$OSTYPE}" in
     darwin*|mac) platform='darwin' ;;
     linux*)      platform='linux' ;;
     cygwin|win*) platform='windows' ;;
     *)
       if [[ -n "$platform" ]] ; then
         error "#R{[ERROR]} Unknown platform type '$platform': expecting one of darwin, linux or windows"
-      else 
+      else
         error "#R{[ERROR]} Cannot determine platform type: please specify one of darwin, linux or" \
               "        windows using the -t option"
       fi
@@ -87,9 +138,7 @@ download_fly() {
   [[ $? -gt 0 || $STATUSCODE != '200' ]] && error "#R{[ERROR]} Failed to download fly (Status: $STATUSCODE):" "$(cat $path)"
   chmod a+x "$path"
 
-      echo
-  describe "#G{Download successful - written to} #C{$path}"
-      echo 
+  describe "" "#G{Download successful - written to} #C{$path}" ""
   exit 0
 }
 
@@ -135,64 +184,133 @@ login() {
   return $rc
 }
 
-list() {
-  echo "The following addons are defined:"
-  echo
-  echo "  visit                Open the Concourse Web User Interface in your browser"
-  echo "                       (requires macOS)"
-  echo
-  echo "  download-fly         Get the version of fly compatible with this Concourse"
-  echo
-  echo "  login                Login to this Concourse deployment with fly"
-  echo
-  echo "  logout               Logout of this Concourse deployment with fly"
-  echo
-  echo "  fly                  Run fly commands targetting this Concourse Deployment"
-  echo
-  echo "  setup-approle        Create the necessary Vault AppRole and policy for Genesis"
-  echo "                       Concourse deployments."
-  echo
+safe_kv_mounts() {
+  safe vault secrets list --detailed \
+    | sed -e 's/infra/my infra/' \
+    | grep '^.\+/ \+kv \+' \
+    | sed -e 's/^\(..*\/\)  *kv  *.*map\[version:\([0-9]\)\].*/--\2 \1/' \
+    | grep -- '^--' \
+    | sed -e 's/^--//'
 }
 
-# MAIN
+matching_mount() {
+  local path="$1" mount ver;
+  while read -r ver mount ; do
+    tail="${path#$mount}"
+    echo >&2 "mount: $mount; ver: $ver; tail: '$tail'"
+    if [[ $tail != "$path" ]] ; then 
+      echo "$mount $tail $ver"
+      return
+    fi
+  done < <(safe_kv_mounts)
+}
 
-if [[ "$GENESIS_ADDON_SCRIPT" == "list" ]] ; then
-  list
+setup_approle() {
+  # If AppRole is already enabled in this Vault, it'll return a 400 error with "path already in use". This is OK.
+  if [[ ! $(safe vault auth enable approle 2>&1) =~ (Success\! Enabled approle auth method)|(path is already in use) ]] ; then
+    echo "Failed to enable AppRole on your targeted Vault. Womp womp :("
+    exit 1
+  fi
+
+  if ! safe exists "$GENESIS_EXODUS_BASE" ; then
+    error "#R{[ERROR]} Cannot find exodus data for #C{$GENESIS_ENVIRONMENT}.  Please redeploy" \
+          "        before using addons."
+  fi
+
+  # Create AppRole Role named "genesis-piplines" with the following parameters:
+  # - 90 minute TTL (Some BOSH deployments could take awhile, and then the Exodus write-back could fail if TTL is too short)
+  # - unlimited token use
+  safe --quiet set auth/approle/role/genesis-pipelines \
+    secret_id_ttl=0 \
+    token_num_uses=0 \
+    token_ttl=90m \
+    token_max_ttl=90m \
+    secret_id_num_uses=0
+  role_id=$(safe get auth/approle/role/genesis-pipelines/role-id:role_id)
+  # generate a secret key for the newly minted role
+  approle_secret=$(safe vault write -field=secret_id -f auth/approle/role/genesis-pipelines/secret-id)
+
+  # write info to exodus
+  safe --quiet set "${GENESIS_EXODUS_MOUNT}ci/genesis-pipelines" approle-id="$role_id"
+  safe --quiet set "${GENESIS_EXODUS_MOUNT}ci/genesis-pipelines" approle-secret="$approle_secret"
+
+  policy=<<EOF
+# Allow the pipelines to read all items within Vault, and write to secret/exodus (for genesis exodus data)
+EOF
+
+  read -r sec_mnt sec_path ver < <(matching_mount "$GENESIS_SECRETS_MOUNT")
+  if [[ -z "$sec_mnt" ]] ; then
+    error "#R{[ERROR]} Cannot find mount for secrets path of '$GENESIS_SECRETS_MOUNT'"
+  fi
+  if [[ "$ver" == "2" && -n "$sec_path" ]] ; then
+    read -r -d '' policy <<EOF
+$policy
+path "$sec_mnt/data/${sec_path%/}/*" {
+  capabilities = ["read", "list"]
+}
+path "$sec_mnt/metadata/${sec_path%/}/*" {
+  capabilities = ["read", "list"]
+}
+
+EOF
+  else
+    read -r -d '' policy <<EOF
+$policy
+path "${sec_mnt%/}/*" {
+  capabilities = ["read", "list"]
+}
+
+EOF
+  fi
+
+  read -r exo_mnt exo_path ver < <(matching_mount "$GENESIS_EXODUS_MOUNT")
+  if [[ -z "$exo_mnt" ]] ; then
+    error "#R{[ERROR]} Cannot find mount for exodus path of '$GENESIS_EXODUS_MOUNT'"
+  fi
+  if [[ "$ver" == "2" && -n "$exo_path" ]] ; then
+    read -r -d '' policy <<EOF
+$policy
+path "$exo_mnt/data/${exo_path%/}/*" {
+  capabilities = ["create", "read", "update", "list", "delete"]
+}
+path "$exo_mnt/metadata/${exo_path%/}/*" {
+  capabilities = ["create", "read", "update", "list", "delete"]
+}
+EOF
+  else
+    read -r -d '' policy <<EOF
+$policy
+path "${exo_mnt%/}/*" {
+  capabilities = ["create", "read", "update", "list", "delete"]
+}
+EOF
+  fi
+
+  safe --quiet vault policy write genesis-pipelines - <<< "$policy"
+  safe --quiet set auth/approle/role/genesis-pipelines policies=default,genesis-pipelines
+
+  describe "" "AppRole written." ""
   exit 0
-fi
+}
+
+### MAIN
 
 # Initialization of Exodus data lookup for efficiency
-if ! safe exists "secret/exodus/$GENESIS_ENVIRONMENT/concourse" ; then
+if ! safe exists "$GENESIS_EXODUS_BASE" ; then
   error "#R{[ERROR]} Cannot find exodus data for #C{$GENESIS_ENVIRONMENT}.  Please redeploy" \
         "        before using addons."
 fi
-if ! host_env="$(safe get "secret/exodus/${GENESIS_ENVIRONMENT}/concourse:host_env" 2>/dev/null)" ; then
-  host_env="$GENESIS_ENVIRONMENT"
-fi
-exodus_data="$(safe get "secret/exodus/${host_env}/concourse" | spruce json)"
+host_env="$(safe get "$GENESIS_EXODUS_BASE:host_env" 2>/dev/null)" || host_env="$GENESIS_ENVIRONMENT"
+exodus_data="$(safe get "${GENESIS_EXODUS_MOUNT}${host_env}/concourse" | spruce json)"
 
 # Process requested addon script
 case $GENESIS_ADDON_SCRIPT in
 visit)
-  if ! command -v open >/dev/null 2>&1; then
-    error "#R{[ERROR]} The 'visit' addon script only works on macOS, currently."
-  fi
-  host_user="$(get_host_param username)"
-  host_pw="$(get_host_param password)"
-  describe "" \
-    "You will need to enter the following credentials once the page opens:" \
-    "#I{  username:} #C{$host_user}" \
-    "#I{  password:} #C{$host_pw}" \
-    ""
-  host="$(get_host_param external_url)"
-
-  read -n 1 -s -r -p "Press any key to open the web console..."
-  open "${host}/teams/main/login"
+  visit
   ;;
 
 download-fly)
   download_fly "$@"
-  exit 0
   ;;
 
 login)
@@ -223,52 +341,7 @@ fly)
   ;;
 
 setup-approle)
-  # If AppRole is already enabled in this Vault, it'll return a 400 error with "path already in use". This is OK.
-  if [[ ! $(safe vault auth enable approle 2>&1) =~ (Success\! Enabled approle auth method)|(path is already in use) ]] ; then
-    echo "Failed to enable AppRole on your targeted Vault. Womp womp :("
-    exit 1
-  fi
-
-  if ! safe exists "secret/exodus/$GENESIS_ENVIRONMENT/concourse" ; then
-    error "#R{[ERROR]} Cannot find exodus data for #C{$GENESIS_ENVIRONMENT}.  Please redeploy" \
-          "        before using addons."
-  fi
-
-  # Create AppRole Role named "genesis-piplines" with the following parameters:
-  # - 90 minute TTL (Some BOSH deployments could take awhile, and then the Exodus write-back could fail if TTL is too short)
-  # - unlimited token use
-  safe --quiet set auth/approle/role/genesis-pipelines \
-    secret_id_ttl=0 \
-    token_num_uses=0 \
-    token_ttl=90m \
-    token_max_ttl=90m \
-    secret_id_num_uses=0
-  role_id=$(safe get auth/approle/role/genesis-pipelines/role-id:role_id)
-  # generate a secret key for the newly minted role
-  approle_secret=$(safe vault write -field=secret_id -f auth/approle/role/genesis-pipelines/secret-id)
-
-
-  # write info to exodus
-  safe --quiet set secret/exodus/ci/genesis-pipelines approle-id=$role_id
-  safe --quiet set secret/exodus/ci/genesis-pipelines approle-secret=$approle_secret
-
-  safe --quiet vault policy write genesis-pipelines -<<EOF
-# Allow the pipelines to read all items within Vault, and write to secret/exodus (for genesis exodus data)
-path "secret/*" {
-  capabilities = ["read", "list"]
-}
-
-path "secret/data/exodus/*" {
-    capabilities = ["create", "read", "update", "list", "delete"]
-}
-path "secret/metadata/exodus/*" {
-    capabilities = ["create", "update", "read", "list", "delete"]
-}
-
-EOF
-
-  safe --quiet set auth/approle/role/genesis-pipelines policies=default,genesis-pipelines
-  exit 0
+  setup_approle
   ;;
 
 *)
@@ -277,3 +350,5 @@ EOF
   exit 1
   ;;
 esac
+
+exit 0

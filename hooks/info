@@ -1,12 +1,12 @@
 #!/bin/bash
 set -eu
 
-host_data="$(safe get "secret/exodus/${GENESIS_ENVIRONMENT}/concourse" | spruce json)"
+host_data="$(safe get "$GENESIS_EXODUS_BASE" | spruce json)"
 worker_data=""
 host_env="$(echo "$host_data" | jq -r '.host_env // ""' 2>/dev/null)"
 if [[ -n "$host_env" ]] ; then
   worker_data="$host_data"
-  host_data="$(safe get "secret/exodus/${host_env}/concourse" | spruce json)"
+  host_data="$(safe get "${GENESIS_EXODUS_MOUNT}${host_env}/concourse" | spruce json)"
 else
   host_env="$GENESIS_ENVIRONMENT"
 fi

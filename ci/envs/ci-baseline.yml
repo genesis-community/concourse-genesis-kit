@@ -4,10 +4,11 @@ kit:
     - full
     - self-signed-cert
 
-params:
-  env:   ci-baseline
-  bosh:  genesis-ci
+genesis:
+  env:      ci-baseline
+  bosh_env: genesis-ci
 
+params:
   concourse_vm_type: large
   external_domain:   concourse.example.com
   num_web_nodes:     1

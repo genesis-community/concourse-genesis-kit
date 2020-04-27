@@ -1,15 +1,22 @@
 #!/bin/bash
-# shellcheck disable=2016
-set -eu
+set -u
+
+#Version check
+min_version="2.7.6"
+genesis_version="$(genesis -v 2>&1 | grep '^Genesis v' | sed -e 's/Genesis v\(.*\) (.*$/\1/')"
+if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_version" ; then
+  describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
+  exit 1
+fi
+set -e
 
 dir="$GENESIS_ROOT"
 name="$GENESIS_ENVIRONMENT"
-prefix="$GENESIS_VAULT_PREFIX"
 
 ymlfile="$dir/$name.yml"
 declare -a features
 features=()
-params="\\nparams:\\n  env:   $name\\n  vault: $prefix\\n"
+params=""
 
 describe "" \
   "#G{Concourse CI/CD Genesis Kit}" \
@@ -17,15 +24,17 @@ describe "" \
   "" \
   "Creating environment #C{$name} in #C{$dir}"
 
-prompt_for kit_type select \
+kit_type= # Assigned below
+prompt_for kit_type "select" \
   "Is this a full Concourse deployment, or a worker deployment for an existing Concourse?" \
   -o "[full]     Full Concourse" \
   -o "[workers]  Satellite Concourse"
 
-features+=("$kit_type")
+features+=( "$kit_type" )
 
 if [[ "$kit_type" == "full" ]] ; then
 
+  auth_backend_feature=
   prompt_for auth_backend_feature "select" \
     "What authentication backend do you wish to use with Concourse?" \
     -o "[github-oauth]            GitHub OAuth Integration" \
@@ -43,9 +52,11 @@ if [[ "$kit_type" == "full" ]] ; then
         'to GitHub, so that Concourse can then authorize users after they log into GitHub.' \
         'See https://developer.github.com/v3/oauth/ for more info.'
 
+      client_id=
+      client_secret=
       prompt_for client_id line "GitHub OAuth Client ID:" -i
       prompt_for client_secret line "GitHub OAuth Client Secret:" -i
-      safe set --quiet "secret/$prefix/oauth" provider_key="$client_id" provider_secret="$client_secret"
+      safe set --quiet "${GENESIS_SECRETS_BASE}oauth" provider_key="$client_id" provider_secret="$client_secret"
 
       describe "" \
         "Concourse authorizes access based off of GitHub Organizations"
@@ -62,7 +73,7 @@ if [[ "$kit_type" == "full" ]] ; then
 
       prompt_for client_id line "GitHub OAuth Client ID:" -i
       prompt_for client_secret line "GitHub OAuth Client Secret:" -i
-      safe set --quiet "secret/$prefix/oauth" provider_key="$client_id" provider_secret="$client_secret"
+      safe set --quiet "${GENESIS_SECRETS_BASE}oauth" provider_key="$client_id" provider_secret="$client_secret"
 
       prompt_for authz_allowed_orgs line \
         "Which GitHub organization do you want to grant access to Concourse?"
@@ -80,7 +91,7 @@ if [[ "$kit_type" == "full" ]] ; then
         "so that Concourse can then authorize users after they log into the UAA."
       prompt_for client_id line "UAA Client ID:" -i
       prompt_for client_secret line "UAA Client Secret:" -i
-      safe set --quiet "secret/$prefix/oauth" provider_key="$client_id" provider_secret="$client_secret"
+      safe set --quiet "${GENESIS_SECRETS_BASE}oauth" provider_key="$client_id" provider_secret="$client_secret"
 
       describe "" \
         "What is the URL of the CF installation that will be used for UAA-based" \
@@ -104,14 +115,15 @@ if [[ "$kit_type" == "full" ]] ; then
       describe "" \
         "The Cloud Foundry CA cert is used to authenticate Concourse to the UAA," \
         "so that Concourse can then authorize users after they log into the UAA." \
-        'This is usually something like `secret/path/to/keys/for/haproxy/ssl:certificate`' \
-        'If you are unsure, use `safe tree` to find it. If you are terminating ssl on LBs or' \
+        "This is usually something like '#C{secret/path/to/keys/for/haproxy/ssl:certificate}'" \
+        "If you are unsure, use '#G{safe tree}' to find it. If you are terminating ssl on LBs or" \
         "Go routers, you will need cert on those nodes."
       prompt_for cf_ca_cert_vault_path line \
         "What is your CF CA cert path?" \
         -V vault_path_and_key
       param_entry params cf_ca_cert_vault_path
 
+      cf_spaces=() # Assigned below
       prompt_for cf_spaces multi-line \
         "What CF spaces do you want to grant access to Concourse?"
       param_entry params cf_spaces -a "${cf_spaces[@]}"
@@ -121,6 +133,7 @@ if [[ "$kit_type" == "full" ]] ; then
   describe "" \
     "Concourse should be protected by TLS, since build logs may contain" \
     "sensitive information (like IPs, usernames, etc.)."
+  ssl_cert_feature= # Assigned below
   prompt_for ssl_cert_feature "select" \
     "How would you like to configure Concourse TLS?" \
     -o "[provided-cert]    I have my own certificate for Concourse" \
@@ -130,10 +143,10 @@ if [[ "$kit_type" == "full" ]] ; then
 
   case "$ssl_cert_feature" in
     "provided-cert")
-      prompt_for "$prefix/ssl/server:certificate" secret-block \
+      prompt_for "ssl/server:certificate" secret-block \
         "What is the SSL certificate for Concourse?"
 
-      prompt_for "$prefix/ssl/server:key" secret-block \
+      prompt_for "ssl/server:key" secret-block \
         "What is the SSL key for Concourse?"
       ;;
   esac
@@ -149,11 +162,12 @@ else
   describe "" \
     "A worker-only Concourse deployment requires an existing full host Concourse" \
     "deployment for the workers to connect to."
+  tsa_host_env= # Assigned below
   prompt_for tsa_host_env line \
     "Please specify environment name of the Concourse host deployment"
   param_entry params tsa_host_env
 
-  if ! safe exists "secret/exodus/$tsa_host_env/concourse" ; then
+  if ! safe exists "${GENESIS_EXODUS_MOUNT}$tsa_host_env/concourse" ; then
     decribe >&2 "" \
       "#R{[ERROR]} No deployment details found for $tsa_host_env Concourse deployment." \
       "Please ensure that it has been deployed first using Genesis v2.6 or greater and this" \
@@ -177,8 +191,13 @@ for f in "${features[@]}" ; do
   printf >>"$ymlfile" -- '    - %s\n' "$f"
 done
 
+genesis_config_block >>"$ymlfile"
+
 # Params
-printf >>"$ymlfile" -- "$( echo "$params" | sed -e 's/%/%%/g')"
+if [[ -n "$params" ]] ; then
+  # shellcheck disable=2059 disable=2028
+  printf >>"$ymlfile" -- "$( echo "\nparams:\n$params" | sed -e 's/%/%%/g')"
+fi
 
 describe "" "Wrote configuration to #C{$ymlfile}." ""
 exit 0
