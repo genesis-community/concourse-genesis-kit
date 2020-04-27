@@ -7,7 +7,7 @@ authors:
 docs:   https://concourse.ci
 code:   https://github.com/genesis-community/concourse-genesis-kit
 
-genesis_version_min: 2.6.0
+genesis_version_min: 2.7.6
 
 certificates:
   base:
@@ -41,3 +41,36 @@ credentials:
       password: random 16
     shout/admin:
       password: random 32
+
+provided:
+  github-oauth:
+    oauth:
+      keys:
+        provider_key:
+          prompt: "GitHub OAuth Client ID"
+        provider_secret:
+          prompt: "GitHub OAuth Client Secret"
+  github-enterprise-oauth:
+    oauth:
+      keys:
+        provider_key:
+          prompt: "GitHub OAuth Client ID"
+        provider_secret:
+          prompt: "GitHub OAuth Client Secret"
+  github-enterprise-oauth:
+    oauth:
+      keys:
+        provider_key:
+          prompt: "UAA Client ID"
+        provider_secret:
+          prompt: "UAA Client Secret"
+  provided-cert:
+    ssl/server:
+      # replace this with type: x509-cert when genesis supports that
+      keys:
+        certificate:
+          prompt: "SSL certificate for Concourse"
+          #multiline: true # not yet supported
+        key:
+          prompt: "SSL key for Concourse"
+          #multiline: true # not yet supported
