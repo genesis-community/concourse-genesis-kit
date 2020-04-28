@@ -186,9 +186,8 @@ login() {
 
 safe_kv_mounts() {
   safe vault secrets list --detailed \
-    | sed -e 's/infra/my infra/' \
     | grep '^.\+/ \+kv \+' \
-    | sed -e 's/^\(..*\/\)  *kv  *.*map\[version:\([0-9]\)\].*/--\2 \1/' \
+    | sed -e 's/^\/\{0,1\}\([^\/].*\/\)  *kv  *.*map\[version:\([0-9]\)\].*/--\2 \/\1/' \
     | grep -- '^--' \
     | sed -e 's/^--//'
 }
@@ -197,99 +196,112 @@ matching_mount() {
   local path="$1" mount ver;
   while read -r ver mount ; do
     tail="${path#$mount}"
-    echo >&2 "mount: $mount; ver: $ver; tail: '$tail'"
+    [[ -n "${GENESIS_TRACE:-${GENESIS_DEBUG:-""}}" ]] && echo >&2 "DEBUG> mount: $mount; ver: $ver; tail: '$tail'"
     if [[ $tail != "$path" ]] ; then 
-      echo "$mount $tail $ver"
+      echo "$mount"; echo "$tail"; echo "$ver"
       return
     fi
   done < <(safe_kv_mounts)
+  bail "#R{[ERROR]} Could not find a mount point for #C{$path} in the current secrets provider"
 }
 
 setup_approle() {
+
+  echo "  - Checking Exodus data availability..."
+  if ! safe exists "$GENESIS_EXODUS_BASE" ; then
+    error "#R{[ERROR]} Cannot find exodus data for #C{$GENESIS_ENVIRONMENT}.  Please redeploy" \
+          "        before using addons."
+  fi
+
+  echo "  - Ensuring Vault AppRole is enabled..."
   # If AppRole is already enabled in this Vault, it'll return a 400 error with "path already in use". This is OK.
   if [[ ! $(safe vault auth enable approle 2>&1) =~ (Success\! Enabled approle auth method)|(path is already in use) ]] ; then
     echo "Failed to enable AppRole on your targeted Vault. Womp womp :("
     exit 1
   fi
 
-  if ! safe exists "$GENESIS_EXODUS_BASE" ; then
-    error "#R{[ERROR]} Cannot find exodus data for #C{$GENESIS_ENVIRONMENT}.  Please redeploy" \
-          "        before using addons."
-  fi
+  describe "  - Generating policy for #C{genesis-pipelines} app role..."
+  policy="$(
+    echo "# Allow the pipelines to read all items within Vault, and write to secret/exodus (for genesis exodus data)"
+    echo
 
-  # Create AppRole Role named "genesis-piplines" with the following parameters:
-  # - 90 minute TTL (Some BOSH deployments could take awhile, and then the Exodus write-back could fail if TTL is too short)
-  # - unlimited token use
-  safe --quiet set auth/approle/role/genesis-pipelines \
-    secret_id_ttl=0 \
-    token_num_uses=0 \
-    token_ttl=90m \
-    token_max_ttl=90m \
-    secret_id_num_uses=0
-  role_id=$(safe get auth/approle/role/genesis-pipelines/role-id:role_id)
-  # generate a secret key for the newly minted role
-  approle_secret=$(safe vault write -field=secret_id -f auth/approle/role/genesis-pipelines/secret-id)
-
-  # write info to exodus
-  safe --quiet set "${GENESIS_EXODUS_MOUNT}ci/genesis-pipelines" approle-id="$role_id"
-  safe --quiet set "${GENESIS_EXODUS_MOUNT}ci/genesis-pipelines" approle-secret="$approle_secret"
-
-  policy=<<EOF
-# Allow the pipelines to read all items within Vault, and write to secret/exodus (for genesis exodus data)
-EOF
-
-  read -r sec_mnt sec_path ver < <(matching_mount "$GENESIS_SECRETS_MOUNT")
-  if [[ -z "$sec_mnt" ]] ; then
-    error "#R{[ERROR]} Cannot find mount for secrets path of '$GENESIS_SECRETS_MOUNT'"
-  fi
-  if [[ "$ver" == "2" && -n "$sec_path" ]] ; then
-    read -r -d '' policy <<EOF
-$policy
-path "$sec_mnt/data/${sec_path%/}/*" {
+    { IFS= read -r sec_mnt && IFS= read -r sec_path && IFS= read -r ver; } < <(matching_mount "$GENESIS_SECRETS_MOUNT")
+    if [[ -z "$sec_mnt" ]] ; then
+      error "#R{[ERROR]} Cannot find mount for secrets path of '$GENESIS_SECRETS_MOUNT'"
+    fi
+    if [[ "$ver" == "2" && -n "$sec_path" ]] ; then
+      cat <<EOF
+path "${sec_mnt}data/${sec_path%/}/*" {
   capabilities = ["read", "list"]
 }
-path "$sec_mnt/metadata/${sec_path%/}/*" {
+path "${sec_mnt}metadata/${sec_path%/}/*" {
   capabilities = ["read", "list"]
 }
 
 EOF
-  else
-    read -r -d '' policy <<EOF
-$policy
+
+    else
+      cat <<EOF
 path "${sec_mnt%/}/*" {
   capabilities = ["read", "list"]
 }
 
 EOF
-  fi
+    fi
 
-  read -r exo_mnt exo_path ver < <(matching_mount "$GENESIS_EXODUS_MOUNT")
-  if [[ -z "$exo_mnt" ]] ; then
-    error "#R{[ERROR]} Cannot find mount for exodus path of '$GENESIS_EXODUS_MOUNT'"
-  fi
-  if [[ "$ver" == "2" && -n "$exo_path" ]] ; then
-    read -r -d '' policy <<EOF
-$policy
-path "$exo_mnt/data/${exo_path%/}/*" {
+    { IFS= read -r exo_mnt && IFS= read -r exo_path && IFS= read -r ver; } < <(matching_mount "$GENESIS_EXODUS_MOUNT")
+    if [[ -z "$exo_mnt" ]] ; then
+      error "#R{[ERROR]} Cannot find mount for exodus path of '$GENESIS_EXODUS_MOUNT'"
+    fi
+    if [[ "$ver" == "2" && -n "$exo_path" ]] ; then
+      cat <<EOF
+path "${exo_mnt}data/${exo_path%/}/*" {
   capabilities = ["create", "read", "update", "list", "delete"]
 }
-path "$exo_mnt/metadata/${exo_path%/}/*" {
+path "${exo_mnt}metadata/${exo_path%/}/*" {
   capabilities = ["create", "read", "update", "list", "delete"]
 }
 EOF
-  else
-    read -r -d '' policy <<EOF
-$policy
+
+    else
+      cat <<EOF
 path "${exo_mnt%/}/*" {
   capabilities = ["create", "read", "update", "list", "delete"]
 }
 EOF
+
+    fi
+  )"
+  if ! safe --quiet vault policy write genesis-pipelines - <<< "$policy" >/dev/null 2>&1 ; then
+    bail "#R{[ERROR] Failed to create 'genesis-pipelines' policy."
   fi
 
-  safe --quiet vault policy write genesis-pipelines - <<< "$policy"
-  safe --quiet set auth/approle/role/genesis-pipelines policies=default,genesis-pipelines
 
-  describe "" "AppRole written." ""
+  # Create AppRole Role named "genesis-pipelines" with the following parameters:
+  # - 90 minute TTL (Some BOSH deployments could take awhile, and then the Exodus write-back could fail if TTL is too short)
+  # - unlimited token use
+  describe "  - Creating and configuring app role #C{genesis-pipelines}..."
+  safe --quiet vault delete auth/approle/role/genesis-pipelines >/dev/null 2>&1
+  if ! safe --quiet set auth/approle/role/genesis-pipelines \
+    secret_id_ttl=0 \
+    token_num_uses=0 \
+    token_ttl=90m \
+    token_max_ttl=90m \
+    secret_id_num_uses=0 \
+    policies=default,genesis-pipelines ; then
+    bail "#R{[ERROR] Failed to create 'genesis-pipelines' approle."
+  fi
+
+  role_id=$(safe get auth/approle/role/genesis-pipelines/role-id:role_id)
+  # generate a secret key for the newly minted role
+  approle_secret=$(safe vault write -field=secret_id -f auth/approle/role/genesis-pipelines/secret-id)
+
+  # write info to exodus
+  describe "  - Writing access credentials to Exodus..."
+  safe --quiet set "${GENESIS_EXODUS_MOUNT}ci/genesis-pipelines" approle-id="$role_id"
+  safe --quiet set "${GENESIS_EXODUS_MOUNT}ci/genesis-pipelines" approle-secret="$approle_secret"
+
+  describe "" "#G{AppRole created.}" ""
   exit 0
 }
 
