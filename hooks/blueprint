@@ -11,7 +11,8 @@ validate_features \
   workers full small-footprint                  \
   no-tls provided-cert self-signed-cert         \
   github-oauth github-enterprise-oauth cf-oauth \
-  vault vault-approle shout prometheus
+  vault vault-approle shout prometheus          \
+  no-haproxy
 
 if [[ "$(bosh_cpi)" == "azure" ]]; then
   merge+=( "manifests/addons/azure.yml" )
@@ -43,7 +44,6 @@ if want_feature "full" || want_feature "small-footprint"; then
   if want_feature "small-footprint" ; then
     merge+=( "manifests/concourse/small-footprint.yml" )
   fi
-
   for oauth in "github-oauth" "cf-oauth" ; do
     if want_feature "$oauth" ; then
       merge+=( "manifests/oauth/${oauth}.yml" )
@@ -71,6 +71,10 @@ if want_feature "full" || want_feature "small-footprint"; then
       echo >&2
       exit 1
     fi
+  fi
+
+  if want_feature "no-haproxy" && ! want_feature "small-footprint"; then
+    merge+=( "manifests/addons/no-haproxy.yml" )
   fi
 
   if want_feature "vault"; then

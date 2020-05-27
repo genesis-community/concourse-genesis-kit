@@ -1,0 +1,10 @@
+---
+- type: remove
+  path: /instance_groups/name=haproxy
+- type: remove
+  path: /meta/jobs/haproxy
+- type: remove
+  path: /releases/name=haproxy
+- type: replace
+  path: /instance_groups/name=web/networks/0/static_ips
+  value: (( static_ips 0, 1, 2, 3, 4 ))
