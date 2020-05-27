@@ -227,6 +227,13 @@ A `small-footprint` deployment cannot be scaled up to a full-size deployment,
 or vice-versa. Any feature flags that work on the `full` deployment will work
 on `small-footprint` deployment.
 
+# Deploying Without HAProxy
+
+The _no-haproxy_ feature allows you to deploy without an HAProxy. If you're
+migrating from a deployment that isn't using this feature, you may see your
+web node IP shift back one IP spot into the place that the HAProxy would have
+taken.
+
 # Setting Up Vault Integration For Pipelines
 
 The ATC can be configured to pull credentials for pipeline configurations using

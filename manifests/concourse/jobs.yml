@@ -10,7 +10,7 @@ meta:
           tcp:
             - name: web_http
               port: 80
-              backend_port: 8080
+              backend_port: 80
               backend_servers: (( grab instance_groups.web.networks.0.static_ips || instance_groups.concourse.networks.0.static_ips ))
 
     bpm:
@@ -31,7 +31,7 @@ meta:
             name: atc
             password: (( vault meta.vault "/database/atc:password" ))
         token_signing_key: (( grab params.token_signing_key ))
-        bind_port: 8080
+        bind_port: 80
         publicly_viewable: true
         main_team:
           auth:
