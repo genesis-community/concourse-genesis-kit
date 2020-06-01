@@ -229,10 +229,19 @@ on `small-footprint` deployment.
 
 # Deploying Without HAProxy
 
-The _no-haproxy_ feature allows you to deploy without an HAProxy. If you're
+The `no-haproxy` feature allows you to deploy without an HAProxy. If you're
 migrating from a deployment that isn't using this feature, you may see your
 web node IP shift back one IP spot into the place that the HAProxy would have
 taken.
+
+Additionally if you would like to attach the web nodes to an IaaS loadbalancer,
+specify the `dynamic-web-ip` feature. This feature attaches a vm-extension to
+the web node that must be defined externally in your cloud config. The vm-extension
+should be configured to attach the vm to the loadbalancer in your specific
+IaaS. The `dynamic-web-ip` feature exposes the following parameter:
+
+  - `web_vm_extension` - The name of the vm-extension that must be externally
+     defined.  Defaults to `concourse-loadbalancer`.
 
 # Setting Up Vault Integration For Pipelines
 

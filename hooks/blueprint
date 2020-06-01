@@ -12,7 +12,7 @@ validate_features \
   no-tls provided-cert self-signed-cert         \
   github-oauth github-enterprise-oauth cf-oauth \
   vault vault-approle shout prometheus          \
-  no-haproxy
+  no-haproxy dynamic-web-ip
 
 if [[ "$(bosh_cpi)" == "azure" ]]; then
   merge+=( "manifests/addons/azure.yml" )
@@ -75,6 +75,9 @@ if want_feature "full" || want_feature "small-footprint"; then
 
   if want_feature "no-haproxy" && ! want_feature "small-footprint"; then
     merge+=( "manifests/addons/no-haproxy.yml" )
+    if want_feature "dynamic-web-ip" ; then
+      merge+=( "manifests/addons/dynamic-web.yml" )
+    fi  
   fi
 
   if want_feature "vault"; then
