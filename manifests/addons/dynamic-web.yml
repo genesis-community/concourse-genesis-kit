@@ -1,0 +1,10 @@
+---
+- type: remove
+  path: /instance_groups/name=web/networks/0/static_ips
+  
+- type: replace
+  path: /instance_groups/name=web/vm_extensions?
+  value: 
+  - (( grab params.web_vm_extension || "concourse-loadbalancer" ))
+
+
