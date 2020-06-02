@@ -10,9 +10,9 @@ instance_groups:
         static_ips: (( static_ips 0 ))
     jobs:
     - name: postgres
-      .: (( grab meta.jobs.postgres ))
+      .: (( inject meta.jobs.postgres ))
     - name: locker
-      .: (( grab meta.jobs.locker   ))
+      .: (( inject meta.jobs.locker   ))
     - name: web
       .: (( inject meta.jobs.web ))
     - name: bpm
