@@ -1,0 +1,30 @@
+---
+- type: remove
+  path: /meta/jobs/postgres
+
+- type: remove
+  path: /instance_groups/name=db
+
+- type: replace
+  path: /instance_groups/name=web/jobs/-
+  value:
+  - name: locker
+    .:    (( inject meta.jobs.locker ))
+
+- type: replace
+  path: /params/external_db_host?
+  value: (( param "Please provide the hostname of the external database server" ))
+
+- type: replace
+  path: /meta/jobs/web/properties/postgresql
+  value:
+    database: (( grab params.external_db_name || "atc" ))
+    host:     (( grab params.external_db_host ))
+    port:     (( grab params.external_db_port || 5432 ))
+    role:
+      name:   (( grab params.external_db_user || "atc" ))
+      password: (( vault meta.vault "/database/external:password" ))
+    sslmode: (( grab params.external_db_sslmode || "verify-ca" ))
+
+- type: remove
+  path: /releases/name=postgres
