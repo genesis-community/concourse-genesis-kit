@@ -1,0 +1,5 @@
+---
+# external-db puts the web node back in, even if the small-footprint doesn't want
+# it, so we clean it up here.
+- type: remove
+  path: /instance_groups/name=web
