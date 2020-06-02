@@ -57,7 +57,7 @@ provided:
           prompt: "GitHub OAuth Client ID"
         provider_secret:
           prompt: "GitHub OAuth Client Secret"
-  github-enterprise-oauth:
+  cf-oauth:
     oauth:
       keys:
         provider_key:
