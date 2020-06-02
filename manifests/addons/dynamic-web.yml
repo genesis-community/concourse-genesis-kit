@@ -7,4 +7,5 @@
   value: 
   - (( grab params.web_vm_extension || "concourse-loadbalancer" ))
 
-
+- type: remove
+  path: /exodus/tsa_host
