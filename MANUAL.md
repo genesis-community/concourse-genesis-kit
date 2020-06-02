@@ -243,6 +243,28 @@ IaaS. The `dynamic-web-ip` feature exposes the following parameter:
   - `web_vm_extension` - The name of the vm-extension that must be externally
      defined.  Defaults to `concourse-loadbalancer`.
 
+# Using an External Database
+
+The `external-db` feature will cause the kit to not deploy the local database
+VM, and will expose parameters for hooking up the web node to an externally
+deployed PostgreSQL database. Normally, the `locker` API would be located on the
+database VM, but if this feature is provided, it will be moved to the web VM.
+The following parameters are provided by this feature:
+
+- `external_db_host` - The hostname of the database to connect to. Required.
+- `external_db_port` - The port that the database is listening on. Defaults to `5432`.
+- `external_db_name` - The name of the database to connect to. Defaults to `atc`.
+- `external_db_sslmode` - The sslmode parameter to connect to the database with.
+   Defaults to `verify-ca`.
+
+If you are using the default SSL mode for this feature, then you may need to
+explicitly define the CA cert to verify the database certificate against, instead
+of relying on the system certificate pool. To provide this CA certificate, define
+the `external-db-ca` feature in addition to the `external-db` feature, and then
+define the following parameter:
+
+- `external_db_ca` - The CA certificate to validate the DB TLS connection against.
+
 # Setting Up Vault Integration For Pipelines
 
 The ATC can be configured to pull credentials for pipeline configurations using

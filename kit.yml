@@ -74,3 +74,7 @@ provided:
         key:
           prompt: "SSL key for Concourse"
           #multiline: true # not yet supported
+  external-db:
+    database/external:
+      keys:
+        password: "Password for external database user"

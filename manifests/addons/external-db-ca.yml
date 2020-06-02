@@ -1,0 +1,9 @@
+---
+- type: replace
+  path: /params/external_db_ca?
+  value: (( param "Please specify the CA certificate for the external DB" ))
+
+- type: replace
+  path: /meta/jobs/web/properties/postgresql/ca_cert?
+  value:
+    certificate: (( grab params.external_db_ca ))
