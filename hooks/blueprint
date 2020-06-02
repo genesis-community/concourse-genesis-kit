@@ -86,6 +86,10 @@ if want_feature "full" || want_feature "small-footprint"; then
     if want_feature "external-db-ca"; then
       merge+=( "manifests/addons/external-db-ca.yml" )
     fi
+
+    if want_feature "small-footprint"; then
+      merge+=( "manifests/addons/external-db-small.yml")
+    fi
   fi
 
   if want_feature "vault"; then
