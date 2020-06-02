@@ -3,10 +3,10 @@
   path: /meta/jobs/postgres
 
 - type: remove
-  path: /instance_groups/name=db
+  path: /instance_groups/name=db?
 
 - type: replace
-  path: /instance_groups/name=web/jobs/-
+  path: /instance_groups/name=web?/jobs/-
   value:
     name: locker
     .:    (( inject meta.jobs.locker ))
@@ -28,3 +28,6 @@
 
 - type: remove
   path: /releases/name=postgres
+
+- type: remove
+  path: /instance_groups/name=concourse?/jobs/name=postgres
