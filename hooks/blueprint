@@ -74,13 +74,6 @@ if want_feature "full" || want_feature "small-footprint"; then
     fi
   fi
 
-  if want_feature "no-haproxy" && ! want_feature "small-footprint"; then
-    merge+=( "manifests/addons/no-haproxy.yml" )
-    if want_feature "dynamic-web-ip" ; then
-      merge+=( "manifests/addons/dynamic-web.yml" )
-    fi  
-  fi
-
   if want_feature "external-db"; then
     merge+=( "manifests/addons/external-db.yml" ) 
     if want_feature "external-db-ca"; then
@@ -111,6 +104,13 @@ if want_feature "full" || want_feature "small-footprint"; then
 
   if want_feature "prometheus"; then
     merge+=( "manifests/addons/prometheus.yml" )
+  fi
+
+  if want_feature "no-haproxy" && ! want_feature "small-footprint"; then
+    merge+=( "manifests/addons/no-haproxy.yml" )
+    if want_feature "dynamic-web-ip" ; then
+      merge+=( "manifests/addons/dynamic-web.yml" )
+    fi  
   fi
 
 elif want_feature "workers" ; then
