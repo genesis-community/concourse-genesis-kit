@@ -1,0 +1,12 @@
+---
+kit:
+  name:    dev
+  features:
+    - small-footprint
+    - self-signed-cert
+
+genesis:
+  env:         small-footprint-self-signed-cert
+
+params:
+  external_domain: concourse.testing.examle

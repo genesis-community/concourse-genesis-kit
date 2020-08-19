@@ -1,0 +1,12 @@
+---
+kit:
+  name:    dev
+  features:
+    - full
+    - self-signed-cert
+
+genesis:
+  env:         full-self-signed-cert
+
+params:
+  external_domain: concourse.testing.examle

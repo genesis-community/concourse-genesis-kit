@@ -1,0 +1,28 @@
+secret/full/no/tls/concourse-genesis-kit/atc/token_signing_key:
+  private: <!{meta.vault}/atc/token_signing_key:private!>
+  public: <!{meta.vault}/atc/token_signing_key:public!>
+secret/full/no/tls/concourse-genesis-kit/database/atc:
+  password: <!{meta.vault}/database/atc:password!>
+secret/full/no/tls/concourse-genesis-kit/locker/api:
+  password: <!{meta.vault}/locker/api:password!>
+secret/full/no/tls/concourse-genesis-kit/locker/ca:
+  certificate: <!{meta.vault}/locker/ca:certificate!>
+  combined: <!{meta.vault}/locker/ca:combined!>
+  crl: <!{meta.vault}/locker/ca:crl!>
+  key: <!{meta.vault}/locker/ca:key!>
+  serial: <!{meta.vault}/locker/ca:serial!>
+secret/full/no/tls/concourse-genesis-kit/locker/server:
+  certificate: <!{meta.vault}/locker/server:certificate!>
+  combined: <!{meta.vault}/locker/server:combined!>
+  key: <!{meta.vault}/locker/server:key!>
+secret/full/no/tls/concourse-genesis-kit/tsa/host_key:
+  fingerprint: <!{meta.vault}/tsa/host_key:fingerprint!>
+  private: <!{meta.vault}/tsa/host_key:private!>
+  public: <!{meta.vault}/tsa/host_key:public!>
+secret/full/no/tls/concourse-genesis-kit/tsa/worker_key:
+  fingerprint: <!{meta.vault}/tsa/worker_key:fingerprint!>
+  private: <!{meta.vault}/tsa/worker_key:private!>
+  public: <!{meta.vault}/tsa/worker_key:public!>
+secret/full/no/tls/concourse-genesis-kit/webui:
+  password: <!{meta.vault}/webui:password!>
+  password-bcrypt: <!{meta.vault}/webui:password-bcrypt!>

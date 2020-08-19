@@ -1,0 +1,12 @@
+---
+kit:
+  name:    dev
+  features:
+    - full
+    - no-tls
+
+genesis:
+  env:         full-no-tls
+
+params:
+  external_domain: concourse.testing.examle

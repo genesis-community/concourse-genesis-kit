@@ -1,0 +1,225 @@
+exodus:
+  external_url: https://concourse.testing.examle
+  features: full,no-tls,github-oauth,vault,vault-approle,shout,prometheus
+  kit_is_dev: true
+  mode: full
+  password: <!{meta.vault}/webui:password!>
+  shout_admin_password: <!{meta.vault}/shout/admin:password!>
+  shout_admin_username: admin
+  shout_ops_password: <!{meta.vault}/shout/ops:password!>
+  shout_ops_username: ops
+  shout_url: http://10.99.0.17:7109
+  tsa_host: 10.99.0.17
+  tsa_host_public_key: <!{meta.vault}/tsa/host_key:public!>
+  tsa_port: 2222
+  tsa_worker_private_key: <!{meta.vault}/tsa/worker_key:private!>
+  tsa_worker_public_key: <!{meta.vault}/tsa/worker_key:public!>
+  username: concourse
+instance_groups:
+- azs:
+  - z1
+  - z2
+  - z3
+  instances: 2
+  jobs:
+  - name: worker
+    properties:
+      baggageclaim:
+        driver: detect
+      http_proxy_url: ""
+      https_proxy_url: ""
+      no_proxy:
+      - localhost
+      - 127.0.0.1
+      worker_gateway:
+        worker_key:
+          private_key: <!{meta.vault}/tsa/worker_key:private!>
+          public_key: <!{meta.vault}/tsa/worker_key:public!>
+    release: concourse
+  name: worker
+  networks:
+  - name: test-network
+  stemcell: default
+  update:
+    max_in_flight: 2
+    serial: true
+  vm_type: test-vm-worker-type
+- azs:
+  - z1
+  - z2
+  - z3
+  instances: 1
+  jobs:
+  - name: haproxy
+    properties:
+      ha_proxy:
+        tcp:
+        - backend_port: 80
+          backend_servers:
+          - 10.99.0.17
+          - 10.99.0.18
+          name: web_http
+          port: 80
+        - backend_port: 9391
+          backend_servers:
+          - 10.99.0.17
+          - 10.99.0.18
+          name: metrics_http
+          port: 9391
+    release: haproxy
+  - name: bpm
+    release: bpm
+  name: haproxy
+  networks:
+  - name: test-network
+    static_ips:
+    - 10.99.0.16
+  stemcell: default
+  vm_type: test-vm-type
+- azs:
+  - z1
+  - z2
+  - z3
+  instances: 2
+  jobs:
+  - name: web
+    properties:
+      add_local_users:
+      - concourse:<!{meta.vault}/webui:password-bcrypt!>
+      bind_port: 80
+      external_url: https://concourse.testing.examle
+      github_auth:
+        client_id: <!{meta.vault}/oauth:provider_key!>
+        client_secret: <!{meta.vault}/oauth:provider_secret!>
+      main_team:
+        auth:
+          github:
+            orgs:
+            - test-org
+          local:
+            users:
+            - concourse
+      postgresql:
+        database: atc
+        role:
+          name: atc
+          password: <!{meta.vault}/database/atc:password!>
+      prometheus:
+        bind_ip: 0.0.0.0
+        bind_port: 9391
+      publicly_viewable: true
+      token_signing_key:
+        private_key: test-token-signing-key-private
+        public_key: test-token-signing-key-public
+      vault:
+        auth:
+          backend: approle
+          backend_max_ttl: null
+          client_token: null
+          params:
+            role_id: test-role-id
+            secret_id: test-secret
+        path_prefix: /concourse
+        tls:
+          insecure_skip_verify: false
+        url: https://vault.testing.example
+      worker_gateway:
+        authorized_keys:
+        - <!{meta.vault}/tsa/worker_key:public!>
+        host_key:
+          private_key: <!{meta.vault}/tsa/host_key:private!>
+          public_key: <!{meta.vault}/tsa/host_key:public!>
+    release: concourse
+  - name: bpm
+    release: bpm
+  - name: shout
+    properties:
+      admin:
+        password: <!{meta.vault}/shout/admin:password!>
+        username: admin
+      ops:
+        password: <!{meta.vault}/shout/ops:password!>
+        username: ops
+      rules: |
+        ((for *
+           (when *
+             (remind 24 hours))))
+    release: shout
+  name: web
+  networks:
+  - name: test-network
+    static_ips:
+    - 10.99.0.17
+    - 10.99.0.18
+  stemcell: default
+  vm_type: test-vm-type
+- azs:
+  - z1
+  - z2
+  - z3
+  instances: 1
+  jobs:
+  - name: postgres
+    properties:
+      databases:
+        databases:
+        - name: atc
+        port: 5432
+        roles:
+        - name: atc
+          password: <!{meta.vault}/database/atc:password!>
+    release: postgres
+  - name: locker
+    properties:
+      locker:
+        password: <!{meta.vault}/locker/api:password!>
+        ssl_cert: <!{meta.vault}/locker/server:certificate!>
+        ssl_key: <!{meta.vault}/locker/server:key!>
+        user: locker
+    release: locker
+  name: db
+  networks:
+  - name: test-network
+  persistent_disk_type: test-disk-type
+  stemcell: default
+  vm_type: test-vm-type
+name: full-all-params-concourse-genesis-kit
+releases:
+- name: concourse
+  sha1: 98fa62d0ef61c9886b824f132189c838f278e7e6
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=6.4.0
+  version: 6.4.0
+- name: slack-notification-resource
+  sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
+  url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
+  version: 9
+- name: postgres
+  sha1: 4488d08ff54117a9d904f6e2f27c82c1cf4c910e
+  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=41
+  version: 41
+- name: locker
+  sha1: ccfcc48d63555a3733c3594d9429a5c1875a9dd2
+  url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
+  version: 0.2.1
+- name: haproxy
+  sha1: 97fbb573fc04d36c548915d8daef12a547e722d6
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=10.1.0
+  version: 10.1.0
+- name: bpm
+  sha1: c956394fce7e74f741e4ae8c256b480904ad5942
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.8
+  version: 1.1.8
+- name: shout
+  sha1: 73c5c0161730a655c03f5a6ceb1c8b2e33403874
+  url: https://github.com/jhunt/shout-boshrelease/releases/download/v0.1.0/shout-0.1.0.tar.gz
+  version: 0.1.0
+stemcells:
+- alias: default
+  os: test-stemcell-os
+  version: latest-test
+update:
+  canaries: 1
+  canary_watch_time: 1000-60000
+  max_in_flight: 4
+  serial: false
+  update_watch_time: 1000-60000

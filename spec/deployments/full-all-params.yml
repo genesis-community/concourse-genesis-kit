@@ -1,0 +1,38 @@
+---
+kit:
+  name:    dev
+  features:
+    - full
+    - no-tls
+    - github-oauth
+    - vault
+    - vault-approle
+    - shout
+    - prometheus
+
+genesis:
+  env:         full-all-params
+
+params:
+  external_domain: concourse.testing.examle
+  external_url:    https://concourse.testing.examle
+  concourse_network:     test-network
+  concourse_vm_type:     test-vm-type
+  worker_vm_type:        test-vm-worker-type
+  concourse_disk_type:   test-disk-type
+  workers:               2
+  num_web_nodes:         2
+
+  stemcell_os:      test-stemcell-os
+  stemcell_version: latest-test
+
+  volume_driver: detect
+
+  token_signing_key:
+    public_key: test-token-signing-key-public
+    private_key: test-token-signing-key-private
+
+  authz_allowed_orgs: test-org
+  vault_approle_role_id: test-role-id
+  vault_approle_secret_id: test-secret
+  vault_url: https://vault.testing.example

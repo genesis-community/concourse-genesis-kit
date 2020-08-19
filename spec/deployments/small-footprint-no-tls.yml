@@ -1,0 +1,12 @@
+---
+kit:
+  name:    dev
+  features:
+    - small-footprint
+    - no-tls
+
+genesis:
+  env:         small-footprint-no-tls
+
+params:
+  external_domain: concourse.testing.examle
