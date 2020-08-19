@@ -1,0 +1,7 @@
+- type: replace
+  path: /releases/name=shout?
+  value:
+    name:    shout
+    version: 0.1.0
+    sha1:    73c5c0161730a655c03f5a6ceb1c8b2e33403874
+    url:     https://github.com/jhunt/shout-boshrelease/releases/download/v0.1.0/shout-0.1.0.tar.gz  

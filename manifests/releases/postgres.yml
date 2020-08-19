@@ -1,0 +1,7 @@
+- type: replace
+  path: /releases/name=postgres?
+  value:
+    name:    postgres
+    version: 41
+    sha1:    4488d08ff54117a9d904f6e2f27c82c1cf4c910e
+    url:     https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=41  

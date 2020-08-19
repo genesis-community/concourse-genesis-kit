@@ -46,10 +46,3 @@ params:
     public_key:      (( vault meta.vault "/atc/token_signing_key:public" ))
     private_key:     (( vault meta.vault "/atc/token_signing_key:private" ))
 
-releases:
-  - name: postgres
-    .: (( inject meta.releases.postgres ))
-  - name: locker
-    .: (( inject meta.releases.locker   ))
-  - name: bpm
-    .: (( inject meta.releases.bpm ))

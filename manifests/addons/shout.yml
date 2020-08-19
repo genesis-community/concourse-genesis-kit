@@ -29,7 +29,3 @@ instance_groups:
             username: admin
             password: (( vault meta.vault "/shout/admin:password" ))
           rules: (( grab params.shout_rules ))
-
-releases:
-- (( append ))
-- (( grab meta.releases.shout))

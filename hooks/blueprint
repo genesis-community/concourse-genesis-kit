@@ -3,7 +3,8 @@ set -eu
 
 declare -a merge
 merge=( "manifests/concourse/base.yml" )
-merge+=( "manifests/concourse/releases.yml")
+merge+=( "manifests/releases/concourse.yml"
+         "manifests/releases/slack-notification.yml" )
 merge+=( "manifests/concourse/jobs.yml")
 
 validate_features \
@@ -40,10 +41,17 @@ fi
 
 if want_feature "full" || want_feature "small-footprint"; then
   if want_feature "full" ; then
-    merge+=( "manifests/concourse/full.yml" )
+    merge+=( "manifests/concourse/full.yml"
+             "manifests/releases/postgres.yml"
+             "manifests/releases/locker.yml"
+             "manifests/releases/haproxy.yml"
+             "manifests/releases/bpm.yml" )
   fi
   if want_feature "small-footprint" ; then
-    merge+=( "manifests/concourse/small-footprint.yml" )
+    merge+=( "manifests/concourse/small-footprint.yml"
+             "manifests/releases/postgres.yml"
+             "manifests/releases/locker.yml"
+             "manifests/releases/bpm.yml" )
   fi
   for oauth in "github-oauth" "cf-oauth" ; do
     if want_feature "$oauth" ; then
@@ -99,7 +107,8 @@ if want_feature "full" || want_feature "small-footprint"; then
   # If credhub support is added later it should probably if elsif'd here, under vault
 
   if want_feature "shout"; then
-    merge+=( "manifests/addons/shout.yml" )
+    merge+=( "manifests/addons/shout.yml"
+             "manifests/releases/shout.yml" )
   fi
 
   if want_feature "prometheus"; then

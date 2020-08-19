@@ -66,13 +66,3 @@ instance_groups:
         .: (( inject meta.jobs.postgres ))
       - name: locker
         .: (( inject meta.jobs.locker ))
-
-releases:
-  - name: postgres
-    .: (( inject meta.releases.postgres ))
-  - name: locker
-    .: (( inject meta.releases.locker   ))
-  - name: haproxy
-    .: (( inject meta.releases.haproxy  ))
-  - name: bpm
-    .: (( inject meta.releases.bpm ))
