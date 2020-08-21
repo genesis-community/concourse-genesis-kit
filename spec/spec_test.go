@@ -56,7 +56,6 @@ var _ = Describe("Concourse Kit", func() {
 			Name:        "full-all-params",
 			CloudConfig: "aws",
 			CPI:         "aws",
-			Focus:       true,
 		})
 	})
 })

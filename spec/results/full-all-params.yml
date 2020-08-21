@@ -1,7 +1,5 @@
 exodus:
   external_url: https://concourse.testing.examle
-  features: full,no-tls,github-oauth,vault,vault-approle,shout,prometheus
-  kit_is_dev: true
   mode: full
   password: <!{meta.vault}/webui:password!>
   shout_admin_password: <!{meta.vault}/shout/admin:password!>
@@ -183,7 +181,7 @@ instance_groups:
   persistent_disk_type: test-disk-type
   stemcell: default
   vm_type: test-vm-type
-name: full-all-params-concourse-genesis-kit
+name: full-all-params-concourse
 releases:
 - name: concourse
   sha1: 98fa62d0ef61c9886b824f132189c838f278e7e6

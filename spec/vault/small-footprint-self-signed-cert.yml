@@ -1,38 +1,38 @@
-secret/small/footprint/self/signed/cert/concourse-genesis-kit/atc/token_signing_key:
+secret/small/footprint/self/signed/cert/concourse/atc/token_signing_key:
   private: <!{meta.vault}/atc/token_signing_key:private!>
   public: <!{meta.vault}/atc/token_signing_key:public!>
-secret/small/footprint/self/signed/cert/concourse-genesis-kit/database/atc:
+secret/small/footprint/self/signed/cert/concourse/database/atc:
   password: <!{meta.vault}/database/atc:password!>
-secret/small/footprint/self/signed/cert/concourse-genesis-kit/locker/api:
+secret/small/footprint/self/signed/cert/concourse/locker/api:
   password: <!{meta.vault}/locker/api:password!>
-secret/small/footprint/self/signed/cert/concourse-genesis-kit/locker/ca:
+secret/small/footprint/self/signed/cert/concourse/locker/ca:
   certificate: <!{meta.vault}/locker/ca:certificate!>
   combined: <!{meta.vault}/locker/ca:combined!>
   crl: <!{meta.vault}/locker/ca:crl!>
   key: <!{meta.vault}/locker/ca:key!>
   serial: <!{meta.vault}/locker/ca:serial!>
-secret/small/footprint/self/signed/cert/concourse-genesis-kit/locker/server:
+secret/small/footprint/self/signed/cert/concourse/locker/server:
   certificate: <!{meta.vault}/locker/server:certificate!>
   combined: <!{meta.vault}/locker/server:combined!>
   key: <!{meta.vault}/locker/server:key!>
-secret/small/footprint/self/signed/cert/concourse-genesis-kit/ssl/ca:
+secret/small/footprint/self/signed/cert/concourse/ssl/ca:
   certificate: <!{meta.vault}/ssl/ca:certificate!>
   combined: <!{meta.vault}/ssl/ca:combined!>
   crl: <!{meta.vault}/ssl/ca:crl!>
   key: <!{meta.vault}/ssl/ca:key!>
   serial: <!{meta.vault}/ssl/ca:serial!>
-secret/small/footprint/self/signed/cert/concourse-genesis-kit/ssl/server:
+secret/small/footprint/self/signed/cert/concourse/ssl/server:
   certificate: <!{meta.vault}/ssl/server:certificate!>
   combined: <!{meta.vault}/ssl/server:combined!>
   key: <!{meta.vault}/ssl/server:key!>
-secret/small/footprint/self/signed/cert/concourse-genesis-kit/tsa/host_key:
+secret/small/footprint/self/signed/cert/concourse/tsa/host_key:
   fingerprint: <!{meta.vault}/tsa/host_key:fingerprint!>
   private: <!{meta.vault}/tsa/host_key:private!>
   public: <!{meta.vault}/tsa/host_key:public!>
-secret/small/footprint/self/signed/cert/concourse-genesis-kit/tsa/worker_key:
+secret/small/footprint/self/signed/cert/concourse/tsa/worker_key:
   fingerprint: <!{meta.vault}/tsa/worker_key:fingerprint!>
   private: <!{meta.vault}/tsa/worker_key:private!>
   public: <!{meta.vault}/tsa/worker_key:public!>
-secret/small/footprint/self/signed/cert/concourse-genesis-kit/webui:
+secret/small/footprint/self/signed/cert/concourse/webui:
   password: <!{meta.vault}/webui:password!>
   password-bcrypt: <!{meta.vault}/webui:password-bcrypt!>

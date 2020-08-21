@@ -1,7 +1,5 @@
 exodus:
   external_url: https://concourse.testing.examle
-  features: small-footprint,self-signed-cert
-  kit_is_dev: true
   mode: small-footprint
   password: <!{meta.vault}/webui:password!>
   self-signed: true
@@ -107,7 +105,7 @@ instance_groups:
     - 10.99.0.16
   stemcell: default
   vm_type: small
-name: small-footprint-self-signed-cert-concourse-genesis-kit
+name: small-footprint-self-signed-cert-concourse
 releases:
 - name: concourse
   sha1: 98fa62d0ef61c9886b824f132189c838f278e7e6

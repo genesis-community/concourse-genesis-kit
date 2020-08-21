@@ -1,7 +1,5 @@
 exodus:
   external_url: https://concourse.testing.examle
-  features: small-footprint,no-tls
-  kit_is_dev: true
   mode: small-footprint
   password: <!{meta.vault}/webui:password!>
   tsa_host: 10.99.0.16
@@ -101,7 +99,7 @@ instance_groups:
     - 10.99.0.16
   stemcell: default
   vm_type: small
-name: small-footprint-no-tls-concourse-genesis-kit
+name: small-footprint-no-tls-concourse
 releases:
 - name: concourse
   sha1: 98fa62d0ef61c9886b824f132189c838f278e7e6

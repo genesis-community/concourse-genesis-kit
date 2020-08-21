@@ -36,6 +36,10 @@ github.com/fsnotify/fsnotify v1.4.9 h1:hsms1Qyu0jgnwNXIxa+/V/PDsU6CfLf6CNO8H7IWo
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
 github.com/genesis-community/testkit v0.0.0-20200707133007-a407a788fef8 h1:g0mVVr+sdZJCJiSil8Q1qKFw4x1Fe7DBlvB2vwGihzI=
 github.com/genesis-community/testkit v0.0.0-20200707133007-a407a788fef8/go.mod h1:ZidExZ8ejGOmpm1xhzKUeNw/NPtcHdtB+SeFnbb68QI=
+github.com/genesis-community/testkit v0.0.0-20200820124414-cefea077f5e8 h1:Yi7O3R9IG5+ttIysa/eTvwqtk6o5mXtV/QNVJ8TlZvE=
+github.com/genesis-community/testkit v0.0.0-20200820124414-cefea077f5e8/go.mod h1:ZidExZ8ejGOmpm1xhzKUeNw/NPtcHdtB+SeFnbb68QI=
+github.com/genesis-community/testkit v0.0.0-20200820133735-febec5cc89d0 h1:gUCyGLQBWRLzQC/d4sY2UzYDAH+qICi8mSUUVEJDFjg=
+github.com/genesis-community/testkit v0.0.0-20200820133735-febec5cc89d0/go.mod h1:ZidExZ8ejGOmpm1xhzKUeNw/NPtcHdtB+SeFnbb68QI=
 github.com/gofrs/flock v0.7.1/go.mod h1:F1TvTiK9OcQqauNUHlbJvyl9Qa1QvF/gOUDKA14jxHU=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
