@@ -2,11 +2,11 @@
 meta:
   kit:     concourse
   release: Concourse Genesis Kit
-  target:  genesis@pipes
+  target:  pipes@genesis
   url:     https://pipes.starkandwayne.com
   exposed: yes
 
-  initial_version: 1.3.0
+  initial_version: 3.17.1
 
   bosh:
     uri:      ((bosh.uri))

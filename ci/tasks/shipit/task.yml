@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: starkandwayne/concourse
+
+inputs:
+- name: version
+- name: git
+- name: git-ci
+
+outputs:
+- name: gh
+- name: notifications
+- name: pushme
+
+run:
+  path: git-ci/ci/tasks/shipit/task

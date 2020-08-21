@@ -68,7 +68,7 @@ header "Assembling Github Release Artifacts..."
 mkdir -p ${RELEASE_ROOT}/artifacts
 echo "v${VERSION}"                         > ${RELEASE_ROOT}/tag
 echo "v${VERSION}"                         > ${RELEASE_ROOT}/name
-mv git/*.tar.gz                              ${RELEASE_ROOT}/artifacts
+mv git/*.tar.gz                              ${RELEASE_ROOT}/artifacts #TODO" where are the tars comming from?
 mv ${REPO_ROOT}/ci/release_notes.md          ${RELEASE_ROOT}/notes.md
 cat > ${RELEASE_ROOT}/notification <<EOF
 <!here> New ${KIT_SHORTNAME} v${VERSION} released!
