@@ -1,5 +1,5 @@
 - type: replace
-  path: /releases/name=haproxy?
+  path: /releases?/name=haproxy?
   value:
     name:    haproxy
     version: 10.1.0

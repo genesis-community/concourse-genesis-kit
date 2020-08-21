@@ -4,7 +4,7 @@ set -eu
 declare -a merge
 merge=( "manifests/concourse/base.yml" )
 merge+=( "manifests/releases/concourse.yml"
-         "manifests/releases/slack-notification.yml" )
+         "manifests/releases/slack-notifications.yml" )
 merge+=( "manifests/concourse/jobs.yml")
 
 validate_features \

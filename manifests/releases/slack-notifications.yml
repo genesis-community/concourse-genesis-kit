@@ -1,5 +1,5 @@
 - type: replace
-  path: /releases/name=slack-notifications?
+  path: /releases?/name=slack-notifications?
   value:
     name:    slack-notification-resource
     version: 9

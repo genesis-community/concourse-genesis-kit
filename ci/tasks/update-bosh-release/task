@@ -16,7 +16,7 @@ popd > /dev/null
 pushd git > /dev/null
 cat > ${OPS_FILE_PATH} <<YML
 - type: replace
-  path: /releases/name=${release_name}?
+  path: /releases?/name=${release_name}?
   value:
     name: ${release_name}
     version: ${release_version}

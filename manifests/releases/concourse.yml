@@ -1,5 +1,5 @@
 - type: replace
-  path: /releases/name=concourse?
+  path: /releases?/name=concourse?
   value:
     name:    concourse
     version: 6.4.0

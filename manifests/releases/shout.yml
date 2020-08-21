@@ -1,5 +1,5 @@
 - type: replace
-  path: /releases/name=shout?
+  path: /releases?/name=shout?
   value:
     name:    shout
     version: 0.1.0

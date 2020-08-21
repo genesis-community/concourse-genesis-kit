@@ -1,5 +1,5 @@
 - type: replace
-  path: /releases/name=locker?
+  path: /releases?/name=locker?
   value:
     name:    locker
     version: 0.2.1
