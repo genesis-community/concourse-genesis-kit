@@ -1,0 +1,7 @@
+- type: replace
+  path: /releases/name=locker?
+  value:
+    name:    locker
+    version: 0.2.1
+    sha1:    ccfcc48d63555a3733c3594d9429a5c1875a9dd2
+    url:     https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz  

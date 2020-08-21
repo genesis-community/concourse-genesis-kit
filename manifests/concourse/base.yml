@@ -39,12 +39,6 @@ instance_groups:
     - name: worker
       .: (( inject meta.jobs.worker ))
 
-releases:
-  - name: concourse
-    .: (( inject meta.releases.concourse ))
-  - name: slack-notification-resource
-    .: (( inject meta.releases.slack-notifications ))
-
 stemcells:
 - alias: default
   os: (( grab params.stemcell_os ))
