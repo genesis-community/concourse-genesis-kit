@@ -11,7 +11,6 @@ url=$( cat url )
 sha1=$( cat sha1 )
 popd > /dev/null
 
-
 # Create ops-file
 pushd git > /dev/null
 cat > ${OPS_FILE_PATH} <<YML
@@ -24,7 +23,6 @@ cat > ${OPS_FILE_PATH} <<YML
     sha1: ${sha1}
 YML
 
-
 # Commit changes
 if [[ -z $(git config --global user.email) ]]; then
     git config --global user.email "ci@starkandwayne.com"
@@ -33,7 +31,6 @@ if [[ -z $(git config --global user.name) ]]; then
     git config --global user.name "CI Bot"
 fi
 
-git merge --no-edit develop
 if [[ -n $(git status -s) ]]; then
     git add ${OPS_FILE_PATH}
     git commit -m "Releases updated: ${release_name}/${release_version}"
