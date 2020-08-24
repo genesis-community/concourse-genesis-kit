@@ -339,10 +339,11 @@ jobs:
         params:
           OPS_FILE_PATH: manifests/releases/concourse.yml
           RELEASE_NAME: concourse
+          BRANCH: (( grab meta.github.branch ))
       - put: git
         params:
           merge: true
-          repository: git
+          repository: pushme
 
 resource_types:
   - name: shout-notification
@@ -353,7 +354,7 @@ resource_types:
 resources:
   - name: git
     type: git
-    check_every: 24h
+    # check_every: 24h
     source:
       uri:         (( grab meta.github.uri ))
       branch:      (( grab meta.github.branch ))
@@ -362,7 +363,7 @@ resources:
 
   - name: git-ci
     type: git
-    check_every: 24h
+    # check_every: 24h
     source:
       uri:         (( grab meta.github.uri ))
       branch:      (( grab meta.github.branch ))
