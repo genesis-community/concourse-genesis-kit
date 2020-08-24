@@ -36,9 +36,3 @@ if [[ -n $(git status -s) ]]; then
     git commit -m "Releases updated: ${release_name}/${release_version}"
 fi
 popd > /dev/null
-
-git clone git pushme
-
-pushd pushme > /dev/null
-
-git checkout -b tmp

@@ -341,8 +341,8 @@ jobs:
           RELEASE_NAME: concourse
       - put: git
         params:
-          rebase: true
-          repository: pushme/git
+          merge: true
+          repository: git
 
 resource_types:
   - name: shout-notification
