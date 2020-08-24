@@ -26,6 +26,13 @@ cat > ${OPS_FILE_PATH} <<YML
     sha1: ${sha1}
 YML
 
+echo "recreate spec-test results to validate: ${release_name}/${release_version} "
+pushd spec > /dev/null
+# TODO: remove spec/{credhub,vault} if needed? because this will regenerate vault.
+rm -rf results/
+ginkgo
+popd
+
 # Commit changes
 if [[ -z $(git config --global user.email) ]]; then
     git config --global user.email "ci@starkandwayne.com"
