@@ -11,8 +11,11 @@ url=$( cat url )
 sha1=$( cat sha1 )
 popd > /dev/null
 
+# ouput hack
+git clone -b ${BRANCH} git pushme
+
 # Create ops-file
-pushd git > /dev/null
+pushd pushme > /dev/null
 cat > ${OPS_FILE_PATH} <<YML
 - type: replace
   path: /releases?/name=${release_name}?
@@ -35,4 +38,3 @@ if [[ -n $(git status -s) ]]; then
     git add ${OPS_FILE_PATH}
     git commit -m "Releases updated: ${release_name}/${release_version}"
 fi
-popd > /dev/null
