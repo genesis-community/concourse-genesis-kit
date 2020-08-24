@@ -16,5 +16,16 @@ outputs:
 - name: notifications
 - name: pushme
 
+params:
+  REPO_ROOT:        git
+  VERSION_FROM:     version/number
+  RELEASE_ROOT:     gh
+  NOTIFICATION_OUT: notifications
+  BRANCH:           master
+  GITHUB_OWNER:     genesis-community
+  GIT_EMAIL:        ci@starkandwayne.com
+  GIT_NAME:         Stark & Wayne CI Bot
+  KIT_SHORTNAME:    concourse
+
 run:
   path: git-ci/ci/tasks/shipit/task

@@ -26,7 +26,6 @@ bail() {
 test -n "${REPO_ROOT:-}"      || bail "REPO_ROOT must be set to the full path to the Git repository."
 test -n "${RELEASE_ROOT:-}"   || bail "RELEASE_ROOT must be set to the output directory where release artifacts should go."
 test -n "${KIT_SHORTNAME:-}"  || bail "KIT_SHORTNAME must be set to the short name of this kit."
-test -n "${REPO_OUT:-}"       || bail "REPO_OUT must be set to the output directory where the Git working copy should be moved to."
 test -n "${BRANCH:-}"         || bail "BRANCH must be set to the git branch you pulled the Git repository from."
 test -n "${GITHUB_OWNER:-}"   || bail "GITHUB_OWNER must be set to the name of the Github user or organization that owns the Git repository."
 test -n "${VERSION_FROM:-}"   || bail "VERSION_FROM must be set to the path of the input version file."
@@ -84,9 +83,6 @@ git config --global user.email "${GIT_EMAIL}"
  git add -A
  git status
  git commit -m "release v${VERSION}")
-
-# so that future steps in the pipeline can push our changes
-cp -a ${REPO_ROOT} ${REPO_OUT}
 
 cat > ${NOTIFICATION_OUT:-notifications}/message <<EOS
 New ${KIT_SHORTNAME} Genesis Kit v${VERSION} released. <https://github.com/${GITHUB_OWNER}/${KIT_SHORTNAME}-genesis-kit/releases/tag/v${VERSION}|Release notes>.

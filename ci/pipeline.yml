@@ -278,7 +278,6 @@ jobs:
         REPO_ROOT:    git
         VERSION_FROM: version/number
         RELEASE_ROOT: gh
-        REPO_OUT:     pushme
         NOTIFICATION_OUT: notifications
         BRANCH:        (( grab meta.github.branch ))
         GITHUB_OWNER:  (( grab meta.github.owner ))
@@ -287,8 +286,8 @@ jobs:
         KIT_SHORTNAME: (( grab meta.kit ))
     - put: git
       params:
-        rebase: true
-        repository: pushme/git
+        merge: true
+        repository: git
     - put: github
       params:
         name:   gh/name
@@ -323,6 +322,7 @@ jobs:
 - name: concourse-release
   public: true
   serial: true
+  serial_groups: [bosh-release]
   plan:
     - do:
       - in_parallel:
