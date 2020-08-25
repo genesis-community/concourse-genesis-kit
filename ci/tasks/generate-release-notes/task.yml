@@ -9,6 +9,10 @@ image_resource:
 inputs:
 - name: git
 - name: git-ci
+- name: git-latest-tag
+
+outputs:
+  - name: release-notes
 
 run:
-  path: git-ci/ci/tasks/release-notes/task
+  path: git-ci/ci/tasks/generate-release-notes/task
