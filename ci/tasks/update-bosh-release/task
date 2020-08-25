@@ -11,13 +11,14 @@ url=$( cat url )
 sha1=$( cat sha1 )
 popd > /dev/null
 
+# ouput hack
+git clone -b ${BRANCH} git pushme
+
+# Create ops-file
+pushd pushme > /dev/null
 if ! grep -q "version: ${release_version}" ${OPS_FILE_PATH}; then
 
-  # ouput hack
-  git clone -b ${BRANCH} git pushme
 
-  # Create ops-file
-  pushd pushme > /dev/null
 cat > ${OPS_FILE_PATH} <<YML
 - type: replace
   path: /releases?/name=${release_name}?
@@ -48,4 +49,6 @@ YML
       git add spec/
       git commit -m "Releases updated: ${release_name}/${release_version}"
   fi
+else
+  echo "Nothing todo as versions are the same"
 fi
