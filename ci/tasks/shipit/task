@@ -36,23 +36,25 @@ test -f "${VERSION_FROM}"     || bail "Version file (${VERSION_FROM}) not found.
 VERSION=$(cat ${VERSION_FROM})
 test -n "${VERSION}"          || bail "Version file (${VERSION_FROM}) was empty."
 
-if [[ ! -f ${REPO_ROOT}/ci/release_notes.md ]]; then
-  echo >&2
-  echo >&2 "#################################################"
-  echo >&2
-  echo >&2 "ci/release_notes.md not found."
-  echo >&2 "Did you forget to write them?"
-  echo >&2
-  echo >&2 "Ah well, happens to the best of us."
-  echo >&2 "We'll make do with what we've got, but please"
-  echo >&2 "don't forget to write them on GitHub!"
-  echo >&2
-  echo >&2 "#################################################"
-  echo >&2
+# TODO: because release_notes creation happens in `generate-release-notes` we can get rid of this.
+# and if this is created the compile kit will not succeed due to non commited file
+# if [[ ! -f ${REPO_ROOT}/ci/release_notes.md ]]; then
+#   echo >&2
+#   echo >&2 "#################################################"
+#   echo >&2
+#   echo >&2 "ci/release_notes.md not found."
+#   echo >&2 "Did you forget to write them?"
+#   echo >&2
+#   echo >&2 "Ah well, happens to the best of us."
+#   echo >&2 "We'll make do with what we've got, but please"
+#   echo >&2 "don't forget to write them on GitHub!"
+#   echo >&2
+#   echo >&2 "#################################################"
+#   echo >&2
 
-  mkdir -p ${REPO_ROOT}/ci
-  echo "_no release notes were written for this release._" > ${REPO_ROOT}/ci/release_notes.md
-fi
+#   mkdir -p ${REPO_ROOT}/ci
+#   echo "_no release notes were written for this release._" > ${REPO_ROOT}/ci/release_notes.md
+# fi
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -60,15 +62,18 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 VERSION=$(cat $VERSION_FROM)
 header "Compiling v$VERSION of Genesis Kit..."
-(cd $REPO_ROOT
- genesis compile-kit --version "$VERSION" --name "$KIT_SHORTNAME")
+pushd $REPO_ROOT
+ genesis compile-kit --version "$VERSION" --name "$KIT_SHORTNAME"
+popd
 
 header "Assembling Github Release Artifacts..."
 mkdir -p ${RELEASE_ROOT}/artifacts
-echo "v${VERSION}"                         > ${RELEASE_ROOT}/tag
-echo "v${VERSION}"                         > ${RELEASE_ROOT}/name
-mv git/*.tar.gz                              ${RELEASE_ROOT}/artifacts #TODO" where are the tars comming from?
-mv ${REPO_ROOT}/ci/release_notes.md          ${RELEASE_ROOT}/notes.md
+echo "v${VERSION}"      > ${RELEASE_ROOT}/tag
+echo "v${VERSION}"      > ${RELEASE_ROOT}/name
+mv $REPO_ROOT/*.tar.gz    ${RELEASE_ROOT}/artifacts
+# Clean release-notes
+echo -e "### Bug fixes:\n\n### Small improvments" > ${REPO_ROOT}ci/release_notes.md
+
 cat > ${RELEASE_ROOT}/notification <<EOF
 <!here> New ${KIT_SHORTNAME} v${VERSION} released!
 EOF
@@ -78,11 +83,12 @@ header "Updating Git repository..."
 git config --global user.name  "${GIT_NAME}"
 git config --global user.email "${GIT_EMAIL}"
 
-(cd ${REPO_ROOT}
+pushd ${REPO_ROOT}
  git merge --no-edit ${BRANCH}
  git add -A
  git status
- git commit -m "release v${VERSION}")
+ git commit -m "release v${VERSION}"
+popd
 
 cat > ${NOTIFICATION_OUT:-notifications}/message <<EOS
 New ${KIT_SHORTNAME} Genesis Kit v${VERSION} released. <https://github.com/${GITHUB_OWNER}/${KIT_SHORTNAME}-genesis-kit/releases/tag/v${VERSION}|Release notes>.
