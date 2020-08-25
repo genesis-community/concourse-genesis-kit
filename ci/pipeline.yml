@@ -78,7 +78,11 @@ groups:
     - minor
   - name: upstream
     jobs:
+    - bpm-release
     - concourse-release
+    - haproxy-release
+    - postgres-release
+    - slack-notifications-release
 
 jobs:
 - name: spec-tests
@@ -272,6 +276,9 @@ jobs:
       - { get: version, resource: version, passed: [rc], params: {bump: final} }
       - { get: git,     passed: [rc] }
       - { get: git-ci }
+      - { get: git-latest-tag }
+    - task: generate-release-notes
+      file: git-ci/ci/tasks/generate-release-notes/task.yml
     - task: release
       file: git-ci/ci/tasks/shipit/task.yml
       params:
@@ -292,7 +299,7 @@ jobs:
       params:
         name:   gh/name
         tag:    gh/tag
-        body:   gh/notes.md
+        body:   release-notes/notes.md
         globs: [gh/artifacts/*]
     - put: version
       params:
@@ -319,6 +326,32 @@ jobs:
         ok:      no
         link:    (( grab meta.shout.links.build ))
 
+- name: bpm-release
+  public: true
+  serial: true
+  serial_groups: [bosh-release]
+  plan:
+    - do:
+      - in_parallel:
+        - { get: git, trigger: false, passed: [spec-tests] }
+        - { get: git-ci, trigger: false }
+        - get: bosh-release-bpm
+          trigger: true
+          params:
+            tarball: false
+      - task: update-bosh-release
+        file: git-ci/ci/tasks/update-bosh-release/task.yml
+        input_mapping:
+          bosh-release: bosh-release-bpm
+        params:
+          OPS_FILE_PATH: manifests/releases/bpm.yml
+          RELEASE_NAME: bpm
+          BRANCH: (( grab meta.github.branch ))
+      - put: git
+        params:
+          merge: true
+          repository: pushme
+
 - name: concourse-release
   public: true
   serial: true
@@ -339,6 +372,84 @@ jobs:
         params:
           OPS_FILE_PATH: manifests/releases/concourse.yml
           RELEASE_NAME: concourse
+          BRANCH: (( grab meta.github.branch ))
+      - put: git
+        params:
+          merge: true
+          repository: pushme
+
+- name: haproxy-release
+  public: true
+  serial: true
+  serial_groups: [bosh-release]
+  plan:
+    - do:
+      - in_parallel:
+        - { get: git, trigger: false, passed: [spec-tests] }
+        - { get: git-ci, trigger: false }
+        - get: bosh-release-haproxy
+          trigger: true
+          params:
+            tarball: false
+      - task: update-bosh-release
+        file: git-ci/ci/tasks/update-bosh-release/task.yml
+        input_mapping:
+          bosh-release: bosh-release-haproxy
+        params:
+          OPS_FILE_PATH: manifests/releases/haproxy.yml
+          RELEASE_NAME: haproxy
+          BRANCH: (( grab meta.github.branch ))
+      - put: git
+        params:
+          merge: true
+          repository: pushme
+
+- name: postgres-release
+  public: true
+  serial: true
+  serial_groups: [bosh-release]
+  plan:
+    - do:
+      - in_parallel:
+        - { get: git, trigger: false, passed: [spec-tests] }
+        - { get: git-ci, trigger: false }
+        - get: bosh-release-postgres
+          trigger: true
+          params:
+            tarball: false
+      - task: update-bosh-release
+        file: git-ci/ci/tasks/update-bosh-release/task.yml
+        input_mapping:
+          bosh-release: bosh-release-postgres
+        params:
+          OPS_FILE_PATH: manifests/releases/postgres.yml
+          RELEASE_NAME: postgres
+          BRANCH: (( grab meta.github.branch ))
+      - put: git
+        params:
+          merge: true
+          repository: pushme
+
+- name: slack-notifications-release
+  public: true
+  serial: true
+  serial_groups: [bosh-release]
+  plan:
+    - do:
+      - in_parallel:
+        - { get: git, trigger: false, passed: [spec-tests] }
+        - { get: git-ci, trigger: false }
+        - get: bosh-release-slack-notifications
+          trigger: true
+          params:
+            tarball: false
+      - task: update-bosh-release
+        file: git-ci/ci/tasks/update-bosh-release/task.yml
+        input_mapping:
+          bosh-release: bosh-release-slack-notifications
+        params:
+          OPS_FILE_PATH: manifests/releases/slack-notifications.yml
+          RELEASE_NAME: slack-notifications
           BRANCH: (( grab meta.github.branch ))
       - put: git
         params:
@@ -370,7 +481,17 @@ resources:
       private_key: (( grab meta.github.private_key ))
       paths: [ci/*]
       disable_ci_skip: true
-      
+
+  - name: git-latest-tag
+    type: git
+    # check_every: 24h
+    source:
+      uri:         (( grab meta.github.uri ))
+      branch:      (( grab meta.github.branch ))
+      private_key: (( grab meta.github.private_key ))
+      tag_filter: "v*"
+      disable_ci_skip: true
+
   - name: version
     type: semver
     source :
@@ -397,8 +518,32 @@ resources:
       repository:   (( grab meta.github.repo ))
       access_token: (( grab meta.github.access_token ))
 
+  - name: bosh-release-bpm
+    type: bosh-io-release
+    check_every: 24h
+    source:
+      repository: cloudfoundry/bpm-release  
+
   - name: bosh-release-concourse
     type: bosh-io-release
     check_every: 24h
     source:
       repository: concourse/concourse-bosh-release
+
+  - name: bosh-release-haproxy
+    type: bosh-io-release
+    check_every: 24h
+    source:
+      repository:  cloudfoundry-incubator/haproxy-boshrelease
+
+  - name: bosh-release-postgres
+    type: bosh-io-release
+    check_every: 24h
+    source:
+      repository: cloudfoundry/postgres-release  
+
+  - name: bosh-release-slack-notifications
+    type: bosh-io-release
+    check_every: 24h
+    source:
+      repository: cloudfoundry-community/slack-notification-resource-boshrelease  
