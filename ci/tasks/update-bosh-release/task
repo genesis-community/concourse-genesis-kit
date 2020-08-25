@@ -11,11 +11,13 @@ url=$( cat url )
 sha1=$( cat sha1 )
 popd > /dev/null
 
-# ouput hack
-git clone -b ${BRANCH} git pushme
+if ! grep -q "version: ${release_version}" ${OPS_FILE_PATH}; then
 
-# Create ops-file
-pushd pushme > /dev/null
+  # ouput hack
+  git clone -b ${BRANCH} git pushme
+
+  # Create ops-file
+  pushd pushme > /dev/null
 cat > ${OPS_FILE_PATH} <<YML
 - type: replace
   path: /releases?/name=${release_name}?
@@ -26,23 +28,24 @@ cat > ${OPS_FILE_PATH} <<YML
     sha1: ${sha1}
 YML
 
-echo "recreate spec-test results to validate: ${release_name}/${release_version} "
-pushd spec > /dev/null
-# TODO: remove spec/{credhub,vault} if needed? because this will regenerate vault.
-rm -rf results/
-ginkgo
-popd
+  echo "recreate spec-test results to validate: ${release_name}/${release_version} "
+  pushd spec > /dev/null
+  # TODO: remove spec/{credhub,vault} if needed? because this will regenerate vault.
+  rm -rf results/
+  ginkgo
+  popd
 
-# Commit changes
-if [[ -z $(git config --global user.email) ]]; then
-    git config --global user.email "ci@starkandwayne.com"
-fi
-if [[ -z $(git config --global user.name) ]]; then
-    git config --global user.name "CI Bot"
-fi
+  # Commit changes
+  if [[ -z $(git config --global user.email) ]]; then
+      git config --global user.email "ci@starkandwayne.com"
+  fi
+  if [[ -z $(git config --global user.name) ]]; then
+      git config --global user.name "CI Bot"
+  fi
 
-if [[ -n $(git status -s) ]]; then
-    git add ${OPS_FILE_PATH}
-    git add spec/
-    git commit -m "Releases updated: ${release_name}/${release_version}"
+  if [[ -n $(git status -s) ]]; then
+      git add ${OPS_FILE_PATH}
+      git add spec/
+      git commit -m "Releases updated: ${release_name}/${release_version}"
+  fi
 fi
