@@ -71,8 +71,10 @@ mkdir -p ${RELEASE_ROOT}/artifacts
 echo "v${VERSION}"      > ${RELEASE_ROOT}/tag
 echo "v${VERSION}"      > ${RELEASE_ROOT}/name
 mv $REPO_ROOT/*.tar.gz    ${RELEASE_ROOT}/artifacts
+
 # Clean release-notes
-echo -e "### Bug fixes:\n\n### Small improvments:" > ${REPO_ROOT}/ci/release_notes.md
+git clone -b ${BRANCH} git pushme
+echo -e "## Bug fixes:\n\n## Small improvments:\n\n" > pushme/ci/release_notes.md
 
 cat > ${RELEASE_ROOT}/notification <<EOF
 <!here> New ${KIT_SHORTNAME} v${VERSION} released!
@@ -83,7 +85,7 @@ header "Updating Git repository..."
 git config --global user.name  "${GIT_NAME}"
 git config --global user.email "${GIT_EMAIL}"
 
-pushd ${REPO_ROOT}
+pushd pushme
  git merge --no-edit ${BRANCH}
  git add -A
  git status
