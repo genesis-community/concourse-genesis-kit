@@ -10,6 +10,7 @@ jobs:
       - { get: git-ci }
     - task: spec-testing
       file: git-ci/ci/tasks/spec-tests/task.yml
+      attempts: 2
     on_success:
       put: notify
       params:
