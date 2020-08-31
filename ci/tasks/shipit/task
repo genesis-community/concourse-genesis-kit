@@ -73,7 +73,7 @@ echo "v${VERSION}"      > ${RELEASE_ROOT}/name
 mv $REPO_ROOT/*.tar.gz    ${RELEASE_ROOT}/artifacts
 
 # Clean release-notes
-git clone -b ${BRANCH} git pushme
+git clone -b ${BRANCH} git-ci pushme
 echo -e "## Bug fixes:\n\n## Small improvments:\n\n" > pushme/ci/release_notes.md
 
 cat > ${RELEASE_ROOT}/notification <<EOF
