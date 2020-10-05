@@ -74,7 +74,8 @@ mv $REPO_ROOT/*.tar.gz    ${RELEASE_ROOT}/artifacts
 
 # Clean release-notes
 git clone -b ${BRANCH} git-ci pushme
-echo -e "## Bug fixes:\n\n## Small improvments:\n\n" > pushme/ci/release_notes.md
+echo -e "\n" > pushme/ci/release_notes.md
+echo -e "## Version: ${VERSION}" > pushme/ci/version
 
 cat > ${RELEASE_ROOT}/notification <<EOF
 <!here> New ${KIT_SHORTNAME} v${VERSION} released!
