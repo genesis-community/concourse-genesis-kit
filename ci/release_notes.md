@@ -1,5 +1,2 @@
-## Bug fixes:
-
-## Small improvments:
 
 
