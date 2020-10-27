@@ -1,0 +1,6 @@
+#!/bin/bash
+echo "$GENESIS_REQUESTED_FEATURES"
+
+if ! want_feature "external-db" ; then
+  echo "+internal-db"
+fi
