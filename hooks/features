@@ -1,0 +1,8 @@
+#!/bin/bash
+echo "$GENESIS_REQUESTED_FEATURES"
+
+echo HELLO > ~/projects/genesis-community/concourse-deployments/output
+
+if ! want_feature "external-db" ; then
+  echo "+internal-db"
+fi

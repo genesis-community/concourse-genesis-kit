@@ -30,9 +30,6 @@ credentials:
     locker/api:
       password: random 16
 
-    database/atc:
-      password: random 64
-
     webui:
       password: random 16 fmt bcrypt
 
@@ -41,6 +38,10 @@ credentials:
       password: random 16
     shout/admin:
       password: random 32
+
+  +internal-db:
+    database/atc:
+      password: random 64
 
 provided:
   github-oauth:
