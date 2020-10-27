@@ -10,15 +10,15 @@ code:   https://github.com/genesis-community/concourse-genesis-kit
 genesis_version_min: 2.7.6
 
 certificates:
-  base:
-    locker:
-      ca: { valid_for: 10y }
-      server: { valid_for: 1y, names: [ "locker" ] }
-
   self-signed-cert:
     ssl:
       ca: { valid_for: 10y }
       server: { valid_for: 1y, names: [ "${params.external_domain}" ] }
+
+  +locker:
+    locker:
+      ca: { valid_for: 10y }
+      server: { valid_for: 1y, names: [ "locker" ] }
 
 credentials:
   base:
