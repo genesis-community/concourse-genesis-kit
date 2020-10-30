@@ -242,7 +242,7 @@ EOF
 
     else
       cat <<EOF
-path "${sec_mnt%/}/*" {
+path "${GENESIS_SECRETS_MOUNT%/}/*" {
   capabilities = ["read", "list"]
 }
 
@@ -265,7 +265,7 @@ EOF
 
     else
       cat <<EOF
-path "${exo_mnt%/}/*" {
+path "${GENESIS_EXODUS_MOUNT%/}/*" {
   capabilities = ["create", "read", "update", "list", "delete"]
 }
 EOF
