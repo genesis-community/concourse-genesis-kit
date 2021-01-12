@@ -108,9 +108,9 @@ instance_groups:
 name: small-footprint-self-signed-cert-concourse
 releases:
 - name: concourse
-  sha1: 6a5a21a38bd7f8c544f1721033e17f34ecb9c063
-  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=6.7.2
-  version: 6.7.2
+  sha1: 14f377c7820ee6b42173b836c21062be5128d9e5
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=6.7.3
+  version: 6.7.3
 - name: slack-notification-resource
   sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
