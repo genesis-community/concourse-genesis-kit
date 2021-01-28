@@ -2,6 +2,7 @@ exodus:
   external_url: https://concourse.testing.examle
   mode: full
   password: <!{meta.vault}/webui:password!>
+  atc_ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   self-signed: true
   tsa_host: 10.99.0.17
   tsa_host_public_key: <!{meta.vault}/tsa/host_key:public!>
