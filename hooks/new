@@ -168,7 +168,7 @@ else
   param_entry params tsa_host_env
 
   if ! safe exists "${GENESIS_EXODUS_MOUNT}$tsa_host_env/concourse" ; then
-    decribe >&2 "" \
+    describe >&2 "" \
       "#R{[ERROR]} No deployment details found for $tsa_host_env Concourse deployment." \
       "Please ensure that it has been deployed first using Genesis v2.6 or greater and this" \
       "version of the Concourse Genesis Kit" \
