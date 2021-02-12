@@ -7,7 +7,7 @@ resource_types:
 resources:
   - name: git
     type: git
-    check_every: 24h
+    check_every: 1h
     source:
       uri:         (( grab meta.github.uri ))
       branch:      (( grab meta.github.branch ))
@@ -17,7 +17,7 @@ resources:
 
   - name: git-ci
     type: git
-    check_every: 24h
+    check_every: 1h
     source:
       uri:         (( grab meta.github.uri ))
       branch:      (( grab meta.github.branch ))
@@ -27,7 +27,7 @@ resources:
 
   - name: git-latest-tag
     type: git
-    check_every: 24h
+    check_every: 1h
     source:
       uri:         (( grab meta.github.uri ))
       branch:      (( grab meta.github.branch ))
