@@ -12,7 +12,8 @@ resources:
       uri:         (( grab meta.github.uri ))
       branch:      (( grab meta.github.branch ))
       private_key: (( grab meta.github.private_key ))
-      ignore_paths: [ci/*]
+      ignore_paths: ["ci/*[^md]"]
+
 
   - name: git-ci
     type: git
@@ -21,7 +22,7 @@ resources:
       uri:         (( grab meta.github.uri ))
       branch:      (( grab meta.github.branch ))
       private_key: (( grab meta.github.private_key ))
-      paths: [ci/*]
+      paths:       [ci/*]
       disable_ci_skip: true
 
   - name: git-latest-tag
@@ -64,7 +65,7 @@ resources:
     type: bosh-io-release
     check_every: 24h
     source:
-      repository: cloudfoundry/bpm-release  
+      repository: cloudfoundry/bpm-release
 
   - name: bosh-release-concourse
     type: bosh-io-release
@@ -82,7 +83,7 @@ resources:
     type: bosh-io-release
     check_every: 24h
     source:
-      repository: cloudfoundry/postgres-release  
+      repository: cloudfoundry/postgres-release
 
   - name: bosh-release-slack-notifications
     type: bosh-io-release
