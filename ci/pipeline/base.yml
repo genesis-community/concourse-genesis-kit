@@ -75,12 +75,15 @@ groups:
     - pre
     - rc
     - shipit
-    - major
-    - minor
   - name: upstream
     jobs:
     - bpm-release
     - concourse-release
     - haproxy-release
     - postgres-release
-    - slack-notifications-release    
+    - slack-notifications-release
+  - name: versions
+    jobs:
+    - major
+    - minor
+    - patch

@@ -7,6 +7,7 @@
 #
 # author:  James Hunt <james@niftylogic.com>
 #          Dennis Bell <dennis.j.bell@gmail.com>
+#          Ramon Makkelie <makkelie@starkandwayne.com>
 
 need_command() {
   local cmd=${1:?need_command() - no command name given}
