@@ -60,33 +60,3 @@ resources:
       user:         (( grab meta.github.owner ))
       repository:   (( grab meta.github.repo ))
       access_token: (( grab meta.github.access_token ))
-
-  - name: bosh-release-bpm
-    type: bosh-io-release
-    check_every: 24h
-    source:
-      repository: cloudfoundry/bpm-release
-
-  - name: bosh-release-concourse
-    type: bosh-io-release
-    check_every: 24h
-    source:
-      repository: concourse/concourse-bosh-release
-
-  - name: bosh-release-haproxy
-    type: bosh-io-release
-    check_every: 24h
-    source:
-      repository:  cloudfoundry-incubator/haproxy-boshrelease
-
-  - name: bosh-release-postgres
-    type: bosh-io-release
-    check_every: 24h
-    source:
-      repository: cloudfoundry/postgres-release
-
-  - name: bosh-release-slack-notifications
-    type: bosh-io-release
-    check_every: 24h
-    source:
-      repository: cloudfoundry-community/slack-notification-resource-boshrelease
