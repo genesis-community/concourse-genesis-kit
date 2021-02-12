@@ -31,7 +31,6 @@ safe rm -rf secret/ci/baseline/${KIT_SHORTNAME}
 header "Deploying BASELINE environment to verify functionality..."
 cd dev
 # make sure hooks are executable before screaming at shipit for failing.
-pwd
 genesis compile-kit --name ${KIT_SHORTNAME} -v 9.9.9 --force
 cd ..
 genesis add-secrets ci-baseline
