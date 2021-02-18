@@ -1,0 +1,13 @@
+---
+kit:
+  name:    dev
+  features:
+    - small-footprint
+    - no-tls
+    - prometheus
+
+genesis:
+  env:         small-footprint-prometheus
+
+params:
+  external_domain: concourse.testing.examle

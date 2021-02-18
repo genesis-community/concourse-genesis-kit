@@ -5,6 +5,6 @@ if ! want_feature "external-db" ; then
   echo "+internal-db"
 fi
 
-if want_feature "full" ; then
+if want_feature "full" || want_feature "small-footprint"  ; then
   echo "+locker"
 fi

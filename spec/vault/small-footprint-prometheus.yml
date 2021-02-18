@@ -1,0 +1,28 @@
+secret/small/footprint/prometheus/concourse/atc/token_signing_key:
+  private: <!{meta.vault}/atc/token_signing_key:private!>
+  public: <!{meta.vault}/atc/token_signing_key:public!>
+secret/small/footprint/prometheus/concourse/database/atc:
+  password: <!{meta.vault}/database/atc:password!>
+secret/small/footprint/prometheus/concourse/locker/api:
+  password: <!{meta.vault}/locker/api:password!>
+secret/small/footprint/prometheus/concourse/locker/ca:
+  certificate: <!{meta.vault}/locker/ca:certificate!>
+  combined: <!{meta.vault}/locker/ca:combined!>
+  crl: <!{meta.vault}/locker/ca:crl!>
+  key: <!{meta.vault}/locker/ca:key!>
+  serial: <!{meta.vault}/locker/ca:serial!>
+secret/small/footprint/prometheus/concourse/locker/server:
+  certificate: <!{meta.vault}/locker/server:certificate!>
+  combined: <!{meta.vault}/locker/server:combined!>
+  key: <!{meta.vault}/locker/server:key!>
+secret/small/footprint/prometheus/concourse/tsa/host_key:
+  fingerprint: <!{meta.vault}/tsa/host_key:fingerprint!>
+  private: <!{meta.vault}/tsa/host_key:private!>
+  public: <!{meta.vault}/tsa/host_key:public!>
+secret/small/footprint/prometheus/concourse/tsa/worker_key:
+  fingerprint: <!{meta.vault}/tsa/worker_key:fingerprint!>
+  private: <!{meta.vault}/tsa/worker_key:private!>
+  public: <!{meta.vault}/tsa/worker_key:public!>
+secret/small/footprint/prometheus/concourse/webui:
+  password: <!{meta.vault}/webui:password!>
+  password-bcrypt: <!{meta.vault}/webui:password-bcrypt!>

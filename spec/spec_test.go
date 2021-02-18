@@ -32,6 +32,11 @@ var _ = Describe("Concourse Kit", func() {
 			CloudConfig: "aws",
 			CPI:         "aws",
 		})
+		Test(Environment{
+			Name:        "small-footprint-prometheus",
+			CloudConfig: "aws",
+			CPI:         "aws",
+		})
 	})
 
 	Describe("full", func() {
