@@ -127,7 +127,7 @@ if want_feature "full" || want_feature "small-footprint"; then
   fi
 
   [[ "$(lookup params.max_builds_to_retain "0")" -gt 0 ]] && 
-    manifests+=("manifests/addons/maximum-builds-retention.yml");
+    merge+=("manifests/addons/maximum-builds-retention.yml");
 
 elif want_feature "workers" ; then
   merge+=( "manifests/concourse/workers.yml" )
