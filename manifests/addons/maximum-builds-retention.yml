@@ -1,0 +1,6 @@
+meta:
+  jobs:
+    web:
+      properties:
+        build_log_retention:
+          maximum_builds: (( grab params.max_builds_to_retain ))
