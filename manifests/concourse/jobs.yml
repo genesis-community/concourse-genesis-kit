@@ -63,6 +63,7 @@ meta:
     worker:
       release: concourse
       properties:
+        runtime:         (( grab params.container_runtime || "containerd" ))
         http_proxy_url:  (( grab params.http_proxy  || "" ))
         https_proxy_url: (( grab params.https_proxy || "" ))
         no_proxy:        (( grab params.no_proxy    || meta.default.no_proxy ))

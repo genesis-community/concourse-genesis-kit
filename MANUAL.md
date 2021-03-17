@@ -10,6 +10,12 @@ satellite sites.
 - `volume_driver` - The garden/runc volume driver to use.  Defaults to
   `detect`, which is usually what you want, unless you know otherwise.
 
+- `max_builds_to_retain` - If set, then any jobs will only keep up to their
+  last n logs, with older ones being reaped from the database.
+
+- `container_runtime` - The container backend to use on worker nodes. Defaults
+  to `containerd`. Can also be set to `guardian` or `houdini`.
+
 ## Sizing and Deployment Parameters
 
 - `concourse_network` - The name of the network you wish to use as specified
