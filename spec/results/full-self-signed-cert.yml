@@ -26,6 +26,7 @@ instance_groups:
       no_proxy:
       - localhost
       - 127.0.0.1
+      runtime: containerd
       worker_gateway:
         worker_key:
           private_key: <!{meta.vault}/tsa/worker_key:private!>
