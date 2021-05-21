@@ -2,6 +2,6 @@
   path: /releases?/name=haproxy?
   value:
     name: haproxy
-    version: 10.3.0
-    url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=10.3.0
-    sha1: 44e9471db6365459903b6d745bd9451c25c0d589
+    version: 10.6.0
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=10.6.0
+    sha1: 79a57d1711c73733f9d5d14ece95db338bbcd618
