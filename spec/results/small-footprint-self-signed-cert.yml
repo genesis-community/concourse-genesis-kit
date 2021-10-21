@@ -1,5 +1,6 @@
 exodus:
   atc_ca_cert: <!{meta.vault}/ssl/ca:certificate!>
+  bosh: small-footprint-self-signed-cert
   external_url: https://concourse.testing.examle
   mode: small-footprint
   password: <!{meta.vault}/webui:password!>
