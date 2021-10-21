@@ -1,6 +1,6 @@
 ---
 kit:
-  subkits:
+  features:
     - full
     - self-signed-cert
 
