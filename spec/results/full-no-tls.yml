@@ -1,4 +1,5 @@
 exodus:
+  bosh: full-no-tls
   external_url: https://concourse.testing.examle
   mode: full
   password: <!{meta.vault}/webui:password!>

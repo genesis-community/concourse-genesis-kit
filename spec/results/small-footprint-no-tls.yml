@@ -1,4 +1,5 @@
 exodus:
+  bosh: small-footprint-no-tls
   external_url: https://concourse.testing.examle
   mode: small-footprint
   password: <!{meta.vault}/webui:password!>
