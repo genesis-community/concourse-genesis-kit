@@ -4,4 +4,4 @@
     name:    slack-notification-resource
     version: 9
     sha1:    a64c65d1f23ea089746e698f29dbe522dd716c1b
-    url:     https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9  
+    url:     https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9

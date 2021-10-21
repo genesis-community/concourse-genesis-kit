@@ -1,3 +1,5 @@
 ---
 exodus:
   self-signed: true
+  atc_ca_cert:            (( vault meta.vault "/ssl/ca:certificate" ))
+
