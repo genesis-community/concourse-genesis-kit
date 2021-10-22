@@ -6,7 +6,7 @@ kit:
 
 genesis:
   env:      ci-baseline
-  bosh_env: genesis-ci
+  bosh_env: snw-genesis-ci
 
 params:
   concourse_vm_type: large
