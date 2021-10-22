@@ -68,8 +68,9 @@ EXPOSE=expose
 if [[ ${EXPOSED} == "false" ]]; then
   EXPOSE=hide
 fi
+fly="${1:-fly}"
 
 set +x
-fly --target ${TARGET} set-pipeline       --pipeline ${PIPELINE} --config .deploy.yml
-fly --target ${TARGET} unpause-pipeline   --pipeline ${PIPELINE}
-fly --target ${TARGET} ${EXPOSE}-pipeline --pipeline ${PIPELINE}
+"$fly" --target ${TARGET} set-pipeline       --pipeline ${PIPELINE} --config .deploy.yml
+"$fly" --target ${TARGET} unpause-pipeline   --pipeline ${PIPELINE}
+"$fly" --target ${TARGET} ${EXPOSE}-pipeline --pipeline ${PIPELINE}
