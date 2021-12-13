@@ -12,7 +12,7 @@ params:
   workers:               3
   num_web_nodes:         1
 
-  stemcell_os:      ubuntu-xenial
+  stemcell_os:      ubuntu-bionic
   stemcell_version: latest
 
   volume_driver: detect
