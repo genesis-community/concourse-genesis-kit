@@ -1,5 +1,7 @@
 exodus:
+  bosh: small-footprint-no-tls
   external_url: https://concourse.testing.examle
+  is_director: false
   mode: small-footprint
   password: <!{meta.vault}/webui:password!>
   tsa_host: 10.99.0.16
@@ -7,6 +9,7 @@ exodus:
   tsa_port: 2222
   tsa_worker_private_key: <!{meta.vault}/tsa/worker_key:private!>
   tsa_worker_public_key: <!{meta.vault}/tsa/worker_key:public!>
+  use_create_env: false
   username: concourse
 instance_groups:
 - azs:
