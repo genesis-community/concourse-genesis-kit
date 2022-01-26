@@ -28,11 +28,12 @@ kit_type= # Assigned below
 prompt_for kit_type "select" \
   "Is this a full Concourse deployment, or a worker deployment for an existing Concourse?" \
   -o "[full]     Full Concourse" \
+  -o "[small-footprint]     Small Footprint Concourse" \
   -o "[workers]  Satellite Concourse"
 
 features+=( "$kit_type" )
 
-if [[ "$kit_type" == "full" ]] ; then
+if [[ "$kit_type" == "full" || "$kit_type" == "small-footprint" ]] ; then
 
   auth_backend_feature=
   prompt_for auth_backend_feature "select" \
