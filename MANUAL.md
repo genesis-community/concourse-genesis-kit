@@ -50,7 +50,7 @@ satellite sites.
   config.  Defaults to `z1`, `z2`, and `z3`.
 
 - `stemcell_os` - The operating system you want to deploy Concourse on.
-  This defaults to `ubuntu-xenial`.
+  This defaults to `ubuntu-bionic`.
 
 - `stemcell_version` - The version of the stemcell to deploy.
   Defaults to `latest`, which is usually what you want.
