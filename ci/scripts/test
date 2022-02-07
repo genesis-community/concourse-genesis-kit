@@ -28,6 +28,9 @@ header "Cleaning up from any previous deployments (if necessary)..."
 cleanup ci-baseline-${KIT_SHORTNAME}
 safe rm -rf secret/ci/baseline/${KIT_SHORTNAME}
 
+header "cleaning up from any failed vault runs...."
+pkill -f "vault server"
+
 header "Deploying BASELINE environment to verify functionality..."
 cd dev
 # make sure hooks are executable before screaming at shipit for failing.
