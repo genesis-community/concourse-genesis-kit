@@ -176,7 +176,7 @@ login() {
   if has_target ; then
     fly -t "$host_env" login --username="$host_user" --password="$host_pw" $insecure
   else
-    fly -t "$host_env" login --username="$host_user" --password="$host_pw" --concourse-url "$(get_host_param external_url)" $insecure 
+    fly -t "$host_env" login --username="$host_user" --password="$host_pw" --concourse-url "$(get_host_param external_url)" $insecure
   fi
   rc="$?"
   [[ $rc -gt 0 ]] && describe >&2 \
@@ -197,7 +197,7 @@ matching_mount() {
   while read -r ver mount ; do
     tail="${path#$mount}"
     [[ -n "${GENESIS_TRACE:-${GENESIS_DEBUG:-""}}" ]] && echo >&2 "DEBUG> mount: $mount; ver: $ver; tail: '$tail'"
-    if [[ $tail != "$path" ]] ; then 
+    if [[ $tail != "$path" ]] ; then
       echo "$mount"; echo "$tail"; echo "$ver"
       return
     fi
@@ -207,101 +207,224 @@ matching_mount() {
 
 setup_approle() {
 
-  echo "  - Checking Exodus data availability..."
-  if ! safe exists "$GENESIS_EXODUS_BASE" ; then
-    error "#R{[ERROR]} Cannot find exodus data for #C{$GENESIS_ENVIRONMENT}.  Please redeploy" \
-          "        before using addons."
-  fi
+  describe "$(cat <<'EOF'
 
-  echo "  - Ensuring Vault AppRole is enabled..."
+This will setup up the app roles and policies for concourse and
+genesis-pipelines.  The concourse app role will provide concourse access to a
+vault location (usually `/concourse`) for interpolating secrets in pipelines.
+The genesis-pipelines app role is used to allow the Genesis pipelines to access
+vault for reading deployment secrets and writing exodus data.
+
+EOF
+)"
+
+  declare -a roles
+  echo -n $'\n'"Ensuring Vault AppRole is enabled..."
   # If AppRole is already enabled in this Vault, it'll return a 400 error with "path already in use". This is OK.
-  if [[ ! $(safe vault auth enable approle 2>&1) =~ (Success\! Enabled approle auth method)|(path is already in use) ]] ; then
-    echo "Failed to enable AppRole on your targeted Vault. Womp womp :("
-    exit 1
-  fi
-
-  describe "  - Generating policy for #C{genesis-pipelines} app role..."
-  policy="$(
-    echo "# Allow the pipelines to read all items within Vault, and write to secret/exodus (for genesis exodus data)"
-    echo
-
-    { IFS= read -r sec_mnt && IFS= read -r sec_path && IFS= read -r ver; } < <(matching_mount "$GENESIS_SECRETS_MOUNT")
-    if [[ -z "$sec_mnt" ]] ; then
-      error "#R{[ERROR]} Cannot find mount for secrets path of '$GENESIS_SECRETS_MOUNT'"
-    fi
-    if [[ "$ver" == "2" && -n "$sec_path" ]] ; then
-      cat <<EOF
-path "${sec_mnt}data/${sec_path%/}/*" {
-  capabilities = ["read", "list"]
-}
-path "${sec_mnt}metadata/${sec_path%/}/*" {
-  capabilities = ["read", "list"]
-}
-
-EOF
-
+  result="$(safe vault auth enable approle 2>&1 || true)"
+  if [[ "$result" =~ (Success\! Enabled approle auth method) ]] ; then
+    describe "#G{[ok - successfully enabled approle]}"
+  elif [[ "$result" =~ (path is already in use) ]] ; then
+    describe "#G{[ok - approle already enabled]}"
+    echo -n "Checking for existing roles..."
+    if result="$( safe ls auth/approle/role -1 )" ; then
+      roles=(); while IFS= read -r role; do [[ -z "$role" ]] || roles+=( "$role" ); done <<<"$result"
+      describe "#G{[ok - ${#roles[@]} role(s) found]}"
     else
-      cat <<EOF
-path "${GENESIS_SECRETS_MOUNT%/}/*" {
-  capabilities = ["read", "list"]
-}
+      bail "#R{[error]}" "Could not read existing roles..." ""
+    fi
+  else
+    bail "#R{[error]}" "Failed to enable app role on your targeted Vault:" "$result" ""
+  fi
 
-EOF
+  approle='concourse'
+  create=''
+  prompt_for create boolean -i --default true\
+    "Do you want to install the #C{$approle} app role?"
+
+  if [[ "$create" == 'true' ]] ; then
+    # TODO: read the configuration values from env file?  Also new wizard asks
+    #       for these values to put in env file...
+    # The quotes around "|$approle|" are not an error - they are required
+    if [[ ${#roles[@]} -gt 0 && "$(IFS='|'; echo "|${roles[*]}|")" =~ "|$approle|" ]] ; then
+      echo -n "$(describe "" "#y{[WARNING]} App role #C{$approle} already exists.  This action will overwrite it...")"
+      prompt_for 'continue' boolean -i "Continue?" --default false
+      [[ $continue == true ]] || bail "Aborted"
     fi
 
-    { IFS= read -r exo_mnt && IFS= read -r exo_path && IFS= read -r ver; } < <(matching_mount "$GENESIS_EXODUS_MOUNT")
-    if [[ -z "$exo_mnt" ]] ; then
-      error "#R{[ERROR]} Cannot find mount for exodus path of '$GENESIS_EXODUS_MOUNT'"
-    fi
-    if [[ "$ver" == "2" && -n "$exo_path" ]] ; then
-      cat <<EOF
-path "${exo_mnt}data/${exo_path%/}/*" {
-  capabilities = ["create", "read", "update", "list", "delete"]
-}
-path "${exo_mnt}metadata/${exo_path%/}/*" {
-  capabilities = ["create", "read", "update", "list", "delete"]
-}
-EOF
+    # Build or verify concourse mount point
+    concourse_mount=
+    prompt_for concourse_mount line -i --default 'concourse' \
+      -V '/^[a-z0-9]*$/' \
+      'Mount to use for concourse secrets'
 
+    concourse_approle_path="${GENESIS_SECRETS_BASE%/}/approle/concourse"
+    prompt_for concourse_approle_path line -i --default "$concourse_approle_path" \
+      "Vault path for storing concourse app role credentials"
+
+    mount_type="$( \
+      safe vault secrets list -detailed \
+      | grep "^${concourse_mount}/" \
+      | sed -e 's/map\[version:\([12]\)\]/v\1/' \
+      | awk '{print $2 "_" $10}')"
+
+    if [[ -z "$mount_type" ]] ; then
+      kv_version=''
+      prompt_for kv_version 'select' '' --default 2 \
+        "Mount ${concourse_mount} does not exist.  It must be a v1 or v2 kv store." \
+        -o '[1] Create a kv v1 secrets store' \
+        -o '[2] Create a kv v2 secrets store'
+
+      echo -n "$(describe "Creating mount #C{${concourse_mount} (kv v$kv_version)...")"
+      if [[ -n "$kv_version" ]] ; then
+        desc="endpoint used for interpolating concourse pipeline secrets"
+        if ! safe vault secrets enable kv -path "${concourse_mount}" -version "${kv_version}" -description "${desc}" ; then
+          bail "#R{[error]}" "Failed to create mount ${concourse_mount} -- please resolve and try again" ""
+        fi
+      fi
+      describe "#G[ok]"
+      mount_type="kv_v{$kv_version}"
     else
-      cat <<EOF
-path "${GENESIS_EXODUS_MOUNT%/}/*" {
-  capabilities = ["create", "read", "update", "list", "delete"]
-}
-EOF
-
+      echo -n "$(describe "Found existing mount #C{${concourse_mount}} - validating...")"
+      if [[ "$mount_type" =~ ^kv_v[12]$ ]] ; then
+        describe "#G{[ok - ${mount_type}]}"
+      else
+        bail "#R{[error - invalid type]}" "Found a ${mount_type} at mount ${concourse_mount} -- Cannot use this as a concourse secrets store (must be kv v1 or v2)" ""
+      fi
     fi
-  )"
-  if ! safe --quiet vault policy write genesis-pipelines - <<< "$policy" >/dev/null 2>&1 ; then
-    bail "#R{[ERROR] Failed to create 'genesis-pipelines' policy."
+
+    # Build concourse policy
+    echo -n "$(describe "Creating #C{concourse} policy...")"
+    policy="$(
+      echo "# List, create, update, and delete key/value secrets for Concourse"
+      capabilities=$'" {\n  capabilities = ["create", "read", "update", "delete", "list", "sudo"]\n}'
+      if [[ "$mount_type" == "kv_v1" ]] ; then
+        echo 'path "'"${concourse_mount}/* $capabilities"
+      else
+        echo 'path "'"${concourse_mount}/data/* $capabilities"
+        echo 'path "'"${concourse_mount}/metadata/* $capabilities"
+      fi
+    )"
+    if ! safe --quiet vault policy write concourse - <<< "$policy" >/dev/null 2>&1 ; then
+      bail "#R{[error]}" "Failed to save #C{concourse} policy."
+    fi
+    describe "#G{[ok]}"
+    describe "#wui{Policy for $approle}" "#K{$policy}" ""
+
+    # Create app role
+    echo -n "$(describe "Creating and configuring app role #C{$approle}...")"
+    safe --quiet vault delete "auth/approle/role/$approle" >/dev/null 2>&1
+    if ! safe --quiet set auth/approle/role/$approle \
+      secret_id_ttl=0 \
+      token_num_uses=0 \
+      token_period=3600 \
+      token_ttl=3600 \
+      token_max_ttl=0 \
+      secret_id_num_uses=0 \
+      policies=concourse ; then
+      bail "#R{[error]}" "Failed to create #C{$approle} approle."
+    fi
+    describe "#G{[ok]}"
+
+    echo -n "Generating and storing authentication credentials..."
+    role_id=$(safe get auth/approle/role/$approle/role-id:role_id)
+    # generate a secret key for the newly minted role
+    approle_secret=$(safe vault write -field=secret_id -f auth/approle/role/$approle/secret-id)
+
+    # write info to vault
+    safe --quiet set "${concourse_approle_path}" approle-id="$role_id"
+    safe --quiet set "${concourse_approle_path}" approle-secret="$approle_secret"
+    describe "#G{[ok]}" "Access credentials written to #M{$concourse_approle_path}"
+
+    describe "" "#G{[DONE]} App role #C{$approle} created."
+  fi # Create oncourse mount
+
+  approle="genesis-pipeline"
+  prompt_for create boolean -i --default true\
+    "Do you want to install the #C{$approle} app role?"
+
+  if [[ "$create" == 'true' ]] ; then
+    # TODO: read the configuration values from env file?  Also new wizard asks
+    #       for these values to put in env file...
+    # The quotes around "|$approle|" are not an error - they are required
+    if [[ ${#roles[@]} -gt 0 && "$(IFS='|'; echo "|${roles[*]}|")" =~ "|$approle|" ]] ; then
+      echo -n "$(describe "" "#y{[WARNING]} App role #C{$approle} already exists.  This action will overwrite it...")"
+      prompt_for 'continue' boolean -i "Continue?" --default false
+      [[ $continue == true ]] || bail "Aborted"
+    fi
+
+    echo -n "Checking Exodus data availability..."
+    if ! safe exists "$GENESIS_EXODUS_BASE" ; then
+      bail "#R{[error]}" "Cannot find exodus data for #C{$GENESIS_ENVIRONMENT}.  Please redeploy " \
+           "before using addons."
+    fi
+    describe "#G{[ok]}"
+
+    echo -n "$(describe "Generating policy for #C{$approle} app role...")"
+    policy="$(
+      echo "# Allow the pipelines to read all items within Vault, and write to secret/exodus (for genesis exodus data)"
+      echo
+
+      { IFS= read -r sec_mnt && IFS= read -r sec_path && IFS= read -r ver; } < <(matching_mount "$GENESIS_SECRETS_MOUNT")
+      if [[ -z "$sec_mnt" ]] ; then
+        bail "#R{[error]}" "Cannot find mount for secrets path of '$GENESIS_SECRETS_MOUNT'"
+      fi
+      capabilities=$'" {\n  capabilities = ["read", "list"]\n}'
+      if [[ "$ver" == "2" && -n "$sec_path" ]] ; then
+        echo 'path "'"${sec_mnt}data/${sec_path%/}/* $capabilities"
+        echo 'path "'"${sec_mnt}metadata/${sec_path%/}/* $capabilities"
+      else
+        echo 'path "'"${GENESIS_SECRETS_MOUNT%/}/* $capabilities"
+      fi
+
+      { IFS= read -r exo_mnt && IFS= read -r exo_path && IFS= read -r ver; } < <(matching_mount "$GENESIS_EXODUS_MOUNT")
+      if [[ -z "$exo_mnt" ]] ; then
+        bail "#R{[error]}" "Cannot find mount for exodus path of '$GENESIS_EXODUS_MOUNT'"
+      fi
+      capabilities=$'" {\n  capabilities = ["create", "read", "update", "list", "delete"]\n}'
+      if [[ "$ver" == "2" && -n "$exo_path" ]] ; then
+        echo 'path "'"${exo_mnt}data/${exo_path%/}/* $capabilities"
+        echo 'path "'"${exo_mnt}metadata/${exo_path%/}/* $capabilities"
+      else
+        echo 'path "'"${GENESIS_EXODUS_MOUNT%/}/* $capabilities"
+      fi
+    )"
+
+    if ! safe --quiet vault policy write "$approle" - <<< "$policy" >/dev/null 2>&1 ; then
+      bail "#R{[error]}" "Failed to create #C{$approle} policy."
+    fi
+    describe "#G{[ok]}"
+    describe "#wui{Policy for $approle}" "#K{$policy}" ""
+
+
+    # Create AppRole Role named "genesis-pipeline" with the following parameters:
+    # - 90 minute TTL (Some BOSH deployments could take awhile, and then the Exodus write-back could fail if TTL is too short)
+    # - unlimited token use
+    echo -n "$(describe "Creating and configuring app role #C{$approle}...")"
+    safe --quiet vault delete "auth/approle/role/$approle" >/dev/null 2>&1
+    if ! safe --quiet set "auth/approle/role/$approle" \
+      secret_id_ttl=0 \
+      token_num_uses=0 \
+      token_ttl=60m \
+      token_max_ttl=60m \
+      secret_id_num_uses=0 \
+      policies="default,$approle" ; then
+      bail "#R{[error]}" "Failed to create #C{$approle} approle."
+    fi
+    describe "#G{[ok]}"
+
+    echo -n "Writing access credentials to Exodus..."
+    role_id=$(safe get auth/approle/role/$approle/role-id:role_id)
+    # generate a secret key for the newly minted role
+    approle_secret=$(safe vault write -field=secret_id -f auth/approle/role/$approle/secret-id)
+
+    # write info to exodus
+    safe --quiet set "${GENESIS_EXODUS_MOUNT}ci/$approle" approle-id="$role_id"
+    safe --quiet set "${GENESIS_EXODUS_MOUNT}ci/$approle" approle-secret="$approle_secret"
+    describe "#G{[ok]}" "Access credentials written to #M{${GENESIS_EXODUS_MOUNT}ci/$approle}"
+
+    describe "" "#G{[DONE]} App role #C{$approle} created." ""
   fi
-
-
-  # Create AppRole Role named "genesis-pipelines" with the following parameters:
-  # - 90 minute TTL (Some BOSH deployments could take awhile, and then the Exodus write-back could fail if TTL is too short)
-  # - unlimited token use
-  describe "  - Creating and configuring app role #C{genesis-pipelines}..."
-  safe --quiet vault delete auth/approle/role/genesis-pipelines >/dev/null 2>&1
-  if ! safe --quiet set auth/approle/role/genesis-pipelines \
-    secret_id_ttl=0 \
-    token_num_uses=0 \
-    token_ttl=90m \
-    token_max_ttl=90m \
-    secret_id_num_uses=0 \
-    policies=default,genesis-pipelines ; then
-    bail "#R{[ERROR] Failed to create 'genesis-pipelines' approle."
-  fi
-
-  role_id=$(safe get auth/approle/role/genesis-pipelines/role-id:role_id)
-  # generate a secret key for the newly minted role
-  approle_secret=$(safe vault write -field=secret_id -f auth/approle/role/genesis-pipelines/secret-id)
-
-  # write info to exodus
-  describe "  - Writing access credentials to Exodus..."
-  safe --quiet set "${GENESIS_EXODUS_MOUNT}ci/genesis-pipelines" approle-id="$role_id"
-  safe --quiet set "${GENESIS_EXODUS_MOUNT}ci/genesis-pipelines" approle-secret="$approle_secret"
-
-  describe "" "#G{AppRole created.}" ""
   exit 0
 }
 
@@ -330,10 +453,10 @@ login)
   ;;
 
 logout)
-  echo 
+  echo
   if ! has_target ; then
     describe "No target set for #C{'$host_env'}"
-  elif ! is_logged_in ; then 
+  elif ! is_logged_in ; then
     describe "Not logged in to target #C{'$host_env'}"
   else
     fly -t "$host_env" logout
