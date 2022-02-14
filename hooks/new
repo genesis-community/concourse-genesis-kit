@@ -159,6 +159,14 @@ if [[ "$kit_type" == "full" || "$kit_type" == "small-footprint" ]] ; then
   prompt_for external_domain line "External Domain or IP:" -i
   param_entry params external_domain
 
+  describe "" \
+    "The main target is the name that will be used by fly to connect to the main" \
+    "team. This defaults to the name of the environment, but can be given a short-" \
+    "hand name for convenience.  Team-based targets will be the name of the team," \
+    "followed by @<main-target->"
+  prompt_for main_target line "Master target name" -i --default "$name"
+  [[ $main_target == $name ]] ||  param_entry params main_target
+
 else
   describe "" \
     "A worker-only Concourse deployment requires an existing full host Concourse" \

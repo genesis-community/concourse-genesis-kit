@@ -14,6 +14,7 @@ exodus:
   tsa_host_public_key:    (( vault meta.vault "/tsa/host_key:public" ))
   tsa_worker_public_key:  (( vault meta.vault "/tsa/worker_key:public" ))
   tsa_worker_private_key: (( vault meta.vault "/tsa/worker_key:private" ))
+  main_target:            (( grab params.main_target || genesis.env ))
   mode:                   "full"
 
 params:

@@ -159,7 +159,7 @@ has_target() {
 
 is_logged_in() {
   needs_fly
-  fly -t "$host_env" status >/dev/null 2>&1
+  fly -t "$main_target" status >/dev/null 2>&1
   return $?
 }
 
@@ -174,9 +174,9 @@ login() {
   insecure=""
   [[ "$(get_host_param self-signed no)" == "1" ]] && insecure="-k"
   if has_target ; then
-    fly -t "$host_env" login --username="$host_user" --password="$host_pw" $insecure
+    fly -t "$main_target" login --username="$host_user" --password="$host_pw" $insecure
   else
-    fly -t "$host_env" login --username="$host_user" --password="$host_pw" --concourse-url "$(get_host_param external_url)" $insecure
+    fly -t "$main_target" login --username="$host_user" --password="$host_pw" --concourse-url "$(get_host_param external_url)" $insecure
   fi
   rc="$?"
   [[ $rc -gt 0 ]] && describe >&2 \
@@ -437,6 +437,7 @@ if ! safe exists "$GENESIS_EXODUS_BASE" ; then
 fi
 host_env="$(safe get "$GENESIS_EXODUS_BASE:host_env" 2>/dev/null)" || host_env="$GENESIS_ENVIRONMENT"
 exodus_data="$(safe get "${GENESIS_EXODUS_MOUNT}${host_env}/concourse" | spruce json)"
+main_target="$(jq -r '.main_target//"'$GENESIS_ENVIRONMENT'"' <<<"$exodus_data")"
 
 # Process requested addon script
 case $GENESIS_ADDON_SCRIPT in
@@ -459,7 +460,7 @@ logout)
   elif ! is_logged_in ; then
     describe "Not logged in to target #C{'$host_env'}"
   else
-    fly -t "$host_env" logout
+    fly -t "$main_target" logout
   fi
   echo
   ;;
@@ -470,7 +471,7 @@ fly)
     "" \
     "Running fly against #C{$host_env}"\
     ""
-  fly -t "$host_env" "$@"
+  fly -t "$main_target" "$@"
   echo
   exit $?
   ;;
