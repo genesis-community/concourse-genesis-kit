@@ -77,14 +77,7 @@ visit() {
 
 get_target() {
   url="$(get_host_param external_url)" || exit $?
-  fly targets | grep "^${host_env} " || true
-}
-
-needs_fly() {
-  if ! command -v fly > /dev/null ; then
-    error "#R{[ERROR]} Cannot find '#C{fly}' command -- use download-fly addon to download it" \
-          "        to somewhere in your path"
-  fi
+  "$fly" targets | grep "^${host_env} " || true
 }
 
 download_fly() {
@@ -101,7 +94,7 @@ download_fly() {
       "-p") platform="$1"; shift ;;
       "--sync")
         [[ -n "$path" ]]             && error "#R{[ERROR]} Can't specify a path and use --sync option"
-        path="$(command -v fly 2>/dev/null)"
+        path="$(type -P fly 2>/dev/null)"
         sync=1
         [[ $? -gt 0 || -z "$path" ]] && error "#R{[ERROR]} No fly found in path -- cannot use --sync option"
         [[ ! -w "$path" ]]           && error "#R{[ERROR]} No write permission to $path -- cannot use --sync option"
@@ -115,10 +108,10 @@ download_fly() {
     esac
   done
 
-  case "${platform:-$OSTYPE}" in
-    darwin*|mac) platform='darwin' ;;
-    linux*)      platform='linux' ;;
-    cygwin|win*) platform='windows' ;;
+  case "${platform:-"${OSTYPE:-"$(uname -s | tr "[:upper:]" "[:lower:]")"}"}" in
+    darwin*|mac)        platform='darwin' ;;
+    linux*)             platform='linux' ;;
+    mingw*|cygwin|win*) platform='windows' ;;
     *)
       if [[ -n "$platform" ]] ; then
         error "#R{[ERROR]} Unknown platform type '$platform': expecting one of darwin, linux or windows"
@@ -142,8 +135,22 @@ download_fly() {
   exit 0
 }
 
+require_fly() {
+  if [[ -z "$fly" ]] ; then
+    download=
+    prompt_for download boolean "Command #C{fly} not found -- download it?" -i --default true
+    if [[ "$download" == 'true' ]] ; then
+      download_fly
+      fly="./fly"
+    else
+      bail "Cannot continue without #C{fly} command - aborting."
+    fi
+  fi
+  [[ -z "${notified_fly_version:-}" ]] && echo >&2 "Using fly at $(humanize_path "$fly")" && notified_fly_version=1
+}
+
 has_target() {
-  needs_fly
+  require_fly
 
   url="$(get_host_param external_url)" || exit $?
   target="$(get_target)" || exit $?
@@ -158,25 +165,26 @@ has_target() {
 }
 
 is_logged_in() {
-  needs_fly
-  fly -t "$main_target" status >/dev/null 2>&1
+  require_fly
+  "$fly" -t "$main_target" status >/dev/null 2>&1
   return $?
 }
 
 login() {
-  needs_fly
+  require_fly
   host_user="$(get_host_param username)"
+  if [[ "$main_target" != "$host_env"
   describe >&2 \
     "" \
-    "Logging in to Concourse deployment #C{$host_env} as user '$host_user'." \
+    "Logging in to Concourse deployment #C{$host_env} (target: $main_target) as user '$host_user'." \
     ""
   host_pw="$(get_host_param password)"
   insecure=""
   [[ "$(get_host_param self-signed no)" == "1" ]] && insecure="-k"
   if has_target ; then
-    fly -t "$main_target" login --username="$host_user" --password="$host_pw" $insecure
+    "$fly" -t "$main_target" login --username="$host_user" --password="$host_pw" $insecure
   else
-    fly -t "$main_target" login --username="$host_user" --password="$host_pw" --concourse-url "$(get_host_param external_url)" $insecure
+    "$fly" -t "$main_target" login --username="$host_user" --password="$host_pw" --concourse-url "$(get_host_param external_url)" $insecure
   fi
   rc="$?"
   [[ $rc -gt 0 ]] && describe >&2 \
@@ -439,6 +447,17 @@ host_env="$(safe get "$GENESIS_EXODUS_BASE:host_env" 2>/dev/null)" || host_env="
 exodus_data="$(safe get "${GENESIS_EXODUS_MOUNT}${host_env}/concourse" | spruce json)"
 main_target="$(jq -r '.main_target//"'$GENESIS_ENVIRONMENT'"' <<<"$exodus_data")"
 
+fly=
+if [[ -n "${GENESIS_FLY_CMD:-}" ]] ; then
+  fly="$GENESIS_FLY_CMD"
+elif [[ -x ${GENESIS_ROOT}/fly ]] ; then
+  fly="${GENESIS_ROOT}/fly"
+else
+  fly="$(type -P fly)"
+fi
+
+describe >&2 "Using addon script from #C{$GENESIS_KIT_NAME} kit #M{v$GENESIS_KIT_VERSION}"
+
 # Process requested addon script
 case $GENESIS_ADDON_SCRIPT in
 visit)
@@ -460,7 +479,8 @@ logout)
   elif ! is_logged_in ; then
     describe "Not logged in to target #C{'$host_env'}"
   else
-    fly -t "$main_target" logout
+    require_fly
+    "$fly" -t "$main_target" logout
   fi
   echo
   ;;
@@ -471,7 +491,7 @@ fly)
     "" \
     "Running fly against #C{$host_env}"\
     ""
-  fly -t "$main_target" "$@"
+  "$fly" -t "$main_target" "$@"
   echo
   exit $?
   ;;
