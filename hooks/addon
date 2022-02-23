@@ -150,15 +150,21 @@ has_target() {
 
   url="$(get_host_param external_url)" || exit $?
   target="${1:-$main_target}"
+  team="${target#*/}"
+  [[ "$team" == "$target" ]] && team='main'
   found="$("$fly" targets | grep "^${target} " || true)"
 
   [[ -z "$found" ]] && return 1
 
-  target_url="$( echo "$found" | awk '{print $2}')"
-  if [[ "$url" != "$target_url" ]] ; then
-    error "#R{[ERROR]} Target mismatch in URL from expected ($url) and current ($target_url)." \
-          "        Cannot continue."
-  fi
+  target_url="$(echo "$found" | awk '{print $2}')"
+  target_team="$(echo "$found" | awk '{print $3}')"
+  [[ "$url" != "$target_url" ]] && error \
+    "#R{[ERROR]} Target mismatch in URL from expected ($url) and current ($target_url)." \
+    "        Cannot continue."
+  [[ "$team" != "$target_team" ]] && error \
+    "#R{[ERROR]} Target mismatch in team from expected ($team) and current ($target_team)." \
+    "        Cannot continue."
+
   return 0
 }
 
@@ -200,6 +206,7 @@ login() {
 
   cmd=( "$fly" -t "$target" "login" )
   [[ -z $use_local ]] || cmd+=( "--username=$host_user" "--password=$host_pw" )
+  [[ -z "$team" ]] || cmd+=( "-n" "$team" )
   has_target "$target" || cmd+=( "--concourse-url" "$(get_host_param external_url)" )
   [[ "$(get_host_param self-signed no)" == "1" ]] && cmd+=( "-k" )
   "${cmd[@]}"
