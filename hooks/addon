@@ -195,7 +195,7 @@ login() {
   if [[ -z "$team" ]] ; then
     use_local=1
   else
-    target="$team@$target"
+    target="$target/$team"
   fi
 
   cmd=( "$fly" -t "$target" "login" )
@@ -220,7 +220,7 @@ logout() {
   # TODO: Support --all to log out of all teams for the given kit.
   while (( $# )) ; do
     target="$main_target"
-    [[ "$1" == "main" ]] || target="$1@$target"
+    [[ "$1" == "main" ]] || target="$target/$1"
     describe "Logging out of #C{$1} team on #C{$main_target} (#M{$host_env})"
     if ! has_target "$target" ; then
       describe "#R{[E]} No target set for #C{$target}"
