@@ -173,10 +173,13 @@ is_logged_in() {
 login() {
   require_fly
   host_user="$(get_host_param username)"
-  if [[ "$main_target" != "$host_env"
+  target_desc=''
+  if [[ "$main_target" != "$host_env" ]] ; then
+    target_desc=" (target: $main_target)"
+  fi
   describe >&2 \
     "" \
-    "Logging in to Concourse deployment #C{$host_env} (target: $main_target) as user '$host_user'." \
+    "Logging in to Concourse deployment #C{$host_env}${target_desc} as user '$host_user'." \
     ""
   host_pw="$(get_host_param password)"
   insecure=""
@@ -203,7 +206,7 @@ safe_kv_mounts() {
 matching_mount() {
   local path="$1" mount ver;
   while read -r ver mount ; do
-    tail="${path#$mount}"
+    tail="${path#"$mount"}"
     [[ -n "${GENESIS_TRACE:-${GENESIS_DEBUG:-""}}" ]] && echo >&2 "DEBUG> mount: $mount; ver: $ver; tail: '$tail'"
     if [[ $tail != "$path" ]] ; then
       echo "$mount"; echo "$tail"; echo "$ver"
@@ -254,17 +257,19 @@ EOF
     # TODO: read the configuration values from env file?  Also new wizard asks
     #       for these values to put in env file...
     # The quotes around "|$approle|" are not an error - they are required
+    # shellcheck disable=SC2076
     if [[ ${#roles[@]} -gt 0 && "$(IFS='|'; echo "|${roles[*]}|")" =~ "|$approle|" ]] ; then
       echo -n "$(describe "" "#y{[WARNING]} App role #C{$approle} already exists.  This action will overwrite it...")"
+      continue=
       prompt_for 'continue' boolean -i "Continue?" --default false
-      [[ $continue == true ]] || bail "Aborted"
+      [[ "$continue" == true ]] || bail "Aborted"
     fi
 
     # Build or verify concourse mount point
     concourse_mount=
     prompt_for concourse_mount line -i --default 'concourse' \
       -V '/^[a-z0-9]*$/' \
-      'Mount to use for concourse secrets'
+      'Mount to use for concourse secrets '
 
     concourse_approle_path="${GENESIS_SECRETS_BASE%/}/approle/concourse"
     prompt_for concourse_approle_path line -i --default "$concourse_approle_path" \
@@ -356,6 +361,7 @@ EOF
     # TODO: read the configuration values from env file?  Also new wizard asks
     #       for these values to put in env file...
     # The quotes around "|$approle|" are not an error - they are required
+    # shellcheck disable=SC2076
     if [[ ${#roles[@]} -gt 0 && "$(IFS='|'; echo "|${roles[*]}|")" =~ "|$approle|" ]] ; then
       echo -n "$(describe "" "#y{[WARNING]} App role #C{$approle} already exists.  This action will overwrite it...")"
       prompt_for 'continue' boolean -i "Continue?" --default false
@@ -446,7 +452,7 @@ if ! safe exists "$GENESIS_EXODUS_BASE" ; then
 fi
 host_env="$(safe get "$GENESIS_EXODUS_BASE:host_env" 2>/dev/null)" || host_env="$GENESIS_ENVIRONMENT"
 exodus_data="$(safe get "${GENESIS_EXODUS_MOUNT}${host_env}/concourse" | spruce json)"
-main_target="$(jq -r '.main_target//"'$GENESIS_ENVIRONMENT'"' <<<"$exodus_data")"
+main_target="$(jq -r --arg default "$GENESIS_ENVIRONMENT" '.main_target//$default' <<<"$exodus_data")"
 
 fly=
 if [[ -n "${GENESIS_FLY_CMD:-}" ]] ; then
