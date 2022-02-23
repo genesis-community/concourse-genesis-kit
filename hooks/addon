@@ -276,6 +276,7 @@ EOF
       | sed -e 's/map\[version:\([12]\)\]/v\1/' \
       | awk '{print $2 "_" $10}')"
 
+    concourse_mount="/${concourse_mount#/}"
     if [[ -z "$mount_type" ]] ; then
       kv_version=''
       prompt_for kv_version 'select' '' --default 2 \
@@ -307,10 +308,10 @@ EOF
       echo "# List, create, update, and delete key/value secrets for Concourse"
       capabilities=$'" {\n  capabilities = ["create", "read", "update", "delete", "list", "sudo"]\n}'
       if [[ "$mount_type" == "kv_v1" ]] ; then
-        echo 'path "'"${concourse_mount}/* $capabilities"
+        echo 'path "'"${concourse_mount%/}/*$capabilities"
       else
-        echo 'path "'"${concourse_mount}/data/* $capabilities"
-        echo 'path "'"${concourse_mount}/metadata/* $capabilities"
+        echo 'path "'"${concourse_mount%/}/data/*$capabilities"
+        echo 'path "'"${concourse_mount%/}/metadata/*$capabilities"
       fi
     )"
     if ! safe --quiet vault policy write concourse - <<< "$policy" >/dev/null 2>&1 ; then
@@ -379,10 +380,10 @@ EOF
       fi
       capabilities=$'" {\n  capabilities = ["read", "list"]\n}'
       if [[ "$ver" == "2" && -n "$sec_path" ]] ; then
-        echo 'path "'"${sec_mnt}data/${sec_path%/}/* $capabilities"
-        echo 'path "'"${sec_mnt}metadata/${sec_path%/}/* $capabilities"
+        echo 'path "'"${sec_mnt}data/${sec_path%/}/*$capabilities"
+        echo 'path "'"${sec_mnt}metadata/${sec_path%/}/*$capabilities"
       else
-        echo 'path "'"${GENESIS_SECRETS_MOUNT%/}/* $capabilities"
+        echo 'path "'"${GENESIS_SECRETS_MOUNT%/}/*$capabilities"
       fi
 
       { IFS= read -r exo_mnt && IFS= read -r exo_path && IFS= read -r ver; } < <(matching_mount "$GENESIS_EXODUS_MOUNT")
@@ -391,10 +392,10 @@ EOF
       fi
       capabilities=$'" {\n  capabilities = ["create", "read", "update", "list", "delete"]\n}'
       if [[ "$ver" == "2" && -n "$exo_path" ]] ; then
-        echo 'path "'"${exo_mnt}data/${exo_path%/}/* $capabilities"
-        echo 'path "'"${exo_mnt}metadata/${exo_path%/}/* $capabilities"
+        echo 'path "'"${exo_mnt}data/${exo_path%/}/*$capabilities"
+        echo 'path "'"${exo_mnt}metadata/${exo_path%/}/*$capabilities"
       else
-        echo 'path "'"${GENESIS_EXODUS_MOUNT%/}/* $capabilities"
+        echo 'path "'"${GENESIS_EXODUS_MOUNT%/}/*$capabilities"
       fi
     )"
 
