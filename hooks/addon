@@ -75,11 +75,6 @@ visit() {
   open "${host}/teams/main/login"
 }
 
-get_target() {
-  url="$(get_host_param external_url)" || exit $?
-  "$fly" targets | grep "^${host_env} " || true
-}
-
 download_fly() {
   [[ -z "$GENESIS_CALLER_DIR" ]] && error "#R{[ERROR]} Calling scope not found -- internal Genesis error"
   cd "$GENESIS_CALLER_DIR"
@@ -151,12 +146,15 @@ require_fly() {
 
 has_target() {
   require_fly
+  local url target found target_url
 
   url="$(get_host_param external_url)" || exit $?
-  target="$(get_target)" || exit $?
-  [[ $? -gt 0 || -z "$target" ]] && return 1
+  target="${1:-$main_target}"
+  found="$("$fly" targets | grep "^${target} " || true)"
 
-  target_url="$( echo "$target" | awk '{print $2}')"
+  [[ -z "$found" ]] && return 1
+
+  target_url="$( echo "$found" | awk '{print $2}')"
   if [[ "$url" != "$target_url" ]] ; then
     error "#R{[ERROR]} Target mismatch in URL from expected ($url) and current ($target_url)." \
           "        Cannot continue."
@@ -166,7 +164,8 @@ has_target() {
 
 is_logged_in() {
   require_fly
-  "$fly" -t "$main_target" status >/dev/null 2>&1
+  target="${1:-$main_target}"
+  "$fly" -t "$target" status >/dev/null 2>&1
   return $?
 }
 
@@ -182,17 +181,57 @@ login() {
     "Logging in to Concourse deployment #C{$host_env}${target_desc} as user '$host_user'." \
     ""
   host_pw="$(get_host_param password)"
-  insecure=""
-  [[ "$(get_host_param self-signed no)" == "1" ]] && insecure="-k"
-  if has_target ; then
-    "$fly" -t "$main_target" login --username="$host_user" --password="$host_pw" $insecure
+  target="$main_target"
+  team=''
+  use_local=''
+  while (( "$#" )) ; do
+    case $1 in
+      --local) use_local=1 ;;
+      -*) bail "Invalid option $1.  Expect --local and/or team name" ;;
+      *) [[ -n "$team" ]] && bail "Cannot only specify one team"; team=$1;;
+    esac
+    shift
+  done
+  if [[ -z "$team" ]] ; then
+    use_local=1
   else
-    "$fly" -t "$main_target" login --username="$host_user" --password="$host_pw" --concourse-url "$(get_host_param external_url)" $insecure
+    target="$team@$target"
   fi
+
+  cmd=( "$fly" -t "$target" "login" )
+  [[ -z $use_local ]] || cmd+=( "--username=$host_user" "--password=$host_pw" )
+  has_target "$target" || cmd+=( "--concourse-url" "$(get_host_param external_url)" )
+  [[ "$(get_host_param self-signed no)" == "1" ]] && cmd+=( "-k" )
+  "${cmd[@]}"
   rc="$?"
   [[ $rc -gt 0 ]] && describe >&2 \
     "#R{[ERROR]} Failed to log in!"
   return $rc
+}
+
+logout() {
+  require_fly
+  echo
+
+  local target;
+  if (( $# == 0 )) ; then
+    set -- main
+  fi
+  # TODO: Support --all to log out of all teams for the given kit.
+  while (( $# )) ; do
+    target="$main_target"
+    [[ "$1" == "main" ]] || target="$1@$target"
+    describe "Logging out of #C{$1} team on #C{$main_target} (#M{$host_env})"
+    if ! has_target "$target" ; then
+      describe "#R{[E]} No target set for #C{$target}"
+    elif ! is_logged_in "$target" ; then
+      describe "#y{[W]} Target #C{$target} was not logged in"
+    else
+      "$fly" -t "$target" logout
+    fi
+    shift
+  done
+  echo
 }
 
 safe_kv_mounts() {
@@ -476,20 +515,11 @@ download-fly)
   ;;
 
 login)
-  login
+  login "$@"
   ;;
 
 logout)
-  echo
-  if ! has_target ; then
-    describe "No target set for #C{'$host_env'}"
-  elif ! is_logged_in ; then
-    describe "Not logged in to target #C{'$host_env'}"
-  else
-    require_fly
-    "$fly" -t "$main_target" logout
-  fi
-  echo
+  logout "$@"
   ;;
 
 fly)
