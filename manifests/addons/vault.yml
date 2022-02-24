@@ -9,6 +9,7 @@ meta:
       properties:
         vault:
           url: (( grab params.vault_url ))
+          shared_path: (( grab params.vault_shared_path || "shared" ))
           path_prefix: (( grab params.vault_path_prefix || "/concourse" ))
           tls:
             insecure_skip_verify: (( grab params.vault_insecure_skip_verify || false ))
