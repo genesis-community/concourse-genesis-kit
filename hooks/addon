@@ -399,7 +399,7 @@ EOF
     describe "" "#G{[DONE]} App role #C{$approle} created."
   fi # Create oncourse mount
 
-  approle="genesis-pipeline"
+  approle="genesis-pipelines"
   prompt_for create boolean -i --default true\
     "Do you want to install the #C{$approle} app role?"
 
@@ -458,7 +458,7 @@ EOF
     describe "#wui{Policy for $approle}" "#K{$policy}" ""
 
 
-    # Create AppRole Role named "genesis-pipeline" with the following parameters:
+    # Create AppRole Role named "genesis-pipelines" with the following parameters:
     # - 90 minute TTL (Some BOSH deployments could take awhile, and then the Exodus write-back could fail if TTL is too short)
     # - unlimited token use
     echo -n "$(describe "Creating and configuring app role #C{$approle}...")"
