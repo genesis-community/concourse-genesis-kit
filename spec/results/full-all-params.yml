@@ -1,7 +1,6 @@
 exodus:
-  bosh: full-all-params
   external_url: https://concourse.testing.examle
-  is_director: false
+  main_target: full-all-params
   mode: full
   password: <!{meta.vault}/webui:password!>
   shout_admin_password: <!{meta.vault}/shout/admin:password!>
@@ -14,7 +13,6 @@ exodus:
   tsa_port: 2222
   tsa_worker_private_key: <!{meta.vault}/tsa/worker_key:private!>
   tsa_worker_public_key: <!{meta.vault}/tsa/worker_key:public!>
-  use_create_env: false
   username: concourse
 instance_groups:
 - azs:
@@ -188,9 +186,9 @@ instance_groups:
 name: full-all-params-concourse
 releases:
 - name: concourse
-  sha1: 96e8dbb7759a8522e55812221d0173a89492a1b8
-  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.6.0
-  version: 7.6.0
+  sha1: 1a801bcd6fb20d310b05b2bce38b6f15327f4c9a
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.7.0
+  version: 7.7.0
 - name: slack-notification-resource
   sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
