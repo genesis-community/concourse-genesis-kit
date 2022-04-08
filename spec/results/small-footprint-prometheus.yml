@@ -8,6 +8,9 @@ exodus:
   tsa_worker_private_key: <!{meta.vault}/tsa/worker_key:private!>
   tsa_worker_public_key: <!{meta.vault}/tsa/worker_key:public!>
   username: concourse
+  bosh: small-footprint-prometheus
+  is_director: false
+  use_create_env: false
 instance_groups:
 - azs:
   - z1
