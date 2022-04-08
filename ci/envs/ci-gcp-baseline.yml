@@ -1,9 +1,9 @@
 ---
-kit:
-  features:
-    - ((append))
-    - full
-    - self-signed-cert
+# kit:
+#   features:
+#     - ((append))
+#     - full
+#     - self-signed-cert
 
 genesis:
   env:   ci-gcp-baseline
