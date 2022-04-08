@@ -1,0 +1,74 @@
+#!/bin/bash - 
+set -ue
+base_dir="$(cd "$(dirname "$0")/.." && pwd)"
+mkdir -p "${base_dir}/pipeline/upstream/"
+
+_lookup() {
+ echo "${1}" | base64 --decode | jq -r "${2}"
+}
+
+# Read upstream.yml
+update_group=()
+upstream_details="$(spruce json "${base_dir}/settings.yml" | jq -r '.meta.upstream.bosh_releases//[] | .[] | @base64')"
+
+# For each release in upstream.yml,
+for release in $upstream_details ; do
+  name="$(_lookup "$release" .name)"
+  type="$(_lookup "$release" '.type//"bosh-io-release"')"
+  path="$(_lookup "$release" '.path//"manifests/releases/'"$name"'.yml"')"
+  repo="$(_lookup "$release" '.repository')"
+  job="update-${name}-release"
+  release="${name}-release"
+
+  update_group+=( "$job" )
+
+  cat <<EOF >> "$base_dir/pipeline/upstream/update_${name}_release.yml"
+jobs:
+- (( append ))
+- name: $job
+  public: false
+  serial: true
+  serial_groups: [upstream-releases]
+  plan:
+  - do:
+    - in_parallel:
+      - { get: git,    trigger: false, passed: [spec-tests] }
+      - { get: git-ci, trigger: false  }
+      - get: $release
+        trigger: true
+        params:
+          tarball: false
+    - task: $job
+      file: git-ci/ci/tasks/update-release.yml
+      input_mapping: {bosh-release: $release}
+      params:
+        RELEASE_NAME:  $name
+        RELEASE_PATH:  $path
+        BRANCH:        (( grab meta.github.branch ))
+        GIT_EMAIL:     (( grab meta.git.email ))
+        GIT_NAME:      (( grab meta.git.name ))
+    - put: git
+      params:
+        merge: true
+        repository: git
+
+resources:
+  - (( append ))
+  - name: $release
+    type: $type
+    check_every: 24h
+    source:
+      repository: $repo
+EOF
+
+done
+(
+echo "groups:"
+echo "- (( append ))"
+echo "- name: upstream"
+echo "  jobs:"
+for job in "${update_group[@]}" ; do 
+  echo "  - $job"
+done
+) >> "$base_dir/pipeline/upstream/update_group.yml"
+

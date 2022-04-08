@@ -1,0 +1,16 @@
+---
+kit:
+  features:
+    - ((append))
+    - full
+    - self-signed-cert
+
+genesis:
+  env:   ci-gcp-baseline
+
+params:
+  concourse_vm_type: large
+  external_domain:   concourse.example.com
+  num_web_nodes:     1
+
+  availability_zones: [z1]

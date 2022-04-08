@@ -19,6 +19,13 @@ meta:
   url:      (( param "Please specify the full url of the target Concourse CI" ))
   pipeline: (( grab meta.name ))
 
+  upstream:
+    package:  example # dummy value for things that don't use upstream
+    path:     (( grab meta.upstream.package ))
+    org:      cloudfoundry
+    repo:     (( concat meta.upstream.org "/" meta.upstream.package ))
+    url:      (( concat "https://github.com/" meta.upstream.repo ".git" ))
+
   vault:
     url:   (( param "Please provide the address of your Vault" ))
     token: (( param "Please provide a Vault Token" ))
@@ -44,12 +51,12 @@ meta:
     branch:       master
     private_key:  (( param "Please generate an SSH Deployment Key for this repo and specify it here" ))
     access_token: (( param "Please generate a Personal Access Token to be used for creating github releases (do you have a ci-bot?)" ))
-
-  bosh:
-    uri:        (( param "Please specify the Genesis CI BOSH Director URI" ))
-    cacert:     (( param "Please specify the Genesis CI BOSH Director Root CA cert" ))
-    username:   admin
-    password:   (( param "Please specify the Genesis CI BOSH Director admin password" ))
+    release_notes:
+      repo:       "ci-release-notes"
+      branch:     "main"
+      file:       (( concat meta.name "-release-notes.md" ))
+      uri:        (( concat "git@github.com:"  meta.github.owner "/" meta.github.release_notes.repo ))
+      edit:       (( concat "https://github.com/" meta.github.owner "/"  meta.github.release_notes.repo "/edit/"  meta.github.release_notes.branch "/" meta.github.release_notes.file ))
 
   shout:
     topic:    (( concat meta.name "-pipeline" ))
@@ -66,22 +73,29 @@ meta:
       pipeline: (( concat meta.url "/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME" ))
       build:    (( concat meta.shout.links.pipeline "/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME" ))
 
+  task_connectivity_params:
+    GIT_NAME:             (( grab meta.git.name ))
+    GIT_EMAIL:            (( grab meta.git.email ))
+    VAULT_URI:            (( grab meta.vault.url ))
+    VAULT_TOKEN:          (( grab meta.vault.token ))
+    INFRASTRUCTURE:       (( grab meta.iaas ))
+
 groups:
   - name: (( grab meta.pipeline ))
     jobs:
+    - build-kit
     - spec-tests
     - spec-check
-    - testflight
-    - pre
-    - rc
-    - shipit
+    - ship-prerelease
+    - deploy
+    - upgrade
+    - prepare
+    - ship-release
+
   - name: upstream
     jobs:
-    - bpm-release
-    - concourse-release
-    - haproxy-release
-    - postgres-release
-    - slack-notifications-release
+    - upstream-sync
+
   - name: versions
     jobs:
     - major

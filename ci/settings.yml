@@ -1,18 +1,27 @@
 ---
 meta:
-  kit:     concourse
-  release: Concourse Genesis Kit
-  target:  genesis@pipes
-  url:     https://pipes.starkandwayne.com
-  exposed: yes
+  kit:             concourse
+  release:         Concourse Genesis Kit
+  target:          cloudpipes/genesis
+  url:             https://cloudpipes.starkandwayne.com
+  iaas:            gcp
+  exposed:         yes
+  version_file:    version
+  initial_version: 4.1.2
 
-  initial_version: 3.17.1
+  # upstream:
+  #   package:  cf-deployment
 
   bosh:
     uri:      ((bosh.uri))
     username: ((bosh.username))
     password: ((bosh.password))
     cacert:   ((bosh.ca))
+
+  credhub:
+    url:      ((bosh.credhub_url))
+    username: ((bosh.credhub_username))
+    password: ((bosh.credhub_password))
 
   vault:
     url:       ((vault.url))
@@ -25,7 +34,8 @@ meta:
   github:
     owner:        genesis-community
     repo:         concourse-genesis-kit
-    branch:       master
+    branch:       develop
+    main-branch:  main
     private_key:  ((github.private_key))
     access_token: ((github.access_token))
 
