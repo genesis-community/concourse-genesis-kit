@@ -67,7 +67,7 @@ cleanup() {
 		); fi
 	done
 }
-set -x 
+
 # Replace this with genesis lookup --env once its available (2.8.5)
 cat <<'EOF' > get-env.pl
 #!/usr/bin/env perl
@@ -80,7 +80,7 @@ vault_path="$(genesis sh "${DEPLOY_ENV}" -s "$(pwd)/get-env.pl" 2>/dev/null | gr
 exodus_path="$(genesis sh "${DEPLOY_ENV}" -s "$(pwd)/get-env.pl" 2>/dev/null | grep '^{' | jq -r '.GENESIS_EXODUS_BASE')"
 vault_path="${vault_path%/}" # trim any trailing slash
 # -----
-set -x
+
 header "Pre-test Cleanup"
 if [[ "$SKIP_FRESH" == "false" ]]; then
 	echo "Deleting any previous deploy"
