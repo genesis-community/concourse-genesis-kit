@@ -88,7 +88,7 @@ if [[ "$SKIP_FRESH" == "false" ]]; then
 else
 	echo "Skipping cleaning up from any previous deploy"
 fi
-set -x
+
 if [[ -z "$vault_path" ]] ; then
   echo >&2 "Failed to determine vault path.  Cannot continue!"
   exit 2
