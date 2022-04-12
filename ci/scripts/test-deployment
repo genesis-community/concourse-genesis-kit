@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -eux
 
 DEPLOY_ENV=${DEPLOY_ENV:-"ci-baseline"}
 SKIP_FRESH=${SKIP_FRESH:-"false"}
