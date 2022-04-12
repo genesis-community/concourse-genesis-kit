@@ -1,0 +1,4 @@
+sections:
+  - name:  releases
+    label: Releases
+    default: true
