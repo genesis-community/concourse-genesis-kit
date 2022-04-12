@@ -94,7 +94,11 @@ groups:
 
   - name: upstream
     jobs:
-    - upstream-sync
+    - bpm-release
+    - concourse-release
+    - haproxy-release
+    - postgres-release
+    - slack-notifications-release
 
   - name: versions
     jobs:
