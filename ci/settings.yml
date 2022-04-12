@@ -11,7 +11,7 @@ meta:
 
   # upstream:
   #   package:  cf-deployment
-
+  #
   bosh:
     uri:      ((bosh.uri))
     username: ((bosh.username))
