@@ -29,7 +29,7 @@ jobs:
         KIT_SHORTNAME:        (( grab meta.kit ))
         SKIP_FRESH:           true
         SKIP_REPLACE_SECRETS: true
-        SKIP_SMOKE_TESTS:     false
+        SKIP_SMOKE_TESTS:     true
         SKIP_CLEAN:           false
     on_failure:
       put: notify
