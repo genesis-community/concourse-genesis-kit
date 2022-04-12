@@ -5,7 +5,7 @@ meta:
   target:          cloudpipes/genesis
   url:             https://cloudpipes.starkandwayne.com
   iaas:            gcp
-  exposed:         yes
+  exposed:         false
   version_file:    version
   initial_version: 4.1.2
 
