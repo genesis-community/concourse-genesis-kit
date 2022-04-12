@@ -5,7 +5,7 @@ genesis:
 meta:
   _ip_prefix: "10.4."
 
- stemcells:
+stemcells:
  - alias: default
    os: ubuntu-bionic
    version: 1.76
