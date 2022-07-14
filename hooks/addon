@@ -275,7 +275,7 @@ vault for reading deployment secrets and writing exodus data.
 EOF
 )"
 
-  declare -a roles
+  roles=()  
   echo -n $'\n'"Ensuring Vault AppRole is enabled..."
   # If AppRole is already enabled in this Vault, it'll return a 400 error with "path already in use". This is OK.
   result="$(safe vault auth enable approle 2>&1 || true)"
