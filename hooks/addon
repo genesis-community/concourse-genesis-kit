@@ -364,6 +364,8 @@ EOF
         echo 'path "'"${concourse_mount%/}/data/*$capabilities"
         echo 'path "'"${concourse_mount%/}/metadata/*$capabilities"
       fi
+    # Allow crud under secret
+      echo 'path "'"secret/*$capabilities"
     )"
     if ! safe --quiet vault policy write concourse - <<< "$policy" >/dev/null 2>&1 ; then
       bail "#R{[error]}" "Failed to save #C{concourse} policy."
