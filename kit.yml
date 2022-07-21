@@ -41,7 +41,7 @@ credentials:
 
   +internal-db:
     database/atc:
-      password: random 64
+      password: random 64 fixed
 
 provided:
   github-oauth:
