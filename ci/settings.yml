@@ -43,3 +43,17 @@ meta:
     url:      ((shout.url)
     username: ((shout.username))
     password: ((shout.password))
+
+  upstream:
+    bosh_releases:
+    - name:       concourse
+      repository: concourse/concourse-bosh-release
+    - name:       bpm
+      repository: cloudfoundry/bpm-release
+    - name:       haproxy
+      repository: cloudfoundry-incubator/haproxy-boshrelease
+    - name:       postgres
+      repository: cloudfoundry/postgres-release
+    - name:       locker
+      type:       github-release
+      repository: cloudfoundry-community/locker-boshrelease

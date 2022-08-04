@@ -1,4 +1,4 @@
-#!/bin/bash - 
+#!/bin/bash -
 set -ue
 base_dir="$(cd "$(dirname "$0")/.." && pwd)"
 mkdir -p "${base_dir}/pipeline/upstream/"
@@ -14,9 +14,15 @@ upstream_details="$(spruce json "${base_dir}/settings.yml" | jq -r '.meta.upstre
 # For each release in upstream.yml,
 for release in $upstream_details ; do
   name="$(_lookup "$release" .name)"
-  type="$(_lookup "$release" '.type//"bosh-io-release"')"
+  type="$(_lookup "$release" '.type//"bosh-io-release"')" # Other valid value is github-release
   path="$(_lookup "$release" '.path//"manifests/releases/'"$name"'.yml"')"
   repo="$(_lookup "$release" '.repository')"
+  owner=""
+  if [[ $type == "github-release" ]] ; then
+    owner=$'\n'"      owner: ${repo%/*}"
+    repo="${repo##*/}"
+  fi
+
   job="update-${name}-release"
   release="${name}-release"
 
@@ -58,17 +64,21 @@ resources:
     type: $type
     check_every: 24h
     source:
-      repository: $repo
+      repository: $repo$owner
 EOF
 
 done
-(
-echo "groups:"
-echo "- (( append ))"
-echo "- name: upstream"
-echo "  jobs:"
-for job in "${update_group[@]}" ; do 
-  echo "  - $job"
-done
-) >> "$base_dir/pipeline/upstream/update_group.yml"
-
+group_file="$base_dir/pipeline/upstream/update_group.yml"
+if [[ "${#update_group[@]}" -gt 0 ]] ; then
+  (
+  echo "groups:"
+  echo "- (( append ))"
+  echo "- name: upstream"
+  echo "  jobs:"
+  for job in ${update_group[@]+"${update_group[@]}"} ; do
+    echo "  - $job"
+  done
+  ) >> "$group_file"
+elif [[ -f "$group_file" ]] ; then
+  rm -f "$group_file"
+fi

@@ -26,9 +26,13 @@ test -n "${BRANCH:-}"         || bail "BRANCH must be set to the branch to updat
 # Get release details
 pushd bosh-release &> /dev/null
 release_name=$RELEASE_NAME
-release_version=$( cat version )
-url=$( cat url )
-sha1=$( cat sha1 )
+release_version="$( cat version )"
+url="$( cat url )"
+if [[ -f sha1 ]] ; then
+  sha1=$( cat sha1 )
+else
+  sha1="$(curl -sSL "$url" | sha1sum | cut -d' ' -f1)"
+fi
 popd &> /dev/null
 
 # Create ops-file

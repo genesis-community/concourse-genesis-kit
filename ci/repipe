@@ -217,8 +217,8 @@ if (( DRYRUN > 0 )) ; then
   if [ ! -t 1 ] ; then
     pid="$$"
     persistent_file="$(/usr/sbin/lsof -p "$pid" -a -d 1 | tail -n 1 | awk '{print $NF}')"
-    if [[ -n "${persistent_file}" ]] ; then 
-      if [[ "${persistent_file}" =~ '->0x' ]] ; then 
+    if [[ -n "${persistent_file}" ]] ; then
+      if [[ "${persistent_file}" =~ '->0x' ]] ; then
         persistent_file=''
       elif [[ -n "$(type -p realpath || true)" ]] ; then
         persistent_file="$(realpath --relative-to="$call_dir" "$persistent_file")"
