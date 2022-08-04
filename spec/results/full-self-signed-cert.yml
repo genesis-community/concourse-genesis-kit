@@ -162,9 +162,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
   version: 9
 - name: postgres
-  sha1: e44bbe8f8a7cdde1cda67b202e399a239d104db6
-  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=43
-  version: 43
+  sha1: 582b1de9522077102dfa44ff7164cd8f499dbfc8
+  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=44
+  version: 44
 - name: locker
   sha1: ccfcc48d63555a3733c3594d9429a5c1875a9dd2
   url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
