@@ -26,7 +26,7 @@ test -n "${BRANCH:-}"         || bail "BRANCH must be set to the branch to updat
 # Get release details
 pushd bosh-release &> /dev/null
 release_name=$RELEASE_NAME
-release_version="$( cat version )"
+release_version="$( cat version | sed -e 's/^v//i')"
 url="$( cat url )"
 if [[ -f sha1 ]] ; then
   sha1=$( cat sha1 )
