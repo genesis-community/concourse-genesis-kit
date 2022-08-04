@@ -131,6 +131,47 @@ if [[ "$kit_type" == "full" || "$kit_type" == "small-footprint" ]] ; then
       ;;
   esac
 
+  use_external_db=
+  prompt_for use_external_db boolean "Do you want to use an external database?" --default no --inline
+  if ${use_external_db} ; then
+      features+=("external-db")
+      prompt_for external_db_host line "Enter the host of the database using IP or FQDN."
+      param_entry params external_db_host
+      external_db_port=
+      prompt_for external_db_port line "The port that the database is listening on." \
+        --default 5432 \
+        --validation port
+      [[ "$external_db_port" == "5432" ]] || param_entry params external_db_port
+      external_db_name=
+      prompt_for external_db_name line "The name of the database to connect to." --default atc
+      [[ "$external_db_name" == "atc" ]] || param_entry params external_db_name
+      external_db_user=
+      prompt_for external_db_user line "The username used to connect to the database." --default atc
+      [[ "$external_db_user" == "atc" ]] || param_entry params external_db_user
+      prompt_for "database/external:password" secret-line "The password for the '${external_db_user}' database user."
+      external_db_sslmode=
+      prompt_for external_db_sslmode "select" \
+        "The sslmode parameter to connect to the database with." \
+        --default verify-ca \
+        --option "[disable] disable - No security, and no overhead for encryption." \
+        --option "[allow] allow - Only use SSL if the server insists on it." \
+        --option "[prefer] prefer - Use SSL if the server supports it." \
+        --option "[require] require - Use SSL but do not verify the certificate." \
+        --option "[verify-ca] verfiy-ca - Use SSL and verify the CA certificate." \
+        --option "[verify-full] verify-full - Use SLL and verify the certificate chain."
+      [[ "$external_db_sslmode" == "verify-ca" ]] || param_entry params external_db_sslmode
+      if [[ "${external_db_sslmode}" == verify-* ]]; then
+          use_external_db_ca=
+          prompt_for use_external_db_ca boolean "Do you want to provide your own ca certificate for ${external_db_sslmode} mode?" --default no --inline
+          if ${use_external_db_ca} ; then
+            features+=("external-db-ca")
+            prompt_for external_db_ca block "The sslmode ca certificate required for sslmode ${external_db_sslmode}."
+            param_entry params external_db_ca
+            echo # makes output look better
+          fi
+      fi
+  fi
+
   describe "" \
     "Concourse should be protected by TLS, since build logs may contain" \
     "sensitive information (like IPs, usernames, etc.)."
@@ -164,8 +205,9 @@ if [[ "$kit_type" == "full" || "$kit_type" == "small-footprint" ]] ; then
     "team. This defaults to the name of the environment, but can be given a short-" \
     "hand name for convenience.  Team-based targets will be the name of the team," \
     "followed by @<main-target->"
+  main_target=
   prompt_for main_target line "Master target name" -i --default "$name"
-  [[ $main_target == $name ]] ||  param_entry params main_target
+  [[ "$main_target" == "$name" ]] ||  param_entry params main_target
 
 else
   describe "" \

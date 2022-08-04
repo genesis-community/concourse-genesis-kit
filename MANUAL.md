@@ -260,8 +260,15 @@ The following parameters are provided by this feature:
 - `external_db_host` - The hostname of the database to connect to. Required.
 - `external_db_port` - The port that the database is listening on. Defaults to `5432`.
 - `external_db_name` - The name of the database to connect to. Defaults to `atc`.
+- `external_db_user` - The username used to connect to the database. Defaults to `atc`.
 - `external_db_sslmode` - The sslmode parameter to connect to the database with.
    Defaults to `verify-ca`.
+
+There is also a secret in the Vault under the path of "database/external:password"
+under the base path for the deployment environment. This can be set by:
+   1. running the genesis new command
+   1. running the genesis add-secrets or rotate-secrets
+   1. manually add the secret with the safe command.
 
 If you are using the default SSL mode for this feature, then you may need to
 explicitly define the CA cert to verify the database certificate against, instead
