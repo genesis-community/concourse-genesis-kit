@@ -26,17 +26,23 @@ test -n "${BRANCH:-}"         || bail "BRANCH must be set to the branch to updat
 # Get release details
 pushd bosh-release &> /dev/null
 release_name=$RELEASE_NAME
-release_version="$( cat version | sed -e 's/^v//i')"
+release_version="$( cat version )"
 url="$( cat url )"
-if [[ -f sha1 ]] ; then
+if [[ -f sha1 ]] ; then # github-release
   sha1=$( cat sha1 )
 else
-  sha1="$(curl -sSL "$url" | sha1sum | cut -d' ' -f1)"
+  filename="$( compgen -G "$release_name"*"$release_version.tar" \
+            || compgen -G "$release_name"*"$release_version.tgz" \
+            || compgen -G "$release_name"*"$release_version.zip" )"
+  if [[ "$url" =~ https://github.com.*releases/tag/v?$release_version ]] ; then
+    url="${url/\/tag\//\/download\/}/$filename"
+  fi
+  sha1="$( sha1sum "$filename" | cut -d' ' -f1)"
 fi
 popd &> /dev/null
 
 # Create ops-file
-if ! grep -q "version: ${release_version}\$" "${RELEASE_PATH}"; then
+if ! grep -q "version: +${release_version}\$" "${RELEASE_PATH}"; then
 
   cat > "git/${RELEASE_PATH}" <<YML
 releases:
@@ -47,7 +53,7 @@ releases:
 YML
 
   header "Release file changes:"
-  git -C git diff --color=always "${RELEASE_PATH}" | cat
+  git -C git diff -b --color=always "${RELEASE_PATH}" | cat
 
   header "Recreate spec-test results to validate upstream"
   pushd git/spec &> /dev/null
