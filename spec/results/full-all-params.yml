@@ -123,6 +123,7 @@ instance_groups:
             role_id: test-role-id
             secret_id: test-secret
         path_prefix: /concourse
+        shared_path: shared
         tls:
           insecure_skip_verify: false
         url: https://vault.testing.example
