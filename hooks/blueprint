@@ -3,6 +3,7 @@ set -eu
 
 declare -a merge
 merge=( "manifests/concourse/base.yml" )
+
 merge+=( "manifests/releases/concourse.yml"
          "manifests/releases/slack-notifications.yml" )
 merge+=( "manifests/concourse/jobs.yml")
@@ -36,8 +37,6 @@ if [[ $maj_feat != 1 ]]; then
     echo >&2 "Can only have one of 'full', workers', or 'small-footprint' as a feature."
     exit 1
 fi
-
-
 
 if want_feature "full" || want_feature "small-footprint"; then
   if want_feature "full" ; then
@@ -154,6 +153,13 @@ fi
 if want_feature "azure"; then
   echo >&2 "The 'azure' feature is no longer necessary - azure CPI will be detected"
   echo >&2 "automatically at deployment time."
+fi
+
+if want_feature "ocfp"; then
+  merge+=( 
+  "ocfp/ocfp.yml" 
+  "ocfp/external-db.yml" 
+  )
 fi
 
 echo "${merge[@]}"

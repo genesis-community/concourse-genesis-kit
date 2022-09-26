@@ -1,0 +1,16 @@
+---
+# TODO: Compare this with base.yml and others in manifests/ to see what should be 
+#       included and assumed based on the ocfp reference architecture contract
+params:
+  concourse_network: (( concat meta.env_name "-concourse" ))
+  concourse_vm_type: (( concat "concourse-" meta.env_scale ))
+  concourse_disk_type: (( concat "concourse-" meta.env_scale ))
+
+  # stemcell_os: ocfp contract ???
+  # stemcell_versio: ocfp contract ???
+
+#bosh-variables: Might not be anything here but maybe?
+
+# stemcells: 
+# - alias: ... # use ocfp ref arch contract directly
+

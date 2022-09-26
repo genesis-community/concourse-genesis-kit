@@ -1,0 +1,56 @@
+---
+meta:
+  concourse_db:
+    type:     (( vault meta.vault "/db/concourse:scheme"   ))
+    username: (( vault meta.vault "/db/concourse:username" ))
+    password: (( vault meta.vault "/db/concourse:password" ))
+    hostname: (( vault meta.vault "/db/concourse:hostname" ))
+    port:     (( vault meta.vault "/db/concourse:port"     ))
+    database: (( vault meta.vault "/db/concourse:database" ))
+    require_tls: true
+    sslmode: "verify-ca"
+    ca:   (( vault meta.vault "/db/concourse:ca" ))
+
+---
+- type: replace
+  path: /params/external_db_ca?
+  value: (( grab meta.concourse_db.ca ))
+
+- type: replace
+  path: /meta/jobs/web/properties/postgresql/ca_cert?
+  value:
+    certificate: (( grab meta.concourse_db.ca ))
+
+- type: remove
+  path: /meta/jobs/postgres
+
+- type: remove
+  path: /instance_groups/name=db?
+
+- type: replace
+  path: /instance_groups/name=web?/jobs/-
+  value:
+    name: locker
+    .:    (( inject meta.jobs.locker ))
+
+- type: replace
+  path: /params/external_db_host?
+  value: (( grab meta.concourse_db.hostname ))
+
+- type: replace
+  path: /meta/jobs/web/properties/postgresql
+  value:
+    database: (( grab meta.concourse_db.database ))
+    host:     (( grab meta.concourse_db.hostname ))
+    port:     (( grab meta.concourse_db.port ))
+    role:
+      name:   (( grab meta.concourse_db.username ))
+      password: (( grab meta.concourse_db.password ))
+    sslmode: (( grab meta.concourse_db.sslmode ))
+
+- type: remove
+  path: /releases/name=postgres
+
+- type: remove
+  path: /instance_groups/name=concourse?/jobs/name=postgres
+
