@@ -2,11 +2,10 @@
 set -eu
 
 declare -a merge
-merge=( "manifests/concourse/base.yml" )
-
-merge+=( "manifests/releases/concourse.yml"
-         "manifests/releases/slack-notifications.yml" )
-merge+=( "manifests/concourse/jobs.yml")
+merge=( "manifests/concourse/base.yml"
+        "manifests/releases/concourse.yml"
+        "manifests/releases/slack-notifications.yml"
+        "manifests/concourse/jobs.yml" )
 
 validate_features \
   azure shield                                  \
@@ -81,7 +80,11 @@ if want_feature "full" || want_feature "small-footprint"; then
     fi
   fi
 
-  if want_feature "external-db"; then
+
+  if want_feature "ocfp"; then
+    merge+=( "ocfp/ocfp.yml"
+            "ocfp/external-db.yml" )
+  elif want_feature "external-db"; then
     merge+=( "manifests/addons/external-db.yml" )
     if want_feature "external-db-ca"; then
       merge+=( "manifests/addons/external-db-ca.yml" )
@@ -153,13 +156,6 @@ fi
 if want_feature "azure"; then
   echo >&2 "The 'azure' feature is no longer necessary - azure CPI will be detected"
   echo >&2 "automatically at deployment time."
-fi
-
-if want_feature "ocfp"; then
-  merge+=( 
-  "ocfp/ocfp.yml" 
-  "ocfp/external-db.yml" 
-  )
 fi
 
 echo "${merge[@]}"
