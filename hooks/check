@@ -2,14 +2,30 @@
 
 # Cloud Config checks
 if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
+    if want_feature ocfp ; then
+    _env_scale="$(lookup --merged meta.env_scale)"
+    _vm_type="concourse-${_env_scale}"
+    _network="${GENESIS_ENVIRONMENT}-concourse"
+    _disk_type="concourse-${_env_scale}"
+    _worker_vm_type="concourse-worker-${_env_scale}"
+    #_web_vm_type="concourse-web-${_env_scale}"
+    #_db_vm_type="concourse-db-${_env_scale}"
+    #_haproxy_vm_type="concourse-haproxy-${_env_scale}"
+  else # Legacy was hard coded
+    _vm_type="small"
+    _network="concourse"
+    _disk_type="concourse"
+    _worker_vm_type="concourse-worker"
+  fi
+
   if ! want_feature proto; then
-    cloud_config_needs network      "$(lookup params.concourse_network   concourse)"
-    cloud_config_needs vm_type      "$(lookup params.worker_vm_type      concourse-worker)"
+    cloud_config_needs network      "$(lookup params.concourse_network   ${_network})"
+    cloud_config_needs vm_type      "$(lookup params.worker_vm_type      ${_worker_vm_type})"
 
     if ! want_feature workers; then
       # without the 'workers' feature, this is a FULL concourse
-      cloud_config_needs vm_type    "$(lookup params.concourse_vm_type   small)"
-      cloud_config_needs disk_type  "$(lookup params.concourse_disk_type concourse)"
+      cloud_config_needs vm_type    "$(lookup params.concourse_vm_type   ${_vm_type})"
+      cloud_config_needs disk_type  "$(lookup params.concourse_disk_type ${_disk_type})"
 
       if lookup --defined params.web_vm_type ; then
         cloud_config_needs vm_type  "$(lookup params.web_vm_type)"
