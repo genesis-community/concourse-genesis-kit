@@ -2,9 +2,9 @@
 # TODO: Compare this with base.yml and others in manifests/ to see what should be 
 #       included and assumed based on the ocfp reference architecture contract
 params:
-  concourse_network: (( concat meta.env_name "-concourse" ))
-  concourse_vm_type: (( concat "concourse-" meta.env_scale ))
-  concourse_disk_type: (( concat "concourse-" meta.env_scale ))
+  concourse_network:   (( concat genesis.env "-concourse" ))
+  concourse_vm_type:   (( concat "concourse-" meta.ocfp.env.scale ))
+  concourse_disk_type: (( concat "concourse-" meta.ocfp.env.scale ))
 
   # stemcell_os: ocfp contract ???
   # stemcell_versio: ocfp contract ???
