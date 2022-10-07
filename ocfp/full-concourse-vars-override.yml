@@ -1,0 +1,7 @@
+---
+params:
+  external_domain:   (( vault meta.ocfp.vault.tf "lbs/concourse:domain" ))
+
+  worker_vm_type: "concourse-worker"
+  num_web_nodes: 1
+  worker_count: 3

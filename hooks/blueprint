@@ -37,7 +37,17 @@ if [[ $maj_feat != 1 ]]; then
     exit 1
 fi
 
-if want_feature "full" || want_feature "small-footprint"; then
+if want_feature "ocfp"; then
+  # Enforce the 'full' feature, using OCFP vars
+  merge+=( "manifests/concourse/full.yml"
+           "manifests/releases/postgres.yml"
+           "manifests/releases/locker.yml"
+           "manifests/releases/haproxy.yml"
+           "manifests/releases/bpm.yml"
+           "ocfp/full-vars-override.yml" )
+
+  merge+=( "ocfp/ocfp.yml" )
+elif want_feature "full" || want_feature "small-footprint"; then
   if want_feature "full" ; then
     merge+=( "manifests/concourse/full.yml"
              "manifests/releases/postgres.yml"
@@ -65,7 +75,7 @@ if want_feature "full" || want_feature "small-footprint"; then
     merge+=( "manifests/oauth/github-enterprise-oauth.yml" )
   fi
 
-  if ! want_feature no-tls ; then
+  if ! want_feature "no-tls" ; then
     merge+=( "manifests/concourse/tls.yml" )
     if want_feature self-signed-cert ; then
       merge+=( "manifests/addons/self-signed.yml" )
@@ -81,10 +91,7 @@ if want_feature "full" || want_feature "small-footprint"; then
   fi
 
 
-  if want_feature "ocfp"; then
-    merge+=( "ocfp/ocfp.yml"
-            "ocfp/external-db.yml" )
-  elif want_feature "external-db"; then
+  if want_feature "external-db"; then
     merge+=( "manifests/addons/external-db.yml" )
     if want_feature "external-db-ca"; then
       merge+=( "manifests/addons/external-db-ca.yml" )
