@@ -45,6 +45,10 @@ if want_feature "ocfp"; then
            "manifests/releases/haproxy.yml"
            "manifests/releases/bpm.yml"
            "ocfp/full-vars-override.yml" )
+  # 'external-db' & 'external-db-ca' features, using OCFP vars
+  merge+=( "manifests/addons/external-db.yml"
+           "manifests/addons/external-db-ca.yml"
+           "ocfp/external-db-vars-override.yml" )
 
   merge+=( "ocfp/ocfp.yml" )
 elif want_feature "full" || want_feature "small-footprint"; then

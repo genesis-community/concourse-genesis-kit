@@ -1,4 +1,14 @@
 ---
+meta:
+  concourse_db:
+    username:    (( grab params.external_db_user || "atc" ))
+    password:    (( vault meta.vault "/database/external:password" ))
+    hostname:    (( param "Please provide the hostname of the external database server" ))
+    port:        (( grab params.external_db_port || 5432 ))
+    database:    (( grab params.external_db_name || "atc" ))
+    sslmode:     (( grab params.external_db_sslmode || "verify-ca" ))
+
+---
 - type: remove
   path: /meta/jobs/postgres
 
@@ -13,18 +23,18 @@
 
 - type: replace
   path: /params/external_db_host?
-  value: (( param "Please provide the hostname of the external database server" ))
+  value: (( grab meta.concourse_db.hostname ))
 
 - type: replace
   path: /meta/jobs/web/properties/postgresql
   value:
-    database: (( grab params.external_db_name || "atc" ))
-    host:     (( grab params.external_db_host ))
-    port:     (( grab params.external_db_port || 5432 ))
+    database:   (( grab meta.concourse_db.database ))
+    host:       (( grab meta.concourse_db.hostname ))
+    port:       (( grab meta.concourse_db.port ))
     role:
-      name:   (( grab params.external_db_user || "atc" ))
-      password: (( vault meta.vault "/database/external:password" ))
-    sslmode: (( grab params.external_db_sslmode || "verify-ca" ))
+      name:     (( grab meta.concourse_db.username ))
+      password: (( grab meta.concourse_db.password ))
+    sslmode:    (( grab meta.concourse_db.sslmode ))
 
 - type: remove
   path: /releases/name=postgres
