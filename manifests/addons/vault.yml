@@ -1,18 +1,28 @@
 ---
+meta:
+  concourse_vault:
+    url:   (( param "Please specify the URL of the Vault for Concourse to pull credentials from" ))
+    token: (( param "Please specify the token that Concourse should use to authenticate with Vault" ))
+    shared_path:          (( grab params.vault_shared_path || "shared" ))
+    path_prefix:          (( grab params.vault_path_prefix || "/concourse" ))
+    insecure_skip_verify: (( grab params.vault_insecure_skip_verify || false ))
+    auth_backend_max_ttl: (( grab params.vault_auth_backend_max_ttl || ~ ))
+
+---
 params:
-  vault_url: (( param "Please specify the URL of the Vault for Concourse to pull credentials from" ))
-  vault_token: (( param "Please specify the token that Concourse should use to authenticate with Vault" ))
+  vault_url:   (( grab meta.concourse_vault.url ))
+  vault_token: (( grab meta.concourse_vault.token ))
 
 meta:
   jobs:
     web:
       properties:
         vault:
-          url: (( grab params.vault_url ))
-          shared_path: (( grab params.vault_shared_path || "shared" ))
-          path_prefix: (( grab params.vault_path_prefix || "/concourse" ))
+          url:         (( grab meta.concourse_vault.url ))
+          shared_path: (( grab meta.concourse_vault.shared_path ))
+          path_prefix: (( grab meta.concourse_vault.path_prefix ))
           tls:
-            insecure_skip_verify: (( grab params.vault_insecure_skip_verify || false ))
+            insecure_skip_verify: (( grab meta.concourse_vault.insecure_skip_verify ))
           auth:
-            backend_max_ttl: (( grab params.vault_auth_backend_max_ttl || ~ ))
-            client_token: (( grab params.vault_token ))
+            backend_max_ttl: (( grab meta.concourse_vault.auth_backend_max_ttl ))
+            client_token:    (( grab meta.concourse_vault.token ))
