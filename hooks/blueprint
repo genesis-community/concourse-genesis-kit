@@ -56,6 +56,10 @@ if want_feature "ocfp"; then
   merge+=( "manifests/addons/no-haproxy.yml" )
 
   merge+=( "ocfp/ocfp.yml" )
+
+  if want_feature "okta" ; then
+    merge+=( "manifests/addons/okta.yml" )
+  fi
 elif want_feature "full" || want_feature "small-footprint"; then
   if want_feature "full" ; then
     merge+=( "manifests/concourse/full.yml"
@@ -99,6 +103,9 @@ elif want_feature "full" || want_feature "small-footprint"; then
     fi
   fi
 
+  if want_feature "okta" ; then
+    merge+=( "manifests/addons/okta.yml" )
+  fi
 
   if want_feature "external-db"; then
     merge+=( "manifests/addons/external-db.yml" )

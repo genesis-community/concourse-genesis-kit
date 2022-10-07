@@ -1,0 +1,15 @@
+---
+meta:
+  concourse_okta_name: (( vault meta.vault "/okta:sso_url" ))
+
+---
+instance_groups:
+  - name: web
+    jobs:
+      - name: web
+        properties:
+          saml_auth:
+            display_name: (( grab meta.concourse_okta_name || "Okta" ))
+            ca_cert:
+              certificate: (( vault meta.vault "/okta:ca_cert" ))
+              sso_url:     (( vault meta.vault "/okta:sso_url" ))
