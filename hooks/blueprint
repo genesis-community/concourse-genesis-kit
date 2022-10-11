@@ -60,6 +60,12 @@ if want_feature "ocfp"; then
   if want_feature "okta" ; then
     merge+=( "manifests/addons/okta.yml" )
   fi
+
+  if want_feature "aws"; then
+    merge+=( "ocfp/iaas/aws.yml" )
+  elif want_feature "azure" || want_feature "gcp" || want_feature "vsphere"; then
+      bail "#R{[ERROR]} The #c{azure}, #c{gcp} or #c{vsphere} features are not supported."
+  fi
 elif want_feature "full" || want_feature "small-footprint"; then
   if want_feature "full" ; then
     merge+=( "manifests/concourse/full.yml"
