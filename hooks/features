@@ -2,7 +2,8 @@
 echo "$GENESIS_REQUESTED_FEATURES"
 
 if want_feature "ocfp" ; then
-  true # Contract handles database (via vault) & sizing (dev/prod)
+  # Contract handles database (via vault) & sizing (dev/prod)
+  echo "+locker"
 else # non-ocfp based 
   if ! want_feature "external-db" ; then
     echo "+internal-db"

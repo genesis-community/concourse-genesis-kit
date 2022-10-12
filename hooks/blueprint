@@ -13,8 +13,8 @@ validate_features \
   no-tls provided-cert self-signed-cert         \
   github-oauth github-enterprise-oauth cf-oauth \
   vault vault-approle shout prometheus          \
-  no-haproxy dynamic-web-ip external-db         \
-  external-db-ca
+  no-haproxy dynamic-web-ip external-db external-db-ca \
+  ocfp okta aws # gcp azure vsphere
 
 if [[ "$(bosh_cpi)" == "azure" ]]; then
   merge+=( "manifests/addons/azure.yml" )
@@ -22,18 +22,13 @@ fi
 
 # Make sure we're only merging one of the major feature flags
 declare -i maj_feat=0
-if want_feature "full" ; then
-  (( maj_feat+=1 ))
-fi
-if want_feature "workers" ; then
-  (( maj_feat+=1 ))
-fi
-if want_feature "small-footprint" ; then
-  (( maj_feat+=1 ))
-fi
+if want_feature "ocfp" ; then (( maj_feat+=1 )) ; fi
+if want_feature "full" ; then (( maj_feat+=1 )) ; fi
+if want_feature "workers" ; then (( maj_feat+=1 )) ; fi
+if want_feature "small-footprint" ; then (( maj_feat+=1 )) ; fi
 
 if [[ $maj_feat != 1 ]]; then
-    echo >&2 "Can only have one of 'full', workers', or 'small-footprint' as a feature."
+    echo >&2 "Can only have one of 'ocfp', 'full', workers', or 'small-footprint' as a feature."
     exit 1
 fi
 
@@ -42,9 +37,14 @@ if want_feature "ocfp"; then
   merge+=( "manifests/concourse/full.yml"
            "manifests/releases/postgres.yml"
            "manifests/releases/locker.yml"
-           "manifests/releases/haproxy.yml"
            "manifests/releases/bpm.yml"
-           "ocfp/full-vars-override.yml" )
+         )
+  # OCFP enforces the 'no-haproxy' feature
+  #merge+=( "manifests/addons/no-haproxy.yml" )
+
+  # OCFP vars overrides
+  merge +=( "ocfp/full-concourse-vars-override.yml" )
+
   # 'vault' feature, using OCFP vars
   merge+=( "manifests/addons/vault.yml"
            "ocfp/vault-vars-override.yml" )
@@ -52,8 +52,6 @@ if want_feature "ocfp"; then
   merge+=( "manifests/addons/external-db.yml"
            "manifests/addons/external-db-ca.yml"
            "ocfp/external-db-vars-override.yml" )
-  # OCFP enforces the 'no-haproxy' feature
-  merge+=( "manifests/addons/no-haproxy.yml" )
 
   merge+=( "ocfp/ocfp.yml" )
 
