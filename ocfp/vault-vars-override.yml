@@ -2,7 +2,6 @@
 meta:
   concourse_vault:
     url:                  (( vault meta.vault "/vault:url"))
-    token:                (( vault meta.vault "/vault:token"))
     shared_path:          "shared"
     path_prefix:          "/concourse"
     insecure_skip_verify: false
