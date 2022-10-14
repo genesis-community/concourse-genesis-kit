@@ -15,3 +15,9 @@ meta:
     concourse:
       ip: (( vault meta.ocfp.vault.tf "/bosh/iaas/subnets/ocfp/0/ips/mgmt/reserved:concourse_ip" ))
 
+params:
+  concourse_network:   (( concat genesis.env "-concourse" ))
+  concourse_vm_type:   (( concat "concourse-" meta.ocfp.env.scale ))
+  concourse_disk_type: (( concat "concourse-" meta.ocfp.env.scale ))
+
+  worker_vm_type:      "concourse-worker"
