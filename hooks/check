@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Cloud Config checks
-if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
-    if want_feature ocfp ; then
+if [[ -n "${GENESIS_CLOUD_CONFIG}" ]] ; then
+  if want_feature "ocfp" ; then
     _env_scale="$(lookup --merged meta.ocfp.env.scale)"
     _vm_type="concourse-${_env_scale}"
     _network="${GENESIS_ENVIRONMENT}-concourse"
@@ -18,11 +18,11 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
     _worker_vm_type="concourse-worker"
   fi
 
-  if ! want_feature proto; then
+  if ! want_feature "proto"; then
     cloud_config_needs network      "$(lookup params.concourse_network   ${_network})"
     cloud_config_needs vm_type      "$(lookup params.worker_vm_type      ${_worker_vm_type})"
 
-    if ! want_feature workers; then
+    if ! want_feature "workers"; then
       # without the 'workers' feature, this is a FULL concourse
       cloud_config_needs vm_type    "$(lookup params.concourse_vm_type   ${_vm_type})"
       cloud_config_needs disk_type  "$(lookup params.concourse_disk_type ${_disk_type})"

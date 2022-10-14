@@ -47,6 +47,7 @@ if want_feature "ocfp"; then
 
   # 'vault' feature, using OCFP vars
   merge+=( "manifests/addons/vault.yml"
+           "manifests/addons/vault-approle.yml"
            "ocfp/vault-vars-override.yml" )
   # 'external-db' & 'external-db-ca' features, using OCFP vars
   merge+=( "manifests/addons/external-db.yml"

@@ -7,3 +7,5 @@ meta:
     path_prefix:          "/concourse"
     insecure_skip_verify: false
     auth_backend_max_ttl: ~
+    approle_role_id:   (( vault meta.vault "/vault:approle_role_id"))
+    approle_secret_id: (( vault meta.vault "/vault:approle_secret_id"))
