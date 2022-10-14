@@ -37,10 +37,10 @@ if want_feature "ocfp"; then
   merge+=( "manifests/concourse/full.yml"
            "manifests/releases/postgres.yml"
            "manifests/releases/locker.yml"
-           "manifests/releases/bpm.yml"
-         )
+           "manifests/releases/haproxy.yml"
+           "manifests/releases/bpm.yml" )
   # OCFP enforces the 'no-haproxy' feature
-  #merge+=( "manifests/addons/no-haproxy.yml" )
+  merge+=( "manifests/addons/no-haproxy.yml" )
 
   # OCFP vars overrides
   merge +=( "ocfp/full-concourse-vars-override.yml" )
