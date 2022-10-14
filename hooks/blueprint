@@ -43,7 +43,7 @@ if want_feature "ocfp"; then
   merge+=( "manifests/addons/no-haproxy.yml" )
 
   # OCFP vars overrides
-  merge +=( "ocfp/full-concourse-vars-override.yml" )
+  merge+=( "ocfp/full-concourse-vars-override.yml" )
 
   # 'vault' feature, using OCFP vars
   merge+=( "manifests/addons/vault.yml"
