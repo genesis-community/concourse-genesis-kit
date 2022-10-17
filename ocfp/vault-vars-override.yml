@@ -3,7 +3,7 @@ meta:
   concourse_vault:
     url:                  (( vault meta.vault "/vault:url"))
     shared_path:          "shared"
-    path_prefix:          "/concourse"
+    path_prefix:          (( concat genesis.secrets_mount "/concourse" ))
     insecure_skip_verify: false
     auth_backend_max_ttl: ~
     approle_role_id:   (( vault meta.vault "/vault:approle_role_id"))
