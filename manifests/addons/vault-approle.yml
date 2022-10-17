@@ -1,18 +1,19 @@
 ---
+params:
+  vault_token:             ~
+  vault_auth_backend:      approle
+  vault_approle_role_id:   (( param "Please specify the role_id of the approle user you want Concourse to authenticate with" ))
+  vault_approle_secret_id: (( param "Please specify the secret_id of the approle user you want Concourse to authenticate with" ))
+
+---
 meta:
   concourse_vault:
     token:             ~
-    auth_backend:      approle
-    approle_role_id:   (( param "Please specify the role_id of the approle user you want Concourse to authenticate with" ))
-    approle_secret_id: (( param "Please specify the secret_id of the approle user you want Concourse to authenticate with" ))
+    auth_backend:      (( grab params.vault_auth_backend ))
+    approle_role_id:   (( grab params.vault_approle_role_id ))
+    approle_secret_id: (( grab params.vault_approle_secret_id ))
 
 ---
-params:
-  vault_token:             ~
-  vault_auth_backend:      (( grab meta.concourse_vault.auth_backend ))
-  vault_approle_role_id:   (( grab meta.concourse_vault.approle_role_id ))
-  vault_approle_secret_id: (( grab meta.concourse_vault.approle_secret_id ))
-
 meta:
   jobs:
     web:
