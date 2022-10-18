@@ -3,7 +3,7 @@ params:
   external_domain: (( vault meta.ocfp.vault.tf "/lbs/concourse:domain" ))
 
   num_web_nodes: 1
-  worker_count: 3
+  worker: 3
 
   concourse_network:   (( concat genesis.env "-concourse" ))
   concourse_disk_type: (( concat "concourse-" meta.ocfp.env.scale ))
