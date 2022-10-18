@@ -33,3 +33,15 @@ exodus:
 - type: replace
   path: /instance_groups/name=web/networks/0/name
   value: (( concat genesis.env "-concourse-web" ))
+
+- type: replace
+  path: /instance_groups/name=web/azs
+  value: 
+    - (( concat genesis.env "-z1" ))
+
+- type: replace
+  path: /instance_groups/name=worker/azs
+  value: 
+    - (( concat genesis.env "-z2" ))
+    - (( concat genesis.env "-z3" ))
+
