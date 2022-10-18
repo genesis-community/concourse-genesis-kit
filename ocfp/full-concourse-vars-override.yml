@@ -16,15 +16,13 @@ params:
     - (( concat genesis.env "-z2" ))
     - (( concat genesis.env "-z3" ))
 
+exodus:
+  tsa_host: (( grab params.external_domain ))
+
 ---
 - type: replace
   path: /instance_groups/name=web/vm_extensions?/-
   value: concourse-lb
 
-- type: replace
-  path: /instance_groups/name=web/networks?
-  value:
-    - name: (( concat genesis.env "-concourse" ))
-      static_ips:
-        - (( grab meta.ocfp.concourse.ip ))
-
+- type: remove
+  path: /instance_groups/name=web/networks/0/static_ips

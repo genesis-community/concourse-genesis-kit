@@ -11,6 +11,3 @@ meta:
       trusted:
         - (( vault genesis.secrets_mount "certs/org:ca" )) # Organization CA, if exists
         - (( vault genesis.secrets_mount "certs/dbs:ca" )) # External Databases CA
-
-    concourse:
-      ip: (( vault meta.ocfp.vault.tf "/bosh/iaas/subnets/ocfp/0/ips/mgmt/reserved:concourse_ip" ))
