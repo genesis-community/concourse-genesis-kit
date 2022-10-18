@@ -2,9 +2,14 @@
 params:
   external_domain: (( vault meta.ocfp.vault.tf "/lbs/concourse:domain" ))
 
-  worker_vm_type: "concourse-worker"
   num_web_nodes: 1
   worker_count: 3
+
+  concourse_network:   (( concat genesis.env "-concourse" ))
+  concourse_disk_type: (( concat "concourse-" meta.ocfp.env.scale ))
+
+  concourse_vm_type:   (( concat "concourse-" meta.ocfp.env.scale ))
+  worker_vm_type:      (( concat "concourse-worker-" meta.ocfp.env.scale ))
 
 ---
 - type: replace
