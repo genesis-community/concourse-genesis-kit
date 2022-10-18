@@ -7,7 +7,6 @@ params:
 
   concourse_network:   (( concat genesis.env "-concourse" ))
   concourse_disk_type: (( concat "concourse-" meta.ocfp.env.scale ))
-
   concourse_vm_type:   (( concat "concourse-" meta.ocfp.env.scale ))
   worker_vm_type:      (( concat "concourse-worker-" meta.ocfp.env.scale ))
 
@@ -26,3 +25,11 @@ exodus:
 
 - type: remove
   path: /instance_groups/name=web/networks/0/static_ips
+
+- type: replace
+  path: /instance_groups/name=worker/networks/0/name
+  value: (( concat genesis.env "-concourse" ))
+
+- type: replace
+  path: /instance_groups/name=web/networks/0/name
+  value: (( concat genesis.env "-concourse-web" ))
