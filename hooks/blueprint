@@ -1,6 +1,29 @@
 #!/bin/bash
 set -eu
 
+function handle_tls_features() {
+  if ! want_feature "no-tls" ; then
+    merge+=( "manifests/concourse/tls.yml" )
+    if want_feature "self-signed-cert" ; then
+      merge+=( "manifests/addons/self-signed.yml" )
+    elif ! want_feature provided-cert ; then
+      echo >&2 "Concourse needs to be configured with 'no-tls', 'provided-cert' or"
+      echo >&2 "'self-signed-cert'."
+      echo >&2
+      echo >&2 "If upgrading, please add 'self-signed-cert' to your environment's list of"
+      echo >&2 "features and run 'genesis add-secrets' to generate the certificate."
+      echo >&2
+      exit 1
+    fi
+  fi
+}
+
+function handle_okta_feature() {
+  if want_feature "okta" ; then
+    merge+=( "manifests/addons/okta.yml" )
+  fi
+}
+
 declare -a merge
 merge=( "manifests/concourse/base.yml"
         "manifests/releases/concourse.yml"
@@ -39,6 +62,8 @@ if want_feature "ocfp"; then
            "manifests/releases/locker.yml"
            "manifests/releases/haproxy.yml"
            "manifests/releases/bpm.yml" )
+  handle_tls_features
+  handle_okta_feature
   # OCFP enforces the 'no-haproxy' feature
   merge+=( "manifests/addons/no-haproxy.yml" )
 
@@ -55,10 +80,6 @@ if want_feature "ocfp"; then
            "ocfp/external-db-vars-override.yml" )
 
   merge+=( "ocfp/ocfp.yml" )
-
-  if want_feature "okta" ; then
-    merge+=( "manifests/addons/okta.yml" )
-  fi
 
   if want_feature "aws"; then
     merge+=( "ocfp/iaas/aws.yml" )
@@ -93,24 +114,9 @@ elif want_feature "full" || want_feature "small-footprint"; then
     merge+=( "manifests/oauth/github-enterprise-oauth.yml" )
   fi
 
-  if ! want_feature "no-tls" ; then
-    merge+=( "manifests/concourse/tls.yml" )
-    if want_feature self-signed-cert ; then
-      merge+=( "manifests/addons/self-signed.yml" )
-    elif ! want_feature provided-cert ; then
-      echo >&2 "Concourse needs to be configured with 'no-tls', 'provided-cert' or"
-      echo >&2 "'self-signed-cert'."
-      echo >&2
-      echo >&2 "If upgrading, please add 'self-signed-cert' to your environment's list of"
-      echo >&2 "features and run 'genesis add-secrets' to generate the certificate."
-      echo >&2
-      exit 1
-    fi
-  fi
+  handle_tls_features
 
-  if want_feature "okta" ; then
-    merge+=( "manifests/addons/okta.yml" )
-  fi
+  handle_okta_feature
 
   if want_feature "external-db"; then
     merge+=( "manifests/addons/external-db.yml" )
