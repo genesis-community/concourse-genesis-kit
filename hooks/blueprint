@@ -30,16 +30,15 @@ merge=( "manifests/concourse/base.yml"
         "manifests/releases/slack-notifications.yml"
         "manifests/concourse/jobs.yml" )
 
-validate_features
 for want in ${GENESIS_REQUESTED_FEATURES}
 do
-  case $want in
+  case ${want} in
     (azure|shield|workers|full|small-footprint|no-tls|provided-cert|self-signed-cert|github-oauth|github-enterprise-oauth|cf-oauth|vault|vault-approle|shout|prometheus|no-haproxy|dynamic-web-ip|external-db|external-db-ca|ocfp|okta|aws|+internal-db|+locker)
     ;;
     (*)
-      if [[ -s "$GENESIS_ROOT/ops/$want.yml" ]]
-      then opsfiles+=( "ops/$want.yml" )
-      else echo >&2 "Unknown feature '$want'" ; exit 1
+      if [[ -s "${GENESIS_ROOT}/ops/$want.yml" ]]
+      then opsfiles+=( "${GENESIS_ROOT}/ops/${want}.yml" )
+      else echo >&2 "Unknown feature '${want}'" ; exit 1
       fi
       ;;
   esac
