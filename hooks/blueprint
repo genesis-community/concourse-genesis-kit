@@ -30,14 +30,20 @@ merge=( "manifests/concourse/base.yml"
         "manifests/releases/slack-notifications.yml"
         "manifests/concourse/jobs.yml" )
 
-validate_features \
-  azure shield                                  \
-  workers full small-footprint                  \
-  no-tls provided-cert self-signed-cert         \
-  github-oauth github-enterprise-oauth cf-oauth \
-  vault vault-approle shout prometheus          \
-  no-haproxy dynamic-web-ip external-db external-db-ca \
-  ocfp okta aws # gcp azure vsphere
+validate_features
+for want in ${GENESIS_REQUESTED_FEATURES}
+do
+  case $want in
+    (azure|shield|workers|full|small-footprint|no-tls|provided-cert|self-signed-cert|github-oauth|github-enterprise-oauth|cf-oauth|vault|vault-approle|shout|prometheus|no-haproxy|dynamic-web-ip|external-db|external-db-ca|ocfp|okta|aws|+internal-db|+locker)
+    ;;
+    (*)
+      if [[ -s "$GENESIS_ROOT/ops/$want.yml" ]]
+      then opsfiles+=( "ops/$want.yml" )
+      else echo >&2 "Unknown feature '$want'" ; exit 1
+      fi
+      ;;
+  esac
+done
 
 if [[ "$(bosh_cpi)" == "azure" ]]; then
   merge+=( "manifests/addons/azure.yml" )
@@ -191,5 +197,10 @@ if want_feature "azure"; then
   echo >&2 "The 'azure' feature is no longer necessary - azure CPI will be detected"
   echo >&2 "automatically at deployment time."
 fi
+
+for opsfile in ${opsfiles[@]}
+do merge+=( "$opsfile" )
+done
+
 
 echo "${merge[@]}"
