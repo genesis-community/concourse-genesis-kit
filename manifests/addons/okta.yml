@@ -11,5 +11,5 @@ instance_groups:
           saml_auth:
             display_name: (( grab meta.concourse_okta_name || "Okta" ))
             ca_cert:
-              certificate: (( vault meta.vault "/okta:ca_cert" ))
               sso_url:     (( vault meta.vault "/okta:sso_url" ))
+              #certificate: (( vault meta.vault "/okta:ca_cert" )) It's a SaaS, public cert trust should work.
