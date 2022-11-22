@@ -210,9 +210,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=11.16.0
   version: 11.16.0
 - name: bpm
-  sha1: 669baca975c6def518c7e736dbf189cfb438475b
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.19
-  version: 1.1.19
+  sha1: a6bf00af0853de8df4a15cfa83e98b51dd784614
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.20
+  version: 1.1.20
 - name: shout
   sha1: 73c5c0161730a655c03f5a6ceb1c8b2e33403874
   url: https://github.com/jhunt/shout-boshrelease/releases/download/v0.1.0/shout-0.1.0.tar.gz
