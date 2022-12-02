@@ -190,9 +190,9 @@ instance_groups:
 name: full-all-params-concourse
 releases:
 - name: concourse
-  sha1: 2613a50ccae8966adc7b14ed9c5495eeca8a31f5
-  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.8.2
-  version: 7.8.2
+  sha1: 0920d2a3c13a81f50529ae72118a9d83bece7e65
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.9.0
+  version: 7.9.0
 - name: slack-notification-resource
   sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
