@@ -300,13 +300,29 @@ following configuration parameters.
 
   - `vault_token` - The token to present as authentication to the Vault API.
 
+## Accessing Vault using an AppRole
+
+You may use a Vault AppRole for Concourse to read pipeline secrets from Vault,
+instead of using an authentication token.
+
+Opt for the `vault-approle` feature for that, and provide the following
+parameters:
+
+- `vault_approle_role_id` - the role ID for the AppRole used to access Vault.
+- `vault_approle_secret_id` - the secret ID of the AppRole.
+
+You may use the `setup-approle` addon in order to create the AppRole that is
+expected here (see also the addons documentation below), but keep in mind that
+the created AppRole will be able to _create_ and _destroy_ secrets, whereas
+Concourse only needs to _read_ secrets.
+
 # Cloud Configuration
 
 By default, Concourse uses the following VM types/networks from your cloud
 config.  Feel free to override them in your environment, if you would rather
 they use entities already existing in your cloud config:
 
-```
+```yaml
 params:
   concourse_network:   concourse
   concourse_vm_type:   concourse          # at least 2 CPUs / 4GB RAM
@@ -314,6 +330,41 @@ params:
   worker_vm_type:      concourse-worker   # at least 8GB RAM / 60GB disk
 ```
 
+# Deploying Concourse in an OCF Platform Architecture
+
+In the context of an OCFP architecture, opinionated design choices are made
+for the Concourse cluster to deploy, and most of its configuration is drawn
+from specific locations in Vault.
+
+In order to benefit from the conventions established for OCFP platforms,
+activate the `ocfp` feature and provide these. This will
+
+ - A _full_ Concourse cluster will be deployed (see the `full` feature above),
+   with no HA-proxy (see the `no-haproxy` feature above), and web nodes will
+   be attached to a `concourse-lb` Load Balancer.
+
+ - An exernal database will be used (see the `exernal-db` feature above),
+   typically an RDS database in an AWS context. This is supposed to be created
+   by the [Codex Terraform][codex_tf] and the `concourse` Postgres database is
+   supposed to be initiated by an `ocfp init-pg` invocation (see
+   [OCFP Ops Scripts][ocfp_ops_scripts]).
+
+ - A Vault instance will be used as the default source for pipeline secrets
+   (see the `vault` feature above), and will be accessed using an AppRole (see
+   the `vaulr-approle` feature above). The `setup-approle` addon can help in
+   understanding how to setup the necessary AppRole.
+
+Some parameters are to be privided in Vault by the operator before deploying,
+within the `secret/<mount-prefix>/<env-slug>/<kit-name>` base path for the
+environement.
+
+ - `<env-path>/vault:url` - The Vault URL
+ - `<env-path>/vault:approle_role_id` - the role ID for the AppRole used to
+   access Vault.
+ - `<env-path>/vault:approle_secret_id` - the secret ID of the AppRole.
+
+[codex_tf]: https://github.com/starkandwayne/codex/tree/master/terraform
+[ocfp_ops_scripts]: https://github.com/starkandwayne/ocfp-ops-scripts
 
 # Available Add-ons
 
@@ -347,13 +398,17 @@ params:
   needing to specify the `-t <target>` argument.  It will even log you in if
   you're not logged in already.
 
+- `setup-approle` - Create the necessary Vault AppRole and policy for Genesis.
+  This will create an AppRole that can not only read secrets, but also
+  _create_ and _destroy_ them.
+
 
 # Examples
 
 To deploy a host Concourse with self-signed certificate, with load-balanced
 web nodes and two medium workers in a single availability zone.
 
-```
+```yaml
 ---
 kit:
   name:    concourse
@@ -377,7 +432,7 @@ params:
 To deploy a worker pool for an isolated production environment that is hosted
 by the above deployment, with bigger workers and more of them:
 
-```
+```yaml
 ---
 kit:
   name:    concourse

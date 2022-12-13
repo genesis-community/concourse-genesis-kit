@@ -1,0 +1,15 @@
+---
+params:
+  vault_url:               (( vault meta.vault "/vault:url"))
+  vault_token:             ~
+  vault_auth_backend:      approle
+  vault_approle_role_id:   (( vault meta.vault "/vault:approle_role_id"))
+  vault_approle_secret_id: (( vault meta.vault "/vault:approle_secret_id"))
+
+---
+meta:
+  concourse_vault:
+    shared_path:          "shared"
+    path_prefix:          (( concat genesis.secrets_mount "concourse" ))
+    insecure_skip_verify: false
+    auth_backend_max_ttl: ~

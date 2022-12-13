@@ -1,10 +1,14 @@
 #!/bin/bash
 echo "$GENESIS_REQUESTED_FEATURES"
 
-if ! want_feature "external-db" ; then
-  echo "+internal-db"
-fi
-
-if want_feature "full" || want_feature "small-footprint"  ; then
+if want_feature "ocfp" ; then
+  # Contract handles database (via vault) & sizing (dev/prod)
   echo "+locker"
+else # non-ocfp based 
+  if ! want_feature "external-db" ; then
+    echo "+internal-db"
+  fi
+  if want_feature "full" || want_feature "small-footprint"  ; then
+    echo "+locker"
+  fi
 fi

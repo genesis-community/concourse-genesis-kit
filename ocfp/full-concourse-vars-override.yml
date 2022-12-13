@@ -1,0 +1,47 @@
+---
+params:
+  external_domain: (( vault meta.ocfp.vault.tf "/lbs/concourse:domain" ))
+
+  num_web_nodes: 1
+  worker: 3
+
+  concourse_network:   (( concat genesis.env "-concourse" ))
+  concourse_disk_type: (( concat "concourse-" meta.ocfp.env.scale ))
+  concourse_vm_type:   (( concat "concourse-" meta.ocfp.env.scale ))
+  worker_vm_type:      (( concat "concourse-worker-" meta.ocfp.env.scale ))
+
+  availability_zones:
+    - (( concat genesis.env "-z1" ))
+    - (( concat genesis.env "-z2" ))
+    - (( concat genesis.env "-z3" ))
+
+exodus:
+  tsa_host: (( grab params.external_domain ))
+
+---
+- type: replace
+  path: /instance_groups/name=web/vm_extensions?/-
+  value: concourse-lb
+
+- type: remove
+  path: /instance_groups/name=web/networks/0/static_ips
+
+- type: replace
+  path: /instance_groups/name=worker/networks/0/name
+  value: (( concat genesis.env "-concourse" ))
+
+- type: replace
+  path: /instance_groups/name=web/networks/0/name
+  value: (( concat genesis.env "-concourse-web" ))
+
+- type: replace
+  path: /instance_groups/name=web/azs
+  value: 
+    - (( concat genesis.env "-z1" ))
+
+- type: replace
+  path: /instance_groups/name=worker/azs
+  value: 
+    - (( concat genesis.env "-z2" ))
+    - (( concat genesis.env "-z3" ))
+

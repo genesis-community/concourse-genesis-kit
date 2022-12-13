@@ -1,20 +1,51 @@
 #!/bin/bash
 set -eu
 
-declare -a merge
-merge=( "manifests/concourse/base.yml" )
-merge+=( "manifests/releases/concourse.yml"
-         "manifests/releases/slack-notifications.yml" )
-merge+=( "manifests/concourse/jobs.yml")
+function handle_tls_features() {
+  if ! want_feature "no-tls" ; then
+    merge+=( "manifests/concourse/tls.yml" )
+    if want_feature "self-signed-cert" ; then
+      merge+=( "manifests/addons/self-signed.yml" )
+    elif ! want_feature provided-cert ; then
+      echo >&2 "Concourse needs to be configured with 'no-tls', 'provided-cert' or"
+      echo >&2 "'self-signed-cert'."
+      echo >&2
+      echo >&2 "If upgrading, please add 'self-signed-cert' to your environment's list of"
+      echo >&2 "features and run 'genesis add-secrets' to generate the certificate."
+      echo >&2
+      exit 1
+    fi
+  fi
+}
 
-validate_features \
-  azure shield                                  \
-  workers full small-footprint                  \
-  no-tls provided-cert self-signed-cert         \
-  github-oauth github-enterprise-oauth cf-oauth \
-  vault vault-approle shout prometheus          \
-  no-haproxy dynamic-web-ip external-db         \
-  external-db-ca
+function handle_okta_feature() {
+  if want_feature "okta" ; then
+    merge+=( "manifests/addons/okta.yml" )
+  fi
+}
+
+declare -a merge
+declare -a opsfiles
+ops_var="merge"
+want_feature "ocfp" && ops_var="opsfiles"
+merge=( "manifests/concourse/base.yml"
+        "manifests/releases/concourse.yml"
+        "manifests/releases/slack-notifications.yml"
+        "manifests/concourse/jobs.yml" )
+
+for want in ${GENESIS_REQUESTED_FEATURES}
+do
+  case ${want} in
+    (azure|shield|workers|full|small-footprint|no-tls|provided-cert|self-signed-cert|github-oauth|github-enterprise-oauth|cf-oauth|vault|vault-approle|shout|prometheus|no-haproxy|dynamic-web-ip|external-db|external-db-ca|ocfp|okta|aws|+internal-db|+locker)
+    ;;
+    (*)
+      if [[ -s "${GENESIS_ROOT}/ops/$want.yml" ]]
+      then eval "${ops_var}+=( \"${GENESIS_ROOT}/ops/${want}.yml\" )"
+      else echo >&2 "Unknown feature '${want}'" ; exit 1
+      fi
+      ;;
+  esac
+done
 
 if [[ "$(bosh_cpi)" == "azure" ]]; then
   merge+=( "manifests/addons/azure.yml" )
@@ -22,24 +53,48 @@ fi
 
 # Make sure we're only merging one of the major feature flags
 declare -i maj_feat=0
-if want_feature "full" ; then
-  (( maj_feat+=1 ))
-fi
-if want_feature "workers" ; then
-  (( maj_feat+=1 ))
-fi
-if want_feature "small-footprint" ; then
-  (( maj_feat+=1 ))
-fi
+if want_feature "ocfp" ; then (( maj_feat+=1 )) ; fi
+if want_feature "full" ; then (( maj_feat+=1 )) ; fi
+if want_feature "workers" ; then (( maj_feat+=1 )) ; fi
+if want_feature "small-footprint" ; then (( maj_feat+=1 )) ; fi
 
 if [[ $maj_feat != 1 ]]; then
-    echo >&2 "Can only have one of 'full', workers', or 'small-footprint' as a feature."
+    echo >&2 "Can only have one of 'ocfp', 'full', workers', or 'small-footprint' as a feature."
     exit 1
 fi
 
+if want_feature "ocfp"; then
+  # Enforce the 'full' feature, using OCFP vars
+  merge+=( "manifests/concourse/full.yml"
+           "manifests/releases/postgres.yml"
+           "manifests/releases/locker.yml"
+           "manifests/releases/haproxy.yml"
+           "manifests/releases/bpm.yml" )
+  handle_tls_features
+  handle_okta_feature
+  # OCFP enforces the 'no-haproxy' feature
+  merge+=( "manifests/addons/no-haproxy.yml" )
 
+  # OCFP vars overrides
+  merge+=( "ocfp/full-concourse-vars-override.yml" )
 
-if want_feature "full" || want_feature "small-footprint"; then
+  # 'vault' feature, using OCFP vars
+  merge+=( "manifests/addons/vault.yml"
+           "manifests/addons/vault-approle.yml"
+           "ocfp/vault-vars-override.yml" )
+  # 'external-db' & 'external-db-ca' features, using OCFP vars
+  merge+=( "manifests/addons/external-db.yml"
+           "manifests/addons/external-db-ca.yml"
+           "ocfp/external-db-vars-override.yml" )
+
+  merge+=( "ocfp/ocfp.yml" )
+
+  if want_feature "aws"; then
+    merge+=( "ocfp/iaas/aws.yml" )
+  elif want_feature "azure" || want_feature "gcp" || want_feature "vsphere"; then
+      bail "#R{[ERROR]} The #c{azure}, #c{gcp} or #c{vsphere} features are not supported."
+  fi
+elif want_feature "full" || want_feature "small-footprint"; then
   if want_feature "full" ; then
     merge+=( "manifests/concourse/full.yml"
              "manifests/releases/postgres.yml"
@@ -67,20 +122,9 @@ if want_feature "full" || want_feature "small-footprint"; then
     merge+=( "manifests/oauth/github-enterprise-oauth.yml" )
   fi
 
-  if ! want_feature no-tls ; then
-    merge+=( "manifests/concourse/tls.yml" )
-    if want_feature self-signed-cert ; then
-      merge+=( "manifests/addons/self-signed.yml" )
-    elif ! want_feature provided-cert ; then
-      echo >&2 "Concourse needs to be configured with 'no-tls', 'provided-cert' or"
-      echo >&2 "'self-signed-cert'."
-      echo >&2
-      echo >&2 "If upgrading, please add 'self-signed-cert' to your environment's list of"
-      echo >&2 "features and run 'genesis add-secrets' to generate the certificate."
-      echo >&2
-      exit 1
-    fi
-  fi
+  handle_tls_features
+
+  handle_okta_feature
 
   if want_feature "external-db"; then
     merge+=( "manifests/addons/external-db.yml" )
@@ -157,3 +201,10 @@ if want_feature "azure"; then
 fi
 
 echo "${merge[@]}"
+
+# ocfp feature wants ops files to come last, otherwise, they occur inline with other features
+if (( ${#opsfiles[@]} > 0 ))
+then echo "${opsfiles[@]}"
+fi
+
+

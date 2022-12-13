@@ -1,0 +1,12 @@
+---
+meta:
+  concourse_db:
+    type:        (( vault meta.vault "/db/concourse:scheme"   ))
+    username:    (( vault meta.vault "/db/concourse:username" ))
+    password:    (( vault meta.vault "/db/concourse:password" ))
+    hostname:    (( vault meta.vault "/db/concourse:hostname" ))
+    port:        (( vault meta.vault "/db/concourse:port"     ))
+    database:    (( vault meta.vault "/db/concourse:database" ))
+    require_tls: true
+    sslmode:     verify-ca
+    ca:          (( vault meta.vault "/db/concourse:ca"       ))
