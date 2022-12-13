@@ -25,6 +25,9 @@ function handle_okta_feature() {
 }
 
 declare -a merge
+declare -a opsfiles
+ops_var="merge"
+want_feature "ocfp" && ops_var="opsfiles"
 merge=( "manifests/concourse/base.yml"
         "manifests/releases/concourse.yml"
         "manifests/releases/slack-notifications.yml"
@@ -37,7 +40,7 @@ do
     ;;
     (*)
       if [[ -s "${GENESIS_ROOT}/ops/$want.yml" ]]
-      then opsfiles+=( "${GENESIS_ROOT}/ops/${want}.yml" )
+      then eval "${ops_var}+=( \"${GENESIS_ROOT}/ops/${want}.yml\" )"
       else echo >&2 "Unknown feature '${want}'" ; exit 1
       fi
       ;;
@@ -197,9 +200,11 @@ if want_feature "azure"; then
   echo >&2 "automatically at deployment time."
 fi
 
-for opsfile in ${opsfiles[@]}
-do merge+=( "$opsfile" )
-done
-
-
 echo "${merge[@]}"
+
+# ocfp feature wants ops files to come last, otherwise, they occur inline with other features
+if (( ${#opsfiles[@]} > 0 ))
+then echo "${opsfiles[@]}"
+fi
+
+
