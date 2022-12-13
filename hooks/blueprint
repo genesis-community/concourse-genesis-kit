@@ -25,13 +25,15 @@ function handle_okta_feature() {
 }
 
 declare -a merge
-declare -a opsfiles
 ops_var="merge"
-want_feature "ocfp" && ops_var="opsfiles"
 merge=( "manifests/concourse/base.yml"
         "manifests/releases/concourse.yml"
         "manifests/releases/slack-notifications.yml"
         "manifests/concourse/jobs.yml" )
+
+declare -a opsfiles
+want_feature "ocfp" && ops_var="opsfiles"
+opsfiles=() # needed to prevent bash v5 from thinking opsfiles is unbound
 
 for want in ${GENESIS_REQUESTED_FEATURES}
 do
