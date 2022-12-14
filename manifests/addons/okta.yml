@@ -19,5 +19,6 @@ instance_groups:
             display_name: (( grab meta.concourse_okta_name || "Okta" ))
             sso_issuer:   (( vault meta.vault "/okta:sso_issuer" ))
             sso_url:      (( vault meta.vault "/okta:sso_url" ))
-            certificate:  (( vault meta.vault "/okta:ca_cert" ))
+            ca_cert:
+              certificate:  (( vault meta.vault "/okta:ca_cert" ))
 
