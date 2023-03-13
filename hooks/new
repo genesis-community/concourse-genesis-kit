@@ -140,7 +140,7 @@ if [[ "$kit_type" == "full" || "$kit_type" == "small-footprint" ]] ; then
 
   if [[ -n "$use_vault" ]] ; then
     [[ $use_vault == "vault-approle" ]] && features+=("vault")
-    features+=("$auth_backend_feature")
+    features+=("$use_vault")
 
     prompt_for vault_url line -i \
       "Vault URL:" \
@@ -163,7 +163,7 @@ if [[ "$kit_type" == "full" || "$kit_type" == "small-footprint" ]] ; then
         prompt_for vault:token secret-line "Vault Token"
         ;;
       (vault-approle)
-        describe \
+        describe '' \
           "You must run #C{$GENESIS_CALL_ENV do -- setup-approle} before deploying to build the" \
           "concourse approle."
         ;;
