@@ -55,8 +55,8 @@ if [[ "$kit_type" == "full" || "$kit_type" == "small-footprint" ]] ; then
 
       client_id=
       client_secret=
-      prompt_for client_id line "GitHub OAuth Client ID:" -i
-      prompt_for client_secret line "GitHub OAuth Client Secret:" -i
+      prompt_for client_id line "GitHub OAuth Client ID" -i
+      prompt_for client_secret line "GitHub OAuth Client Secret" -i
       safe set --quiet "${GENESIS_SECRETS_BASE}oauth" provider_key="$client_id" provider_secret="$client_secret"
 
       describe "" \
@@ -72,8 +72,8 @@ if [[ "$kit_type" == "full" || "$kit_type" == "small-footprint" ]] ; then
         'to GitHub, so that Concourse can then authorize users after they log into GitHub.' \
         'See https://developer.github.com/v3/oauth/ for more info.'
 
-      prompt_for client_id line "GitHub OAuth Client ID:" -i
-      prompt_for client_secret line "GitHub OAuth Client Secret:" -i
+      prompt_for client_id line "GitHub OAuth Client ID" -i
+      prompt_for client_secret line "GitHub OAuth Client Secret" -i
       safe set --quiet "${GENESIS_SECRETS_BASE}oauth" provider_key="$client_id" provider_secret="$client_secret"
 
       prompt_for authz_allowed_orgs line \
@@ -150,7 +150,7 @@ if [[ "$kit_type" == "full" || "$kit_type" == "small-footprint" ]] ; then
 
     vault_insecure_skip_verify=
     prompt_for vault_insecure_skip_verify boolean "Allow insecure connection?" --default yes --inline
-    $vault_insecure_skip_verify && param_entry params vault_path_prefix
+    $vault_insecure_skip_verify && param_entry params vault_insecure_skip_verify
 
     vault_path_prefix=
     prompt_for vault_path_prefix line -i \
