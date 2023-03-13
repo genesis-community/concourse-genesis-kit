@@ -38,7 +38,7 @@ opsfiles=() # needed to prevent bash v5 from thinking opsfiles is unbound
 for want in ${GENESIS_REQUESTED_FEATURES}
 do
   case ${want} in
-    (azure|shield|workers|full|small-footprint|no-tls|provided-cert|self-signed-cert|github-oauth|github-enterprise-oauth|cf-oauth|vault|vault-approle|shout|prometheus|no-haproxy|dynamic-web-ip|external-db|external-db-ca|ocfp|okta|aws|+internal-db|+locker)
+    (azure|shield|workers|full|small-footprint|no-tls|provided-cert|self-signed-cert|github-oauth|github-enterprise-oauth|cf-oauth|vault|vault-approle|shout|prometheus|no-haproxy|dynamic-web-ip|external-db|external-db-ca|ocfp|okta|aws|+internal-db|+locker|+vault-token-default|+vault-approle-default)
     ;;
     (*)
       if [[ -s "${GENESIS_ROOT}/ops/$want.yml" ]]
@@ -180,7 +180,7 @@ elif want_feature "workers" ; then
 
   for want in ${GENESIS_REQUESTED_FEATURES}; do
     case "$want" in
-      provided-cert|self-signed-cert|github-oauth|github-enterprise-oauth|cf-oauth)
+      provided-cert|self-signed-cert|github-oauth|github-enterprise-oauth|cf-oauth|vault|vault-approle)
         describe >&2 "#Y{[WARNING]} $want feature has no effect on worker-only deployment, and will be ignored"
         ;;
     esac

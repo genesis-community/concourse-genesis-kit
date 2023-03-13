@@ -131,6 +131,45 @@ if [[ "$kit_type" == "full" || "$kit_type" == "small-footprint" ]] ; then
       ;;
   esac
 
+  use_vault=
+  prompt_for use_vault "select" \
+    "Vault integration for secret storage:" \
+    -o "[vault]         Use static token" \
+    -o "[vault-approle] Use approle (generate via genesis <env> do setup-approle)" \
+    -o "[]              No secret storage integration"
+
+  if [[ -n "$use_vault" ]] ; then
+    [[ $use_vault == "vault-approle" ]] && features+=("vault")
+    features+=("$auth_backend_feature")
+
+    prompt_for vault_url line -i \
+      "Vault URL:" \
+      --default "$GENESIS_TARGET_VAULT" \
+      -V url
+    param_entry params vault_url
+
+    vault_insecure_skip_verify=
+    prompt_for vault_insecure_skip_verify boolean "Allow insecure connection?" --default yes --inline
+    $vault_insecure_skip_verify && param_entry params vault_path_prefix
+
+    vault_path_prefix=
+    prompt_for vault_path_prefix line -i \
+      "Vault Path Prefix:" \
+      --default '/concourse'
+    [[ $vault_path_prefix == '/concourse' ]] || param_entry params vault_path_prefix
+
+    case "$use_vault" in
+      (vault)
+        prompt_for vault:token secret-line "Vault Token"
+        ;;
+      (vault-approle)
+        describe \
+          "You must run #C{$GENESIS_CALL_ENV do -- setup-approle} before deploying to build the" \
+          "concourse approle."
+        ;;
+    esac
+  fi
+
   use_external_db=
   prompt_for use_external_db boolean "Do you want to use an external database?" --default no --inline
   if ${use_external_db} ; then
@@ -148,7 +187,8 @@ if [[ "$kit_type" == "full" || "$kit_type" == "small-footprint" ]] ; then
       external_db_user=
       prompt_for external_db_user line "The username used to connect to the database." --default atc
       [[ "$external_db_user" == "atc" ]] || param_entry params external_db_user
-      prompt_for "database/external:password" secret-line "The password for the '${external_db_user}' database user."
+      prompt_for "database/external:password" secret-line \
+        "The password for the '${external_db_user}' database user."
       external_db_sslmode=
       prompt_for external_db_sslmode "select" \
         "The sslmode parameter to connect to the database with." \
@@ -251,4 +291,7 @@ if [[ -n "$params" ]] ; then
 fi
 
 describe "" "Wrote configuration to #C{$ymlfile}." ""
+
+offer_environment_editor
+
 exit 0

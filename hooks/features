@@ -11,4 +11,15 @@ else # non-ocfp based
   if want_feature "full" || want_feature "small-footprint"  ; then
     echo "+locker"
   fi
+  if want_feature "vault" ; then
+    if want_feature "vault-approle" ; then
+      if [[ -z "$(lookup params.vault_approle_role_id "")" && -z "$(lookup params.vault_approle_secret_id)" ]] ; then
+        echo "+vault-approle-defaults"
+      fi
+    else
+      if [[ -z "$(lookup params.vault_token "")" ]] ; then
+        echo "+vault-token-defaults"
+      fi
+    fi
+  fi
 fi

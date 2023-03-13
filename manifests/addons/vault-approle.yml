@@ -2,8 +2,8 @@
 params:
   vault_token:             ~
   vault_auth_backend:      approle
-  vault_approle_role_id:   (( param "Please specify the role_id of the approle user you want Concourse to authenticate with" ))
-  vault_approle_secret_id: (( param "Please specify the secret_id of the approle user you want Concourse to authenticate with" ))
+  vault_approle_role_id:   (( vault meta.vault "approle/concourse:approle-id" ))
+  vault_approle_secret_id: (( vault meta.vault "approle/concourse:approle-secret" ))
 
 ---
 meta:

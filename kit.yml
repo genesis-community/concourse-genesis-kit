@@ -80,3 +80,17 @@ provided:
       keys:
         password:
           prompt: "Password for external database user"
+
+  +vault-token-default:
+    vault:
+      keys:
+        token:
+          prompt: "Vault token"
+
+  +vault-approle-default:
+    approle/concourse:
+      keys:
+        approle-id:
+          prompt: "Approle ID (generated from setup-approle addon)"
+        approle-secret:
+          prompt: "Approle Secret (generated from setup-approle addon)"

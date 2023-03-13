@@ -1,7 +1,7 @@
 ---
 params:
   vault_url:   (( param "Please specify the URL of the Vault for Concourse to pull credentials from" ))
-  vault_token: (( param "Please specify the token that Concourse should use to authenticate with Vault" ))
+  vault_token: (( vault meta.vault "vault:token" ))
 
 ---
 meta:

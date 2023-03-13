@@ -3,7 +3,7 @@
 set -u
 
 #Version check
-min_version="2.7.6"
+min_version="2.8.6-rc10"
 genesis_version="$(genesis -v 2>&1 | grep '^Genesis v' | sed -e 's/Genesis v\(.*\) (.*$/\1/')"
 if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_version" ; then
   describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
@@ -27,7 +27,8 @@ The following addons are defined for #C{$GENESIS_KIT_ID} kit:
   #G{fly}                  Run fly commands targetting this Concourse Deployment
 
   #G{setup-approle}        Create the necessary Vault AppRole and policy for Genesis
-                       Concourse deployments.
+                       Concourse deployments.  Unlike other addons, this can and
+                       should be run before deployment.
 END_OF_LIST
   )" ""
 }
@@ -414,13 +415,6 @@ EOF
       [[ $continue == true ]] || bail "Aborted"
     fi
 
-    echo -n "Checking Exodus data availability..."
-    if ! safe exists "$GENESIS_EXODUS_BASE" ; then
-      bail "#R{[error]}" "Cannot find exodus data for #C{$GENESIS_ENVIRONMENT}.  Please redeploy " \
-           "before using addons."
-    fi
-    describe "#G{[ok]}"
-
     echo -n "$(describe "Generating policy for #C{$approle} app role...")"
     policy="$(
       echo "# Allow the pipelines to read all items within Vault, and write to secret/exodus (for genesis exodus data)"
@@ -480,9 +474,9 @@ EOF
     approle_secret=$(safe vault write -field=secret_id -f auth/approle/role/$approle/secret-id)
 
     # write info to exodus
-    safe --quiet set "${GENESIS_EXODUS_MOUNT}ci/$approle" approle-id="$role_id"
-    safe --quiet set "${GENESIS_EXODUS_MOUNT}ci/$approle" approle-secret="$approle_secret"
-    describe "#G{[ok]}" "Access credentials written to #M{${GENESIS_EXODUS_MOUNT}ci/$approle}"
+    safe --quiet set "${GENESIS_CI_MOUNT}$approle" approle-id="$role_id"
+    safe --quiet set "${GENESIS_CI_MOUNT}$approle" approle-secret="$approle_secret"
+    describe "#G{[ok]}" "Access credentials written to #M{${GENESIS_CI_MOUNT}$approle}"
 
     describe "" "#G{[DONE]} App role #C{$approle} created." ""
   fi
@@ -490,15 +484,7 @@ EOF
 }
 
 ### MAIN
-
-# Initialization of Exodus data lookup for efficiency
-if ! safe exists "$GENESIS_EXODUS_BASE" ; then
-  error "#R{[ERROR]} Cannot find exodus data for #C{$GENESIS_ENVIRONMENT}.  Please redeploy" \
-        "        before using addons."
-fi
-host_env="$(safe get "$GENESIS_EXODUS_BASE:host_env" 2>/dev/null)" || host_env="$GENESIS_ENVIRONMENT"
-exodus_data="$(safe get "${GENESIS_EXODUS_MOUNT}${host_env}/concourse" | spruce json)"
-main_target="$(jq -r --arg default "$GENESIS_ENVIRONMENT" '.main_target//$default' <<<"$exodus_data")"
+#
 
 fly=
 if [[ -n "${GENESIS_FLY_CMD:-}" ]] ; then
@@ -510,6 +496,22 @@ else
 fi
 
 describe >&2 "Using addon script from #C{$GENESIS_KIT_NAME} kit #M{v$GENESIS_KIT_VERSION}"
+
+# setup-approle doesn't need exodus data or a deployment to run
+if [[ "$GENESIS_ADDON_SCRIPT" == "setup-approle" ]] ; then
+  setup_approle
+  exit 0
+fi
+
+# Initialization of Exodus data lookup for efficiency
+if ! safe exists "$GENESIS_EXODUS_BASE" ; then
+  error "#R{[ERROR]} Cannot find exodus data for #C{$GENESIS_ENVIRONMENT}.  Please redeploy" \
+        "        before using addons."
+fi
+host_env="$(safe get "$GENESIS_EXODUS_BASE:host_env" 2>/dev/null)" || host_env="$GENESIS_ENVIRONMENT"
+exodus_data="$(safe get "${GENESIS_EXODUS_MOUNT}${host_env}/concourse" | spruce json)"
+main_target="$(jq -r --arg default "$GENESIS_ENVIRONMENT" '.main_target//$default' <<<"$exodus_data")"
+
 
 # Process requested addon script
 case $GENESIS_ADDON_SCRIPT in
@@ -538,10 +540,6 @@ fly)
   "$fly" -t "$main_target" "$@"
   echo
   exit $?
-  ;;
-
-setup-approle)
-  setup_approle
   ;;
 
 *)
