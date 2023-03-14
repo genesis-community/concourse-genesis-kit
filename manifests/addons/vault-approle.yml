@@ -2,8 +2,8 @@
 params:
   vault_token:             ~
   vault_auth_backend:      approle
-  vault_approle_role_id:   (( vault meta.vault "approle/concourse:approle-id" ))
-  vault_approle_secret_id: (( vault meta.vault "approle/concourse:approle-secret" ))
+  vault_approle_role_id:   (( vault meta.vault "/approle/concourse:approle-id" ))
+  vault_approle_secret_id: (( vault meta.vault "/approle/concourse:approle-secret" ))
 
 ---
 meta:

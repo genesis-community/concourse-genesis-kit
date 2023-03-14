@@ -486,15 +486,6 @@ EOF
 ### MAIN
 #
 
-fly=
-if [[ -n "${GENESIS_FLY_CMD:-}" ]] ; then
-  fly="$GENESIS_FLY_CMD"
-elif [[ -x ${GENESIS_ROOT}/fly ]] ; then
-  fly="${GENESIS_ROOT}/fly"
-else
-  fly="$(type -P fly)"
-fi
-
 describe >&2 "Using addon script from #C{$GENESIS_KIT_NAME} kit #M{v$GENESIS_KIT_VERSION}"
 
 # setup-approle doesn't need exodus data or a deployment to run
@@ -511,6 +502,15 @@ fi
 host_env="$(safe get "$GENESIS_EXODUS_BASE:host_env" 2>/dev/null)" || host_env="$GENESIS_ENVIRONMENT"
 exodus_data="$(safe get "${GENESIS_EXODUS_MOUNT}${host_env}/concourse" | spruce json)"
 main_target="$(jq -r --arg default "$GENESIS_ENVIRONMENT" '.main_target//$default' <<<"$exodus_data")"
+
+fly=
+if [[ -n "${GENESIS_FLY_CMD:-}" ]] ; then
+  fly="$GENESIS_FLY_CMD"
+elif [[ -x ${GENESIS_ROOT}/fly ]] ; then
+  fly="${GENESIS_ROOT}/fly"
+else
+  fly="$(type -P fly)"; true
+fi
 
 
 # Process requested addon script
