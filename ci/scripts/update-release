@@ -28,9 +28,9 @@ pushd bosh-release &> /dev/null
 release_name=$RELEASE_NAME
 release_version="$( cat version )"
 url="$( cat url )"
-if [[ -f sha1 ]] ; then # github-release
+if [[ -f sha1 ]] ; then # bosh-io-release
   sha1=$( cat sha1 )
-else
+else # github-release (maybe others?)
   filename="$( compgen -G "$release_name"*"$release_version.tar" \
             || compgen -G "$release_name"*"$release_version.tgz" \
             || compgen -G "$release_name"*"$release_version.zip" )"
