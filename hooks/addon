@@ -509,7 +509,7 @@ if [[ -n "${GENESIS_FLY_CMD:-}" ]] ; then
 elif [[ -x ${GENESIS_ROOT}/fly ]] ; then
   fly="${GENESIS_ROOT}/fly"
 else
-  fly="$(type -P fly)"; true
+  fly="$(type -P fly)" && true
 fi
 
 
