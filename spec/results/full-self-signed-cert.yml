@@ -154,9 +154,9 @@ instance_groups:
 name: full-self-signed-cert-concourse
 releases:
 - name: concourse
-  sha1: 0920d2a3c13a81f50529ae72118a9d83bece7e65
-  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.9.0
-  version: 7.9.0
+  sha1: 9879a5c3820b63ecdb98bba8d32e502cca6b0d27
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.9.1
+  version: 7.9.1
 - name: slack-notification-resource
   sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
