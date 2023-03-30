@@ -43,7 +43,7 @@ fi
 popd &> /dev/null
 
 # Create ops-file
-if ! grep -q "version: +${release_version}\$" "git/${RELEASE_PATH}"; then
+if ! grep -q "version: \\+${release_version}\$" "git/${RELEASE_PATH}"; then
 
   cat > "git/${RELEASE_PATH}" <<YML
 releases:
@@ -54,7 +54,13 @@ releases:
 YML
 
   header "Release file changes:"
-  git -C git diff -b --color=always "${RELEASE_PATH}" | cat
+  results="$(git -C git diff -b --color=always "${RELEASE_PATH}" | cat)"
+  if echo "$results" | grep -q '.' ; then
+    echo "$results"
+  else
+    echo "No differences found"
+    exit 0
+  fi
 
   header "Recreate spec-test results to validate upstream"
   pushd git/spec &> /dev/null
@@ -88,5 +94,5 @@ YML
     echo "No changes detected."
   fi
 else
-  echo "Nothing todo as versions are the same"
+  echo "Nothing to do as versions are the same"
 fi
