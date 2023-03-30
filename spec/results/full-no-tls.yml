@@ -158,9 +158,9 @@ releases:
   url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
   version: 0.2.1
 - name: haproxy
-  sha1: b3202f2a5baaecdd2b08c065fb3a7492a4b03ff5
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=11.16.1
-  version: 11.16.1
+  sha1: 59b244cd766a96a0d4d2eeaecb12c09b14b68804
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=11.17.4
+  version: 11.17.4
 - name: bpm
   sha1: e8abe19ec186962828de843f8f281cddb6141904
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.21
