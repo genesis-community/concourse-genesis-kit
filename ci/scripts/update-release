@@ -31,7 +31,8 @@ url="$( cat url )"
 if [[ -f sha1 ]] ; then # bosh-io-release
   sha1=$( cat sha1 )
 else # github-release (maybe others?)
-  filename="$( compgen -G "$release_name"*"$release_version.tar" \
+  filename="$( compgen -G "$release_name"*"$release_version.tar.gz" \
+            || compgen -G "$release_name"*"$release_version.tar" \
             || compgen -G "$release_name"*"$release_version.tgz" \
             || compgen -G "$release_name"*"$release_version.zip" )"
   if [[ "$url" =~ https://github.com.*releases/tag/v?$release_version ]] ; then
@@ -42,7 +43,7 @@ fi
 popd &> /dev/null
 
 # Create ops-file
-if ! grep -q "version: +${release_version}\$" "${RELEASE_PATH}"; then
+if ! grep -q "version: +${release_version}\$" "git/${RELEASE_PATH}"; then
 
   cat > "git/${RELEASE_PATH}" <<YML
 releases:
