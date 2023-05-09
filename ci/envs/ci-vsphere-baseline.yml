@@ -10,7 +10,7 @@ genesis:
 
 params:
   concourse_vm_type: large
-  external_domain:   concourse.example.com
+  external_domain:   concourse.ci.pipes.scalecf.net
   num_web_nodes:     1
 
   availability_zones: [z1]
