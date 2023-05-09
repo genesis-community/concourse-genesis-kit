@@ -35,7 +35,7 @@ Learn More
 For more in-depth documentation, check out the [manual][5].
 
 [1]: https://concourse.ci
-[2]: https://github.com/starkandwayne/genesis
+[2]: https://github.com/genesis-community/genesis
 [3]: https://github.com/cloudfoundry-community/locker
 [4]: https://github.com/cloudfoundry-community/locker-resource
 [5]: MANUAL.md

@@ -3,7 +3,7 @@ name: concourse
 version: 3.13.0
 authors:
 - James Hunt  <jhunt@starkandwayne.com>
-- Dennis Bell <dbell@starkandwayne.com>
+- Dennis Bell <dennis@rubidiumstudios.com>
 docs:   https://concourse.ci
 code:   https://github.com/genesis-community/concourse-genesis-kit
 

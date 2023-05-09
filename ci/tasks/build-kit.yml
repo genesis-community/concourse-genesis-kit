@@ -4,7 +4,8 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: starkandwayne/genesis
+    repository: (( grab meta.image.name ))
+    tag:        (( grab meta.image.tag ))
 
 inputs:
 - name: version
