@@ -4,8 +4,8 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: (( grab meta.image.name ))
-    tag:        (( grab meta.image.tag ))
+    repository: registry.ops.scalecf.net/genesis-community/genesis
+    tag: latest
 
 inputs:
 - name: version
