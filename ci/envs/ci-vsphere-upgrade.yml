@@ -12,6 +12,6 @@ params:
   concourse_vm_type: large
   external_domain:   concourse-upgrade.ci.pipes.scalecf.net
   concourse_network: concourse-ci2
-  num_web_nodes:     3
+  num_web_nodes:     1
 
   availability_zones: [z1]

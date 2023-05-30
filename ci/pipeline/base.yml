@@ -88,7 +88,7 @@ groups:
     - spec-check
     - ship-prerelease
     - deploy
-    # - upgrade
+    - upgrade
     - prepare
     - ship-release
 
