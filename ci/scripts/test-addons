@@ -1,0 +1,4 @@
+genesis "do" "${DEPLOY_ENV}" -- download-fly
+genesis "do" "${DEPLOY_ENV}" -- login
+genesis "do" "${DEPLOY_ENV}" -- fly teams -d
+genesis "do" "${DEPLOY_ENV}" -- logout
