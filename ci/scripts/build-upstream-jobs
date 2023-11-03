@@ -14,15 +14,29 @@ upstream_details="$(spruce json "${base_dir}/settings.yml" | jq -r '.meta.upstre
 # For each release in upstream.yml,
 for release in $upstream_details ; do
   name="$(_lookup "$release" .name)"
-  type="$(_lookup "$release" '.type//"bosh-io-release"')" # Other valid value is github-release
+  type="$(_lookup "$release" '.type//"bosh-io-release"')"
   path="$(_lookup "$release" '.path//"manifests/releases/'"$name"'.yml"')"
   repo="$(_lookup "$release" '.repository')"
-  owner=""
-  if [[ $type == "github-release" ]] ; then
-    owner=$'\n'"      owner: ${repo%/*}"
-    repo="${repo##*/}"
-  fi
+  if [[ $type == 'bosh-io-release' ]] ; then
+    source=$'\n'"      repository: $repo";
+  elif [[ $type == 'github-release' ]] ; then
+    owner="$(_lookup "$release" '.owner//""')"
+    if [[ -z "$owner" && "$repo" =~ / ]] ; then
+      owner="${repo%%/*}"
+      repo="${repo#*/}"
+    fi
+    source=$'\n'"      repository: $repo"$'\n'"      owner: $owner";
 
+    token="$(_lookup "$release" '.access_token//""')"
+    if [[ -n "$token" ]] ; then
+      source="$source"$'\n      access_token: "'"$token"'"'
+    fi
+  else
+    echo >&2 "Unknown resource type for $name upstream release: $type"
+    echo >&2 "Expecting one of: bosh-io-release, github-release"
+    echo >&2 "Update upstream.bosh-releases configuration in ci/settings.yml"
+    exit 1
+  fi
   job="update-${name}-release"
   release="${name}-release"
 
@@ -63,8 +77,7 @@ resources:
   - name: $release
     type: $type
     check_every: 24h
-    source:
-      repository: $repo$owner
+    source: $source
 EOF
 
 done
@@ -72,9 +85,10 @@ group_file="$base_dir/pipeline/upstream/update_group.yml"
 if [[ "${#update_group[@]}" -gt 0 ]] ; then
   (
   echo "groups:"
-  echo "- (( append ))"
+  echo "- (( merge on name ))"
   echo "- name: upstream"
   echo "  jobs:"
+  echo "  - (( append ))"
   for job in ${update_group[@]+"${update_group[@]}"} ; do
     echo "  - $job"
   done

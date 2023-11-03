@@ -54,3 +54,4 @@ meta:
     - name:       locker
       type:       github-release
       repository: cloudfoundry-community/locker-boshrelease
+      access_token: ((github.access_token))

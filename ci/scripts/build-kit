@@ -33,15 +33,15 @@ echo "$VAULT_TOKEN" | safe auth token
 safe read secret/handshake
 
 check_dirs=()
-for dir in overlay manifests; do
+for dir in overlay manifests spec/results; do
   [[ -d "$REPO_ROOT/$dir" ]] && check_dirs+=( "$REPO_ROOT/$dir/" )
 done
 if [[ ${#check_dirs[@]} -gt 0 ]] ; then
   header "Checking SHA1s of specified components (not including bosh-deployment) ..."
   out="$(eval "spruce merge --skip-eval $( \
     grep -rl '^releases:' "${check_dirs[@]}" \
-    | sed -e "s/\\(.*\\)/<(spruce json \\1 | jq -r '{releases: .releases}')/" |tr "\n" " " \
-    ) | spruce json | jq -r ." )"
+    | sed -e "s/\\(.*\\)/<(spruce json \\1 | jq -r '{releases: [ \"(( merge on sha1 ))\", .releases[] ]}')/" |tr "\n" " " \
+  ) | spruce json | jq -r ." )"
   echo "$out" | spruce merge | spruce json | "${CI_ROOT}/ci/scripts/check-sha1s"
 fi
 
