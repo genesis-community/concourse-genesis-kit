@@ -1,6 +1,7 @@
 exodus:
   bosh: small-footprint-prometheus
   external_url: https://concourse.testing.examle
+  features: small-footprint,no-tls,prometheus
   is_director: false
   mode: small-footprint
   password: <!{meta.vault}/webui:password!>

@@ -1,6 +1,7 @@
 exodus:
   bosh: full-all-params
   external_url: https://concourse.testing.examle
+  features: full,no-tls,github-oauth,vault,vault-approle,shout,prometheus
   is_director: false
   main_target: full-all-params
   mode: full
