@@ -1,6 +1,7 @@
 exodus:
   bosh: full-no-tls
   external_url: https://concourse.testing.examle
+  features: full,no-tls
   is_director: false
   main_target: full-no-tls
   mode: full

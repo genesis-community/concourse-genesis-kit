@@ -2,6 +2,7 @@ exodus:
   atc_ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   bosh: full-self-signed-cert
   external_url: https://concourse.testing.examle
+  features: full,self-signed-cert
   is_director: false
   main_target: full-self-signed-cert
   mode: full
