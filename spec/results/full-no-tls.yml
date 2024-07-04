@@ -143,29 +143,29 @@ instance_groups:
 name: full-no-tls-concourse
 releases:
 - name: concourse
-  sha1: 9879a5c3820b63ecdb98bba8d32e502cca6b0d27
-  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.9.1
-  version: 7.9.1
+  sha1: c0b566627e3f8890fec9e4ebeea25921a6932d47
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.11.2
+  version: 7.11.2
 - name: slack-notification-resource
   sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
   version: 9
 - name: postgres
-  sha1: 582b1de9522077102dfa44ff7164cd8f499dbfc8
-  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=44
-  version: 44
+  sha1: c00282991b51ca0b3a7399c1c96fb18eff907659
+  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=52
+  version: "52"
 - name: locker
   sha1: ccfcc48d63555a3733c3594d9429a5c1875a9dd2
   url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
   version: 0.2.1
 - name: haproxy
-  sha1: 70acc9dfcd550c8efbd85287f82ce7a396e46a0a
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=12.1.0%2B2.7.7
-  version: 12.1.0+2.7.7
+  sha1: 70f2fd8eb3d35708406137ee91c8da781d16b38b
+  url: https://bosh.io/d/github.com/cloudfoundry/haproxy-boshrelease?v=14.1.1%2B2.8.10
+  version: 14.1.1+2.8.10
 - name: bpm
-  sha1: 8000e1875637e82b96f3e497c45238dfcb3dec45
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.2.2
-  version: 1.2.2
+  sha1: d3e85f17607fbe7fa4e8db1e797ef16fa411dd5d
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.2.20
+  version: 1.2.20
 stemcells:
 - alias: default
   os: ubuntu-jammy
