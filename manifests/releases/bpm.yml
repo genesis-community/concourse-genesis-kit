@@ -1,5 +1,5 @@
 releases:
-- name: bpm
-  version: 1.2.2
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.2.2
-  sha1: 8000e1875637e82b96f3e497c45238dfcb3dec45
+- name: "bpm"
+  version: "1.2.20"
+  url: "https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.2.20"
+  sha1: "d3e85f17607fbe7fa4e8db1e797ef16fa411dd5d"

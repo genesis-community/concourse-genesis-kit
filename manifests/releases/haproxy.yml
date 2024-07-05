@@ -1,5 +1,6 @@
 releases:
-- name: haproxy
-  version: 12.1.0+2.7.7
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=12.1.0%2B2.7.7
-  sha1: 70acc9dfcd550c8efbd85287f82ce7a396e46a0a
+- name: "haproxy"
+  version: "14.1.1+2.8.10"
+  url: "https://bosh.io/d/github.com/cloudfoundry/haproxy-boshrelease?v=14.1.1%2B2.8.10"
+  sha1: "70f2fd8eb3d35708406137ee91c8da781d16b38b"
+
