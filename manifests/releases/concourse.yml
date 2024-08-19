@@ -1,5 +1,5 @@
 releases:
-- name: "concourse"
-  version: "7.11.2"
-  url: "https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.11.2"
-  sha1: "c0b566627e3f8890fec9e4ebeea25921a6932d47"
+- name: concourse
+  version: 7.11.2
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.11.2
+  sha1: c0b566627e3f8890fec9e4ebeea25921a6932d47
