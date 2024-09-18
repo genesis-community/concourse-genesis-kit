@@ -1,9 +1,12 @@
 ---
 kit:
   features:
-    - ((append))
-    - full
-    - self-signed-cert
+  - ((append))
+  - full
+  - self-signed-cert
+  ci:
+    job: deploy
+    serial_groups: [deployment]
 
 genesis:
   env:   ci-vsphere-baseline

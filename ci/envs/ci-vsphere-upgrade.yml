@@ -1,9 +1,13 @@
 ---
 kit:
   features:
-    - ((append))
-    - full
-    - self-signed-cert
+  - ((append))
+  - full
+  - self-signed-cert
+  ci:
+    job: upgrade
+    type: upgrade
+    serial_groups: [deployment]
 
 genesis:
   env:   ci-vsphere-upgrade
