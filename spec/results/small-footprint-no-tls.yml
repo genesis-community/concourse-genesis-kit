@@ -107,9 +107,9 @@ instance_groups:
 name: small-footprint-no-tls-concourse
 releases:
 - name: concourse
-  sha1: c0b566627e3f8890fec9e4ebeea25921a6932d47
-  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.11.2
-  version: 7.11.2
+  sha1: 1cff6c589a12b8da35bc777a891b7f8dd78a9efd
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.12.0
+  version: 7.12.0
 - name: slack-notification-resource
   sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
