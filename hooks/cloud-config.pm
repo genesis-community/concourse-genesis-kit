@@ -45,6 +45,10 @@ sub perform {
               'net_id' => $self->network_reference('id'),
               'security_groups' => ['default', 'concourse'],
             },
+            stackit => {
+              'net_id' => $self->network_reference('id'),
+              'security_groups' => ['default', 'concourse'],
+            },
             aws => {
               'subnet' => $self->network_reference('subnet_ids.0'),
               'security_groups' => ['concourse'],
@@ -57,6 +61,16 @@ sub perform {
       $self->vm_type_definition('concourse',
         cloud_properties_for_iaas => {
           openstack => {
+            'instance_type' => $self->for_scale({
+              dev => 'm1.large',
+              prod => 'm1.xlarge'
+            }, 'm1.large'),
+            'boot_from_volume' => $self->TRUE,
+            'root_disk' => {
+              'size' => 40 # in gigabytes
+            },
+          },
+          stackit => {
             'instance_type' => $self->for_scale({
               dev => 'm1.large',
               prod => 'm1.xlarge'
@@ -90,6 +104,16 @@ sub perform {
               'size' => 80 # in gigabytes
             },
           },
+          stackit => {
+            'instance_type' => $self->for_scale({
+              dev => 'm1.xlarge',
+              prod => 'm1.2xlarge'
+            }, 'm1.xlarge'),
+            'boot_from_volume' => $self->TRUE,
+            'root_disk' => {
+              'size' => 80 # in gigabytes
+            },
+          },
           aws => {
             'instance_type' => $self->for_scale({
               dev => 't3.xlarge',
@@ -113,6 +137,9 @@ sub perform {
         },
         cloud_properties_for_iaas => {
           openstack => {
+            'type' => 'storage_premium_perf6',
+          },
+          stackit => {
             'type' => 'storage_premium_perf6',
           },
           aws => {

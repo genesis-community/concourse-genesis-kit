@@ -36,7 +36,7 @@ sub perform {
 
   # Check for custom ops files in the deployment
   for my $feature ($self->features) {
-    if ($feature =~ /^(azure|shield|workers|full|small-footprint|no-tls|provided-cert|self-signed-cert|github-oauth|github-enterprise-oauth|cf-oauth|vault|vault-approle|shout|prometheus|no-haproxy|dynamic-web-ip|external-db|external-db-ca|ocfp|okta|aws|\+internal-db|\+locker|\+vault-token-default|\+vault-approle-default)$/) {
+    if ($feature =~ /^(azure|shield|workers|full|small-footprint|no-tls|provided-cert|self-signed-cert|github-oauth|github-enterprise-oauth|cf-oauth|vault|vault-approle|shout|prometheus|no-haproxy|dynamic-web-ip|external-db|external-db-ca|ocfp|okta|aws|stackit|\+internal-db|\+locker|\+vault-token-default|\+vault-approle-default)$/) {
       # These are standard features handled below
     } elsif (-f $self->env->path("ops/$feature.yml")) {
       if ($self->want_feature('ocfp')) {
@@ -102,6 +102,8 @@ sub perform {
 
     if ($self->want_feature("aws")) {
       $self->add_files("ocfp/iaas/aws.yml");
+    } elsif ($self->want_feature("stackit")) {
+      $self->add_files("ocfp/iaas/stackit.yml");
     } elsif ($self->want_feature("azure") || $self->want_feature("gcp") || $self->want_feature("vsphere")) {
       bail("#R{[ERROR]} The #c{azure}, #c{gcp} or #c{vsphere} features are not supported.");
     }
