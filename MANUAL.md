@@ -1,475 +1,264 @@
 # Concourse Genesis Kit Manual
 
-The **Concourse Genesis Kit** deploys a Concourse CI/CD system.
-It supports _full_ Concourses, which contain all of the components (web,
-database, and workers), as well as _workers-only_ Concourses, for remote
-satellite sites.
+The **Concourse Genesis Kit** deploys a Concourse CI/CD system. It supports _full_ Concourses, which contain all of the components (web, database, and workers), as well as _workers-only_ Concourses, for remote satellite sites.
 
-# Base Parameters
+This manual serves as an overview of the kit functionality with links to more detailed documentation.
 
-- `volume_driver` - The garden/runc volume driver to use.  Defaults to
-  `detect`, which is usually what you want, unless you know otherwise.
+## Table of Contents
 
-- `max_builds_to_retain` - If set, then any jobs will only keep up to their
-  last n logs, with older ones being reaped from the database.
+- [Quick Reference](#quick-reference)
+- [Deployment Types](#deployment-types)
+- [Feature Flags](#feature-flags)
+- [Authentication Options](#authentication-options)
+- [Integration Options](#integration-options)
+- [Advanced Configuration](#advanced-configuration)
+- [Available Addons](#available-addons)
+- [Detailed Documentation](#detailed-documentation)
+- [Example Deployments](#example-deployments)
 
-- `container_runtime` - The container backend to use on worker nodes. Defaults
-  to `containerd`. Can also be set to `guardian` or `houdini`.
+## Quick Reference
 
-## Sizing and Deployment Parameters
+### Key Parameters
 
-- `concourse_network` - The name of the network you wish to use as specified
-  in your cloud config.  Defaults to `concourse`.
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `external_domain` | FQDN for Concourse web UI | Required for full deployments |
+| `workers` | Number of worker VMs to deploy | 3 |
+| `container_runtime` | Container backend (`containerd`, `guardian`, `houdini`) | `containerd` |
+| `stemcell_os` | The OS to deploy Concourse on | `ubuntu-bionic` |
+| `tsa_host_env` | Target environment for worker-only deployments | Required for workers-only |
 
-- `concourse_vm_type` - The name of the vm type to be used for all the
-  non-worker vms (web, haproxy, db).  Defaults to `small`.
+For a complete list of parameters, see the [Parameters Reference](docs/configuration/params.md).
 
-- `worker_vm_type` - The name of the vm type to be used by workers.  This
-  typically needs more memory and disk than other VMs; we recommend at least
-  8GB of RAM and 60GB of disk.  Defaults to `concourse-worker`.
+## Deployment Types
 
-- `haproxy_vm_type` - The name of the vm type to be used for the haproxy
-  load balancer that sits in front of the web nodes.  Defaults to the value
-  of `concourse_vm_type`.
+The Concourse Genesis Kit supports three primary deployment types:
 
-- `num_web_nodes` - How many web nodes to deploy.  Defaults to 1, but can be
-  scaled up to 5.
+1. **Full Deployment**: All components (web UI, API, database, and workers)
+   - Enable with the `full` feature flag
+   - Requires `external_domain` parameter
 
-- `web_vm_type` - The name of the vm type to be used for the web (ATC)
-  nodes. Defaults to the value of `concourse_vm_type`.
+2. **Small Footprint**: Reduced resource requirements (web/DB combined)
+   - Enable with the `small-footprint` feature flag
+   - Still requires `external_domain` parameter
 
-- `db_vm_type` - The name of the vm type to be used for the database node.
-  Defaults to the value of `concourse_vm_type`.
+3. **Workers-Only**: Remote workers that connect to a separate Concourse
+   - Enable with the `workers` feature flag
+   - Requires `tsa_host_env` parameter
 
-- `concourse_disk_type` - What type of persistent disk (per cloud config) to
-  deploy for the database node.  Defaults to `concourse`.
+For details, see the [Deployment Types Documentation](docs/configuration/deployment-types.md).
 
-- `availability_zones` - What BOSH HA availability zones to deploy Concourse
-  across.  The chosen network must have at least one subnet in each of the
-  listed zones, and the zones themselves must be defined in your cloud
-  config.  Defaults to `z1`, `z2`, and `z3`.
+## Feature Flags
 
-- `stemcell_os` - The operating system you want to deploy Concourse on.
-  This defaults to `ubuntu-bionic`.
+### Core Feature Flags
 
-- `stemcell_version` - The version of the stemcell to deploy.
-  Defaults to `latest`, which is usually what you want.
+| Feature Flag | Description |
+|--------------|-------------|
+| `full` | Deploy a complete Concourse system |
+| `small-footprint` | Deploy a smaller Concourse with web/DB on one VM |
+| `workers` | Deploy only worker nodes for a remote Concourse |
 
-- `workers` - How many workers to deploy.  Defaults to `3`
+### Authentication Feature Flags
 
-## HTTP(S) Proxy Parameters
+| Feature Flag | Description |
+|--------------|-------------|
+| `github-oauth` | Enable GitHub OAuth authentication |
+| `github-enterprise-oauth` | Enable GitHub Enterprise OAuth authentication |
+| `cf-oauth` | Enable Cloud Foundry UAA OAuth authentication |
+| `okta` | Enable SAML authentication via Okta |
 
-- `http_proxy` - (Optional) URL of an HTTP proxy to use for any
-  outbound HTTP (non-TLS) communication.
+### TLS Feature Flags
 
-- `https_proxy` - (Optional) URL of an HTTP proxy to use for any
-  outbound HTTPS (TLS) communication.
+| Feature Flag | Description |
+|--------------|-------------|
+| `self-signed-cert` | Generate and use a self-signed TLS certificate |
+| `provided-cert` | Use a provided TLS certificate |
+| `no-tls` | Don't use TLS (not recommended for production) |
 
-- `no_proxy` - A list of IPs, FQDNs, partial domains, etc. to
-  skip the proxy and connect to directly.  This has no effect if
-  the `http_proxy` and `https_proxy` are not set.
+### Integration Feature Flags
 
-# Deploying A Full Concourse
+| Feature Flag | Description |
+|--------------|-------------|
+| `vault` | Enable Vault integration for pipeline secrets |
+| `vault-approle` | Use Vault AppRole instead of tokens |
+| `prometheus` | Enable Prometheus metrics endpoint |
+| `external-db` | Use an external PostgreSQL database |
+| `ocfp` | Deploy as part of an OCFP architecture |
 
-A _full_ Concourse includes all of the components of the Concourse CI/CD
-system, including workers, the database, the TSA worker coordination
-node(s), and frontend web UI / API node(s).  You generally need exactly one
-of these.
+For a complete list of feature flags, see the [Features Reference](docs/configuration/features.md).
 
-To deploy a full Concourse, specify the `full` feature, and provide
-the following configuration parameters:
+## Authentication Options
 
-- `external_domain` - The fully-qualified domain name, or IP address, for
-  Concourse.  This is used for redirection, and is **required**.
+The Concourse Genesis Kit supports multiple authentication methods:
 
-- `external_url` - The full HTTP(S) URL for this Concourse.  By default,
-  this will be constructed from the chosen `external_domain`.
+1. **Basic Authentication** (default)
+   - Simple username/password for the `main` team
+   - Password stored in Vault at `secret/$env/concourse/webui`
 
-## Shout! A Programmable Notification Gateway
+2. **GitHub OAuth**
+   - Enable with `github-oauth` feature
+   - Set `authz_allowed_orgs` or `github_authz` parameters
 
-If you want to handle notification with some style, enable the
-`shout` addon, and specify your Shout! rules in the `shout_rules`
-parameter.
+3. **CF OAuth**
+   - Enable with `cf-oauth` feature
+   - Set `cf_api_uri` and `cf_spaces` parameters
 
-For details on why and how to do this, see the [Shout!][shout]
-documentation.
+4. **SAML/Okta**
+   - Enable with `okta` feature
+   - Configure via Vault settings
 
-[shout]: https://github.com/jhunt/shout/blob/master/README.md
+For details, see the [Authentication Documentation](docs/authentication/).
 
-The Shout! server will be accessible to your Concourse pipelines,
-on port 7109, at the first web node.
+## Integration Options
 
-## Prometheus Integration
+### Vault Integration
 
-To expose a Prometheus exporter endpoint in Concourse, enable
-the `prometheus` addon. This only works if you're deploying a
-`full` Concourse.
+Enable Vault integration for pipeline secrets:
 
-Parameters:
+```yaml
+features:
+  - vault
+```
 
-- `prometheus_metrics_port`: The port to listen for metrics on. Defaults to
-	9391.
+For details, see the [Vault Integration Documentation](docs/integrations/vault.md).
 
-## HTTP Basic Authentication (Default)
+### Prometheus Integration
 
-Out of the box, Concourse uses HTTP Basic Authentication, assigning a single
-user to the `main` team.
+Enable Prometheus metrics:
 
-The following parameters apply to this authentication method:
+```yaml
+features:
+  - prometheus
+```
 
-- `main_user` - Username of the default administrator account, which will
-  belong to the `main` team.
+For details, see the [Prometheus Integration Documentation](docs/integrations/prometheus.md).
 
-The following secrets will be pulled from the vault:
+### External Database
 
-- **Basic Authentication Pasword** - The password used in basic
-  authentication, for the user interface and the `fly` command.
-  Genesis generates this (randomized) password.  It is stored in
-  the vault, at `secret/$env/concourse/webui`
+Use an external PostgreSQL database:
 
-## Github OAuth2-based Authentication
+```yaml
+features:
+  - external-db
+params:
+  external_db_host: postgres.example.com
+```
 
-Concourse can authenticate against a Github OAuth2 application, either on
-public Github (github.com) or an enterprise, on-premise Github installation.
+For details, see the [External Database Documentation](docs/integrations/external-db.md).
 
-To hook up to public Github, enable the `github-oauth` feature flag, and
-provide the following parameters:
+## Advanced Configuration
 
-  - `authz_allowed_orgs` - What Github organization to authenticate.
-    For legacy reasons, it retains a pluralization of its name, but only
-    allows a single organization.  This parameter is **required**.
+### Team Management
 
-  - `github_authz` - A list of authorizations to determine who is
-    allowed to authenticate. This supersedes `authz_allowed_orgs`,
-    and lets you grant individual teams and users access,
-    regardless of their org memberships.
+Concourse uses a team-based security model. The `main` team is configured through the deployment manifest, while other teams are managed using the `fly` CLI.
 
-The following secrets will be pulled from the vault:
+For details, see the [Team Management Documentation](docs/advanced/team-management.md).
 
-  - **Oauth2 Client ID and Secret** - The Client ID and secret of the Github
-    OAuth2 application to use.
-    This is stored in the vault, at `secret/$env/concourse/oauth`
+### Container Runtimes
 
-To hook up to an Enterprise Github installation, enable the
-`github-enterprise-oauth` feature flag, and provide the following
-parameters (above and beyond those required by `github-oauth`):
-
-  - `github_host` - Domain of the Github Enterprise installation; something like
-    `github.example.com`. No scheme, no trailing slash. This parameter is
-    **required**.
-
-## Cloud Foundry UAA OAuth2-based Authentication
-
-To use your Cloud Foundry UAA server to authenticate Concourse users, enable
-the `cf-oauth` feature flag, and provide the following parameters:
-
-  - `cf_api_uri` - The Cloud Foundry API URL.  This will be used for
-    enumerating org / space memberships, inside of Cloud Foundry.
-    For example: `https://api.sys.your-cf.com`.
-    This parameter is **required**.
-
-  - `cf_spaces` - A list of Cloud Foundry spaces in the form `ORG:SPACE`.
-    Developers in those spaces will be given access to Concourse. This
-    parameter is **required**.
-
-  - `cf_ca_cert_vault_path` - The path, in the Vault, to the Cloud Foundry
-    CA certificate. This is usually something like
-    `secret/path/to/keys/for/haproxy/ssl:certificate`
-    This parameter is **required**.
-
-The following secrets will be pulled from the vault:
-
-  - **Oauth2 Client ID and Secret** - The Client ID and secret of the Cloud
-    Foundry UAA Client to authenticate with.
-    This is stored in the vault, at `secret/$env/concourse/oauth`
-
-
-## X.509 Certificates
-
-Normally, Concourse is configured with an X.509 Certificate, and forces all
-traffic over HTTPS, for security reasons.
-
-If you don't have a certificate, but still want to run TLS, activate the
-`self-signed-cert` feature flag, and Genesis will generate an appropriate
-certificate for you.
-
-If you want to provide your own certificate, enable the `provided-cert`
-flag, and store the certificate in the vault, at the following locations:
-
-  - `secret/$env/concourse/ssl/server:certificate` - The public certificate,
-    PEM-encoded.
-  - `secret/$env/concourse/ssl/server:key` - The private RSA key,
-    PEM-encoded.
-
-If you don't want to run TLS locally (i.e. if you have a reverse proxy out
-in front) you can activate the `no-tls` feature flag.
-
-# Deploying a Satellite Concourse
-
-A _satellite_ Concourse consists solely of remote workers, which connect
-into the TSA on a full Concourse.  These workers will be tagged so that
-pipelines can run specific tasks on them.
-
-To deploy a satellite Concourse, specify the `workers` feature, and provide
-the following configuration parameters:
-
-  - `tsa_host_env` - The name of the Genesis environment to register this
-    satellite Concourse to.
-
-  - `tags` - The list of tags to apply to the workers in this satellite
-    Concourse.  By default, the environment name is applied as the sole tag.
-    Tags cannot contain interior whitespace.
-
-
-# Deploying a Smaller Footprint Concourse
-
-A _small footprint_ Concourse consists of placing all non-worker software into
-a single VM. This is useful for low-traffic, low-concurrent-tasks deployments
-and operators wish to save on resources. Workers still remain as separate VMs.
-
-To enable this feature, specify the `small-footprint` feature instead of `full`
-
-A `small-footprint` deployment cannot be scaled up to a full-size deployment,
-or vice-versa. Any feature flags that work on the `full` deployment will work
-on `small-footprint` deployment.
-
-# Deploying Without HAProxy
-
-The `no-haproxy` feature allows you to deploy without an HAProxy. If you're
-migrating from a deployment that isn't using this feature, you may see your
-web node IP shift back one IP spot into the place that the HAProxy would have
-taken.
-
-Additionally if you would like to attach the web nodes to an IaaS loadbalancer,
-specify the `dynamic-web-ip` feature. This feature attaches a vm-extension to
-the web node that must be defined externally in your cloud config. The vm-extension
-should be configured to attach the vm to the loadbalancer in your specific
-IaaS. The `dynamic-web-ip` feature exposes the following parameter:
-
-  - `web_vm_extension` - The name of the vm-extension that must be externally
-     defined.  Defaults to `concourse-loadbalancer`.
-
-# Using an External Database
-
-The `external-db` feature will cause the kit to not deploy the local database
-VM, and will expose parameters for hooking up the web node to an externally
-deployed PostgreSQL database. Normally, the `locker` API would be located on the
-database VM, but if this feature is provided, it will be moved to the web VM.
-The following parameters are provided by this feature:
-
-- `external_db_host` - The hostname of the database to connect to. Required.
-- `external_db_port` - The port that the database is listening on. Defaults to `5432`.
-- `external_db_name` - The name of the database to connect to. Defaults to `atc`.
-- `external_db_user` - The username used to connect to the database. Defaults to `atc`.
-- `external_db_sslmode` - The sslmode parameter to connect to the database with.
-   Defaults to `verify-ca`.
-
-There is also a secret in the Vault under the path of "database/external:password"
-under the base path for the deployment environment. This can be set by:
-   1. running the genesis new command
-   1. running the genesis add-secrets or rotate-secrets
-   1. manually add the secret with the safe command.
-
-If you are using the default SSL mode for this feature, then you may need to
-explicitly define the CA cert to verify the database certificate against, instead
-of relying on the system certificate pool. To provide this CA certificate, define
-the `external-db-ca` feature in addition to the `external-db` feature, and then
-define the following parameter:
-
-- `external_db_ca` - The CA certificate to validate the DB TLS connection against.
-
-# Setting Up Vault Integration For Pipelines
-
-The ATC can be configured to pull credentials for pipeline configurations using
-Vault. The pipelines can specify properties wrapped in double parentheses to
-pull these credentials dynamically from that Vault. For more information, see
-https://concourse-ci.org/creds.html.
-
-To add this functionality, specify the `vault` feature and provide the
-following configuration parameters.
-
-  - `vault_url` - The URL of the Vault api to contact
-
-  - `vault_path_prefix` - The path prefix to look for paths
-  under. For example, if `((example))` is given in a pipeline
-  definition, it would look at `<vault_path_prefix>/example`
-  in the vault. Defaults to `/concourse`.
-
-  - `vault_insecure_skip_verify` - Whether to skip validation of
-  the cert presented by the Vault API. Defaults to `false`
-
-  - `vault_token` - The token to present as authentication to the Vault API.
-
-## Accessing Vault using an AppRole
-
-You may use a Vault AppRole for Concourse to read pipeline secrets from Vault,
-instead of using an authentication token.
-
-Opt for the `vault-approle` feature for that, and provide the following
-parameters:
-
-- `vault_approle_role_id` - the role ID for the AppRole used to access Vault.
-- `vault_approle_secret_id` - the secret ID of the AppRole.
-
-You may use the `setup-approle` addon in order to create the AppRole that is
-expected here (see also the addons documentation below), but keep in mind that
-the created AppRole will be able to _create_ and _destroy_ secrets, whereas
-Concourse only needs to _read_ secrets.
-
-# Cloud Configuration
-
-By default, Concourse uses the following VM types/networks from your cloud
-config.  Feel free to override them in your environment, if you would rather
-they use entities already existing in your cloud config:
+Configure the container runtime used by worker nodes:
 
 ```yaml
 params:
-  concourse_network:   concourse
-  concourse_vm_type:   concourse          # at least 2 CPUs / 4GB RAM
-  concourse_disk_type: concourse          # at least 10GB (for the db)
-  worker_vm_type:      concourse-worker   # at least 8GB RAM / 60GB disk
+  container_runtime: containerd  # Options: containerd, guardian, houdini
 ```
 
-# Deploying Concourse in an OCF Platform Architecture
+For details, see the [Container Runtime Documentation](docs/configuration/container-runtimes.md).
 
-In the context of an OCFP architecture, opinionated design choices are made
-for the Concourse cluster to deploy, and most of its configuration is drawn
-from specific locations in Vault.
+### OCFP Integration
 
-In order to benefit from the conventions established for OCFP platforms,
-activate the `ocfp` feature and provide these. This will
+Deploy Concourse as part of an OCFP architecture:
 
- - A _full_ Concourse cluster will be deployed (see the `full` feature above),
-   with no HA-proxy (see the `no-haproxy` feature above), and web nodes will
-   be attached to a `concourse-lb` Load Balancer.
+```yaml
+features:
+  - ocfp
+```
 
- - An exernal database will be used (see the `exernal-db` feature above),
-   typically an RDS database in an AWS context. This is supposed to be created
-   by the [Codex Terraform][codex_tf] and the `concourse` Postgres database is
-   supposed to be initiated by an `ocfp init-pg` invocation (see
-   [OCFP Ops Scripts][ocfp_ops_scripts]).
+For details, see the [OCFP Documentation](docs/advanced/ocfp.md).
 
- - A Vault instance will be used as the default source for pipeline secrets
-   (see the `vault` feature above), and will be accessed using an AppRole (see
-   the `vaulr-approle` feature above). The `setup-approle` addon can help in
-   understanding how to setup the necessary AppRole.
+## Available Addons
 
-Some parameters are to be privided in Vault by the operator before deploying,
-within the `secret/<mount-prefix>/<env-slug>/<kit-name>` base path for the
-environement.
+The Concourse Genesis Kit provides several helpful addons:
 
- - `<env-path>/vault:url` - The Vault URL
- - `<env-path>/vault:approle_role_id` - the role ID for the AppRole used to
-   access Vault.
- - `<env-path>/vault:approle_secret_id` - the secret ID of the AppRole.
+- `visit` - Opens the Concourse web UI in your browser
+- `download-fly` - Downloads the matching `fly` CLI
+- `login` - Authenticates your `fly` CLI
+- `logout` - Logs out from Concourse
+- `fly` - Runs fly commands against your Concourse
+- `setup-approle` - Configures Vault AppRole for Concourse
 
-[codex_tf]: https://github.com/starkandwayne/codex/tree/master/terraform
-[ocfp_ops_scripts]: https://github.com/starkandwayne/ocfp-ops-scripts
+Example usage:
+```bash
+genesis do my-env -- login
+genesis do my-env -- fly pipelines
+```
 
-# Available Add-ons
+For details, see the [Addons Documentation](docs/addons/).
 
-- `visit` - Opens the Concourse Web user interface in your browser (requires
-  macOS)
+## Detailed Documentation
 
-- `download-fly` - Downloads the version of the `fly` cli compatible with the
-  deployed version of Concourse.  With no argumements will place the `fly`
-  executable in your current directory.  Supports the following arguments:
+For more detailed documentation, see:
 
-  `<path>`: instead of placing the executable in the current directory, store
-  it under the specified `<path>`.
+- [Parameters Reference](docs/configuration/params.md)
+- [Features Reference](docs/configuration/features.md)
+- [Authentication Methods](docs/authentication/)
+- [Integrations](docs/integrations/)
+- [IaaS-Specific Guides](docs/iaas/)
+- [Troubleshooting Guide](docs/troubleshooting.md)
+- [Upgrade Guide](docs/upgrade.md)
 
-  `--sync`: instead of placing the executable in the current directory, it
-  replaces the `fly` command found in your path.  You must have write-access
-  to that location for this to succeed.
+## Example Deployments
 
-  `-p <platform>`: explicitly state the platform to use instead of relying on
-  the detected platform.  Expects `<platform>` to be one of `darwin`|`mac`,
-  `cygwin`|`windows`|`win`, or `linux`.  **Note:** if you're using fly in the Bash
-  Shell under Windows 10, specify `linux` as your platform.
-
-- `login` - Authenticates your `fly` CLI to this Concourse deployment,
-  creating the `fly` target if necessary, using the same name as this
-  environment.  If you used a self-signed certificate, it will use the
-  `--skip-ssl-validation` flag automatically.
-
-- `logout` - Will recind the authentication token for this target.
-
-- `fly <cmd> <args...>` - Issue a fly command to this Concourse without
-  needing to specify the `-t <target>` argument.  It will even log you in if
-  you're not logged in already.
-
-- `setup-approle` - Create the necessary Vault AppRole and policy for Genesis.
-  This will create an AppRole that can not only read secrets, but also
-  _create_ and _destroy_ them.
-
-
-# Examples
-
-To deploy a host Concourse with self-signed certificate, with load-balanced
-web nodes and two medium workers in a single availability zone.
+### Basic Deployment
 
 ```yaml
 ---
 kit:
-  name:    concourse
-  version: 2.0.0
+  name: concourse
+  version: 3.13.0
   features:
     - full
     - self-signed-cert
 
 params:
-  env: us-east1-prod
-
-  external_domain: ci.example.com
-  num_web_nodes:   2
-
-  worker_vm_type:  medium
-  worker_count:    2
-
-  availability_zones: [z1]
+  env: prod
+  external_domain: concourse.example.com
+  workers: 3
 ```
 
-To deploy a worker pool for an isolated production environment that is hosted
-by the above deployment, with bigger workers and more of them:
+### Small Footprint with GitHub Auth
 
 ```yaml
 ---
 kit:
-  name:    concourse
-  version: 2.0.0
+  name: concourse
+  version: 3.13.0
+  features:
+    - small-footprint
+    - self-signed-cert
+    - github-oauth
+
+params:
+  env: dev
+  external_domain: concourse-dev.example.com
+  authz_allowed_orgs: my-github-org
+```
+
+### Workers-Only Deployment
+
+```yaml
+---
+kit:
+  name: concourse
+  version: 3.13.0
   features:
     - workers
 
 params:
-  env: us-west1-prod
-
-  tsa_host_env: us-east1-prod
-
-  worker_vm_type: large
-  worker_count:   6
-
-  tags:
-    - us-west1-prod
-    - alternative-tag
-
-  availability_zones: [z1]
+  env: workers
+  tsa_host_env: prod
+  workers: 5
+  tags: [remote, high-cpu]
 ```
 
-
-## History
-
-2.0.0 was the first version to support Genesis 2.6 hooks and exodus data
-for addon scripts and `genesis info`.
-
-2.1.0 added parameters for fine-grain control of GitHub OAuth2 config, added
-`no-tls` feature to disable HTTPS, and some bug fixes.
-
-2.2.0 upgraded Concourse to 3.14.1 and Garden to 1.14.0, as well as adding
-Vault feature, which can hook up an externally deployed Vault to the ATC
-for credential storage.
-
-2.3.0 added an addon command to setup an AppRole and policy for Genesis
-Concourse deployments. Also added Shout! support.
-
-2.3.1 added a `small-footprint` feature to place all non-worker software
-on a single VM.
+For more examples, see the [Example Deployments](docs/examples/).
