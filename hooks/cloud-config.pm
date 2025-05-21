@@ -82,12 +82,19 @@ sub perform {
           },
           aws => {
             'instance_type' => $self->for_scale({
-              dev => 't3.large',
-              prod => 'm5.xlarge'
-            }, 't3.large'),
+              dev => 't3.medium',
+              prod => 'm6i.large'
+            }, 't3.medium'),
             'ephemeral_disk' => {
-              'size' => 40,
-              'type' => 'gp2'
+              'encrypted' => $self->TRUE,
+              'size' => $self->for_scale({
+                dev => gigabytes(64),
+                prod => gigabytes(128)
+              }, gigabytes(64)),
+              'type' => 'gp3'
+            },
+            'metadata_options' => {
+              'http_tokens' => 'required'
             },
           },
         },
@@ -116,12 +123,19 @@ sub perform {
           },
           aws => {
             'instance_type' => $self->for_scale({
-              dev => 't3.xlarge',
-              prod => 'm5.2xlarge'
-            }, 't3.xlarge'),
+              dev => 't3.medium',
+              prod => 'm6i.large'
+            }, 't3.medium'),
             'ephemeral_disk' => {
-              'size' => 80,
-              'type' => 'gp2'
+              'encrypted' => $self->TRUE,
+              'size' => $self->for_scale({
+                dev => gigabytes(64),
+                prod => gigabytes(256)
+              }, gigabytes(64)),
+              'type' => 'gp3'
+            },
+            'metadata_options' => {
+              'http_tokens' => 'required'
             },
           },
         },
@@ -143,12 +157,23 @@ sub perform {
             'type' => 'storage_premium_perf6',
           },
           aws => {
-            'type' => 'gp2',
+            'type' => 'gp3',
+            'encrypted' => $self->TRUE,
           },
         },
       ),
     ],
   });
+
+  # Add AWS load balancer VM extension
+  if ($self->iaas eq 'aws') {
+    push @{$config->{vm_extensions}}, {
+      name => 'concourse-lb',
+      cloud_properties => {
+        lb_target_groups => ['ocfp-mgmt-concourse-lb-tg']
+      }
+    };
+  }
 
   $self->done($config);
 }
