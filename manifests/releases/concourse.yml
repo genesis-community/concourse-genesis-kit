@@ -1,5 +1,5 @@
 releases:
 - name: concourse
-  version: 7.13.0
-  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.13.0
-  sha1: 85e6454ae3cd4363126f362b0390a430c4c46b29
+  version: 7.13.2
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.13.2
+  sha1: 20ef477efc14cbf701c0ddfe69565ad5c238a87a
