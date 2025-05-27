@@ -84,7 +84,7 @@ sub perform {
     $self->_setup_pipelines_approle(\@roles);
   }
 
-  return 1;
+  return $self->done();
 }
 
 sub _setup_concourse_approle {

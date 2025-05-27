@@ -51,7 +51,7 @@ sub perform {
   system("read -n 1 -s -r -p \"Press any key to open the web console...\"");
   system($cmd, "${host}/teams/main/login");
 
-  return 1;
+  return $self->done();
 }
 
 sub _get_open_command {

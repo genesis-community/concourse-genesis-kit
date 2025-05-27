@@ -72,8 +72,7 @@ sub perform {
     }
   }
 
-  info("");
-  return $success;
+  return $self->done();
 }
 
 sub _find_fly {

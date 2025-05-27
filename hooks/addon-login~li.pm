@@ -105,7 +105,7 @@ sub perform {
     $env->notify("#R{[ERROR]} Failed to log in!");
   }
 
-  return $rc == 0 ? 1 : 0;
+  return $rc == 0 ? $self->done() : $self->done(0);
 }
 
 sub _find_fly {

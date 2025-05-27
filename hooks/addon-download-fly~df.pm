@@ -127,7 +127,7 @@ sub perform {
 
   $env->notify( "\n#G{Download successful - written to}:\n\t#C{$path}\n" );
 
-  return 1;
+  return $self->done();
 }
 
 1;

@@ -27,18 +27,17 @@ sub perform {
     my $call_env = $self->env->get_call_path_with_env();
 
     info(
-      "\n".
       "\n#M{$ENV{GENESIS_ENVIRONMENT}} $mode Concourse deployed!\n".
       "\nFor details about the deployment, run\n".
       "\t#G{$ENV{GENESIS_CALL} info $ENV{GENESIS_ENVIRONMENT}}\n".
       "\nTo download the '#C{fly}' CLI for the first time, run\n".
-      "  #G{$call_env do -- download-fly /location/in/your/path}\n".
+      "\t#G{$call_env do -- download-fly /location/in/your/path}\n".
       "\nTo update your current version of the '#C{fly}' CLI, run\n".
-      "  #G{$call_env do -- download-fly --sync}\n".
+      "\t#G{$call_env do -- download-fly --sync}\n".
       "\nTo target & log into this Concourse with fly, run\n".
-      "  #G{$call_env do -- login}\n".
+      "\t#G{$call_env do -- login}\n".
       "\nTo run a fly command against this Concourse, run (without -t <target>)\n".
-      "  #G{$call_env do -- fly [options and arguments]}\n".
+      "\t#G{$call_env do -- fly [options and arguments]}\n".
       "\nAs an extra efficiency, if you run the '#C{fly}' addon above, it will\n".
       "\tautomatically create the target if one doesn't exist, and log you in if\n".
       "\tyou're not already logged in, before running your desired command.\n".
@@ -47,7 +46,7 @@ sub perform {
     );
   }
 
-  return $self->done(1);
+  return $self->done();
 }
 
 1;

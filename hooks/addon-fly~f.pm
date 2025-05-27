@@ -57,7 +57,7 @@ sub perform {
   my $rc = system(@cmd);
   info("");
 
-  return $rc == 0 ? 1 : 0;
+  return $rc == 0 ? $self->done() : $self->done(0);
 }
 
 sub _find_fly {
