@@ -9,6 +9,14 @@ code:   https://github.com/genesis-community/concourse-genesis-kit
 
 genesis_version_min: 2.7.6
 
+supports:
+- aws
+- azure
+- gcp
+- openstack
+- vsphere
+- stackit
+
 certificates:
   self-signed-cert:
     ssl:
