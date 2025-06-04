@@ -29,7 +29,7 @@ sub perform {
   # Skip cloud config checking as it's now handled separately
 
   # Check kit feature compatibility
-  if ($self->env->want_feature('ocfp') && $self->env->want_feature('workers')) {
+  if ($self->want_feature('ocfp') && $self->want_feature('workers')) {
     $self->env->notify(
       error => "The 'ocfp' and 'workers' features cannot be used together: [#R{FAILED}]"
     );
@@ -39,7 +39,7 @@ sub perform {
   # Check mutual exclusivity of authentication methods
   my $auth_count = 0;
   for my $auth_feature (qw/github-oauth github-enterprise-oauth cf-oauth okta/) {
-    $auth_count++ if $self->env->want_feature($auth_feature);
+    $auth_count++ if $self->want_feature($auth_feature);
   }
 
   if ($auth_count > 1) {
@@ -50,7 +50,7 @@ sub perform {
   }
 
   # Check vault configuration
-  if ($self->env->want_feature('vault-approle') && !$self->env->want_feature('vault')) {
+  if ($self->want_feature('vault-approle') && !$self->want_feature('vault')) {
     $self->env->notify(
       error => "The 'vault-approle' feature requires the 'vault' feature: [#R{FAILED}]"
     );
@@ -64,7 +64,7 @@ sub perform {
     $self->env->notify(error => "environment files [#R{FAILED}]");
   }
 
-  return $self->done();
+  return $self->done(1);
 }
 
 1;

@@ -28,7 +28,7 @@ sub perform {
   return 1 if $self->completed;
 
   my $network_name = $self->env->lookup('params.concourse_network', 'concourse');
-  my $is_ocfp = $self->env->want_feature('ocfp');
+  my $is_ocfp = $self->want_feature('ocfp');
   my $env_scale = $is_ocfp ? $self->env->lookup('meta.ocfp.env.scale', 'dev') : 'default';
 
   my $config = $self->build_cloud_config({
@@ -47,7 +47,7 @@ sub perform {
             },
             stackit => {
               'net_id' => $self->network_reference('id'),
-              'security_groups' => ['default', 'concourse'],
+	      'security_groups' => $self->network_reference('sgs', 'get_sgs_by_names', 'ocfp', 'default'),
             },
             aws => {
               'subnet' => $self->network_reference('subnet_ids.0'),
@@ -72,10 +72,9 @@ sub perform {
           },
           stackit => {
             'instance_type' => $self->for_scale({
-              dev => 'm1.large',
-              prod => 'm1.xlarge'
-            }, 'm1.large'),
-            'boot_from_volume' => $self->TRUE,
+              dev => 'm1.2',
+              prod => 'g1.3'
+            }, 'm1.3'),
             'root_disk' => {
               'size' => 40 # in gigabytes
             },
@@ -113,10 +112,9 @@ sub perform {
           },
           stackit => {
             'instance_type' => $self->for_scale({
-              dev => 'm1.xlarge',
-              prod => 'm1.2xlarge'
-            }, 'm1.xlarge'),
-            'boot_from_volume' => $self->TRUE,
+              dev => 'g1.3',
+              prod => 'g1.4'
+            }, 'm1.3'),
             'root_disk' => {
               'size' => 80 # in gigabytes
             },
@@ -176,6 +174,13 @@ sub perform {
   }
 
   $self->done($config);
+}
+
+sub get_sgs_by_names {
+	my ($self, $subnet_data, $ref, @names) = @_;
+	my @ids = map {$subnet_data->{$ref}{$_}{id}} @names;
+	# TODO: Error checking
+	return \@ids
 }
 
 1;

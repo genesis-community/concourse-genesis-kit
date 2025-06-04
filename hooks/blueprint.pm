@@ -227,7 +227,7 @@ sub perform {
     }
   }
 
-  return $self->done();
+  return $self->done(1);
 }
 
 sub _handle_tls_features {
