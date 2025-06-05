@@ -1,17 +1,16 @@
-#!/usr/bin/env perl
-# vim: set ts=2 sw=2 sts=2 foldmethod=marker
 package Genesis::Hook::Features::Concourse v2.7.0;
 
-use strict;
-use warnings;
 use v5.20; # Genesis min perl version is 5.20
+use warnings;
 
 # Only needed for development
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
+
 use parent qw(Genesis::Hook::Features);
 
 use Genesis qw/bail/;
 
+# init - Initialize the hook {{{
 sub init {
   my $class = shift;
   my $obj = $class->SUPER::init(@_);
@@ -19,6 +18,9 @@ sub init {
   return $obj;
 }
 
+# }}}
+
+# perform - Main hook execution {{{
 sub perform {
   my ($self) = @_;
 
@@ -30,6 +32,10 @@ sub perform {
   if ($self->has_feature("ocfp")) {
     # Contract handles database (via vault) & sizing (dev/prod)
     $self->add_feature("+locker");
+		if ($self->has_feature("internal-db")) {
+			$self->delete_feature("internal-db");
+			$self->add_feature("+internal-db");
+		}
   } else {
     # Non-ocfp based
     if (!$self->has_feature("external-db")) {
@@ -59,5 +65,8 @@ sub perform {
   return $self->done();
 }
 
-1;
+# }}}
+
+1; # End of module
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
 
