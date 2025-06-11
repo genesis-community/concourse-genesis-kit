@@ -339,7 +339,7 @@ EOF
       echo -n "$(describe "Creating mount #C{${concourse_mount} (kv v$kv_version)...")"
       if [[ -n "$kv_version" ]] ; then
         desc="endpoint used for interpolating concourse pipeline secrets"
-        if ! safe vault secrets enable kv -path "${concourse_mount}" -version "${kv_version}" -description "${desc}" ; then
+        if ! safe vault secrets enable -path "${concourse_mount}" -version "${kv_version}" -description "${desc}" kv ; then
           bail "#R{[error]}" "Failed to create mount ${concourse_mount} -- please resolve and try again" ""
         fi
       fi

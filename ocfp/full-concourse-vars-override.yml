@@ -1,6 +1,6 @@
 ---
 params:
-  external_domain: (( vault meta.ocfp.vault.tf "/lbs/concourse:domain" ))
+  external_domain: (( vault meta.ocfp.vault.config "/lbs/concourse:domain" ))
 
   num_web_nodes: 1
   worker: 3

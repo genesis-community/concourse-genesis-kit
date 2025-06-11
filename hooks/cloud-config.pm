@@ -23,6 +23,13 @@ sub init {
   return $obj;
 }
 
+sub stackit_subnet_reference {
+	my ($self, $property) = @_;
+	# Custom method to handle stackit's 1:1 network:subnet relationship
+	# This extracts subnet information directly instead of using network references
+	return $self->subnet_reference($property);
+}
+
 sub perform {
   my ($self) = @_;
   return 1 if $self->completed;
@@ -37,7 +44,7 @@ sub perform {
         strategy => $is_ocfp ? 'ocfp' : 'manual',
         dynamic_subnets => {
           allocation => {
-            size => 16,
+            size => 12, #was 16
             statics => 5,
           },
           cloud_properties_for_iaas => {
