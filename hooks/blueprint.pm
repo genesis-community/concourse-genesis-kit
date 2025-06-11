@@ -49,8 +49,10 @@ sub perform {
     }
   }
 
+  my $iaas //= $self->iaas;
+
   # Handle CPI-specific features
-  if ($self->bosh_cpi() eq "azure") {
+  if ($iaas eq "azure") {
     $self->add_files("manifests/addons/azure.yml");
   }
 
@@ -82,7 +84,12 @@ sub perform {
     $self->add_files("manifests/addons/no-haproxy.yml");
 
     # OCFP vars overrides
-    $self->add_files("ocfp/full-concourse-vars-override.yml");
+    #
+    if ($iaas eq "stackit") {
+      $self->add_files("ocfp/full-concourse-vars-override-stackit.yml"); # Uses static IP for F5 or external lb
+    } else {
+      $self->add_files("ocfp/full-concourse-vars-override.yml"); # Uses ELB
+    }
 
     # 'vault' feature, using OCFP vars
     $self->add_files(
@@ -91,12 +98,14 @@ sub perform {
       "ocfp/vault-vars-override.yml"
     );
 
-    # 'external-db' & 'external-db-ca' features, using OCFP vars
-    $self->add_files(
-      "manifests/addons/external-db.yml",
-      "manifests/addons/external-db-ca.yml",
-      "ocfp/external-db-vars-override.yml"
-    );
+    if (!$iaas eq "stackit") {  # STACKIT doesn't use external DB's yet
+      # 'external-db' & 'external-db-ca' features, using OCFP vars
+      $self->add_files(
+        "manifests/addons/external-db.yml",
+        "manifests/addons/external-db-ca.yml",
+        "ocfp/external-db-vars-override.yml"
+      );
+    }
 
     $self->add_files("ocfp/ocfp.yml");
 

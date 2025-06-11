@@ -1,4 +1,3 @@
-#!/usr/bin/env perl
 # vim: set ts=2 sw=2 sts=2 foldmethod=marker
 package Genesis::Hook::Addon::Concourse::SetupApprole v2.7.0;
 
@@ -43,6 +42,7 @@ sub perform {
 
   # Check if AppRole is enabled
   info("Ensuring Vault AppRole is enabled...");
+  use Pry; pry;
   my $result = $self->vault->query("auth enable approle 2>&1 || true");
 
   my @roles = ();
