@@ -1,16 +1,15 @@
-#!/usr/bin/env perl
-# # vim: set ts=2 sw=2 sts=2 et:
-package Genesis::Hook::Info::Concourse v2.7.0; # ...::[KIT] v[KIT_VERSION]
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
+# # vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
+package Genesis::Hook::Info::Concourse; # ...::[KIT] v[KIT_VERSION]
 
-use strict;
-use warnings;
-use v5.20; # Genesis supports min perl v5.20.
+use v5.20;
+use warnings; # Genesis supports min perl v5.20.
 
 # Only needed for development
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 
 # Parent class inheritance
-use parent qw(Genesis::Hook);
+use parent qw(Genesis::Hook::Info);
 
 # Import required functions
 use Genesis qw/bail info/;

@@ -1,10 +1,8 @@
-#!/usr/bin/env perl
-# vim: set ts=2 sw=2 sts=2 et:
-package Genesis::Hook::Blueprint::Concourse v2.7.0;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
+package Genesis::Hook::Blueprint::Concourse;
 
-use strict;
-use warnings;
 use v5.20;
+use warnings;
 
 # Only needed for development
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}

@@ -1,4 +1,5 @@
-package Genesis::Hook::Features::Concourse v2.7.0;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
+package Genesis::Hook::Features::Concourse;
 
 use v5.20; # Genesis min perl version is 5.20
 use warnings;
