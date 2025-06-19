@@ -1,4 +1,3 @@
-# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
 package Genesis::Hook::PostDeploy::Concourse;
 
 use v5.20;
@@ -47,7 +46,8 @@ sub perform {
     );
   }
 
-  return $self->done();
+  return $self->done(1);
 }
 
 1;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
