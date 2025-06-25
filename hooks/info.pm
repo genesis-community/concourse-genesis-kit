@@ -36,7 +36,7 @@ sub perform {
     $host_env = $env->name;
   }
 
-  if ($env->want_feature("workers")) {
+  if ($self->want_feature("workers")) {
     if (!keys %$worker_data) {
       info("#R{[ERROR]} Missing data on this worker-only deploy. Please redeploy with Genesis v2.6 or later");
       return $self->done(0);

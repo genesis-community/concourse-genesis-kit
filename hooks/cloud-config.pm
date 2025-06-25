@@ -41,8 +41,7 @@ sub perform {
         strategy => $is_ocfp ? 'ocfp' : 'manual',
         dynamic_subnets => {
           allocation => {
-            size => 12, #was 16
-            statics => 5,
+            total_size => 12, #was 16
           },
           cloud_properties_for_iaas => {
             openstack => {

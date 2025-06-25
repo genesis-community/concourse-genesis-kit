@@ -8,6 +8,8 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'./.genesis
 
 use parent qw(Genesis::Hook::PostDeploy);
 
+use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
+
 sub init {
   my ($class, %ops) = @_;
   my $self = $class->SUPER::init(%ops);
@@ -18,12 +20,12 @@ sub init {
 sub perform {
   my ($self) = @_;
 
-  # Call any parent methods that need to be executed
-  $self->SUPER::perform() if $self->can('SUPER::perform');
+  #  # Call any parent methods that need to be executed
+  #$self->SUPER::perform() if $self->can('SUPER::perform');
 
   # Only show deployment info if the deployment was successful
   if ($self->deploy_successful) {
-    my $mode = $self->env->want_feature('workers') ? "Satellite (workers only)" : "Full";
+    my $mode = $self->want_feature('workers') ? "Satellite (workers only)" : "Full";
     my $call_env = $self->env->get_call_path_with_env();
 
     info(
