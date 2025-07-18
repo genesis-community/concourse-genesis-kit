@@ -11,7 +11,7 @@ use parent qw(Genesis::Hook::Addon);
 sub init {
   my $class = shift;
   my $obj = $class->SUPER::init(@_);
-  $obj->check_minimum_genesis_version('3.1.0-rc.20');
+  $obj->check_minimum_genesis_version('3.1.0');
   return $obj;
 }
 
@@ -41,7 +41,7 @@ sub perform {
 
   # Check if AppRole is enabled
   info("Ensuring Vault AppRole is enabled...");
-  my $result = $self->vault->query("auth enable approle 2>&1 || true");
+  my $result = $self->vault->query("vault","auth","enable","approle");
 
   my @roles = ();
   if ($result =~ /(Success\! Enabled approle auth method)/) {
@@ -50,7 +50,7 @@ sub perform {
     info("#G{[ok - approle already enabled]}");
     info("Checking for existing roles...");
 
-    my $roles_output = $self->vault->query("ls auth/approle/role -1");
+    my $roles_output = $self->vault->query("ls","auth/approle/role","-1");
     @roles = split(/\n/, $roles_output);
     info("#G{[ok - " . scalar(@roles) . " role(s) found]}");
   } else {
@@ -58,18 +58,15 @@ sub perform {
   }
 
   # Setup concourse approle
-  my $create_concourse = "";
-  prompt_for('create', 'boolean', "-i", "--default", "true",
-    "Do you want to install the #C{concourse} app role?",
-    \$create_concourse);
+  my $create_concourse = prompt_for_boolean("Do you want to install the #C{concourse} app role? [Y/N]", 0);
 
-  if ($create_concourse eq 'true') {
+  if ($create_concourse) {
     $self->_setup_concourse_approle(\@roles);
   }
 
   # Setup genesis-pipelines approle
   my $create_pipelines = "";
-  prompt_for('create',
+  prompt_for_boolean('create',
     'boolean',
     "-i",
     "--default",
@@ -93,7 +90,7 @@ sub _setup_concourse_approle {
   if (grep { $_ eq $approle } @$roles_ref) {
     info("#y{[WARNING]} App role #C{$approle} already exists. This action will overwrite it...");
     my $continue = "";
-    prompt_for(
+    prompt_for_boolean(
       'continue',
       'boolean',
       "-i",
@@ -106,30 +103,30 @@ sub _setup_concourse_approle {
   }
 
   # Get concourse mount point
-  my $concourse_mount = "";
-  prompt_for(
-    'concourse_mount',
-    'line',
-    "-i",
-    "--default",
-    'concourse',
-    "-V",
-    '/^[a-z0-9]*$/',
-    "Mount to use for concourse secrets ",
-    \$concourse_mount
-  );
+  my $concourse_mount = "concourse";
+#  prompt_for(
+#    'concourse_mount',
+#    'line',
+#    "-i",
+#    "--default",
+#    'concourse',
+#    "-V",
+#    '/^[a-z0-9]*$/',
+#    "Mount to use for concourse secrets ",
+#    \$concourse_mount
+#  );
 
   # Get approle path
   my $concourse_approle_path = $ENV{GENESIS_SECRETS_BASE} . "approle/concourse";
-  prompt_for(
-    'concourse_approle_path',
-    'line',
-    "-i",
-    "--default",
-    $concourse_approle_path,
-    "Vault path for storing concourse app role credentials",
-    \$concourse_approle_path
-  );
+#  prompt_for(
+#    'concourse_approle_path',
+#    'line',
+#    "-i",
+#    "--default",
+#    $concourse_approle_path,
+#    "Vault path for storing concourse app role credentials",
+#    \$concourse_approle_path
+#  );
 
   # Check if mount exists
   my $mount_type = $self->_get_mount_type($concourse_mount);
@@ -139,19 +136,19 @@ sub _setup_concourse_approle {
 
   if (!$mount_type) {
     # Create mount if it doesn't exist
-    my $kv_version = "";
-    prompt_for('kv_version', 'select', "", "--default", "2",
-      "Mount ${concourse_mount_path} does not exist. It must be a v1 or v2 kv store.",
-      "-o", "[1] Create a kv v1 secrets store",
-      "-o", "[2] Create a kv v2 secrets store",
-      \$kv_version);
+    my $kv_version = "2";
+#    prompt_for('kv_version', 'select', "", "--default", "2",
+#      "Mount ${concourse_mount_path} does not exist. It must be a v1 or v2 kv store.",
+#      "-o", "[1] Create a kv v1 secrets store",
+#      "-o", "[2] Create a kv v2 secrets store",
+#      \$kv_version);
 
     info("Creating mount #C{${concourse_mount_path} (kv v$kv_version)}...");
 
     if ($kv_version) {
       my $desc = "endpoint used for interpolating concourse pipeline secrets";
       my $rc = $self->vault->query(
-        "secrets enable kv -path \"${concourse_mount}\" -version \"${kv_version}\" -description \"${desc}\""
+        "vault","secrets","enable","-path",$concourse_mount,"-version",$kv_version,"-description",$desc, "kv"
       );
       if ($rc != 0) {
         bail("#R{[error]}\nFailed to create mount ${concourse_mount_path} -- please resolve and try again\n");
@@ -185,7 +182,7 @@ sub _setup_concourse_approle {
     $policy .= "path \"${concourse_mount_path}/metadata/*$capabilities\n";
   }
 
-  my $rc = $self->vault->query("policy write concourse - <<< \"$policy\"");
+  my $rc = $self->vault->query("vault","policy","write","concourse","- <<<", $policy);
   if ($rc != 0) {
     bail("#R{[error]}\nFailed to save #C{concourse} policy.");
   }
@@ -194,7 +191,7 @@ sub _setup_concourse_approle {
 
   # Create app role
   info("Creating and configuring app role #C{$approle}...");
-  $self->vault->query("delete auth/approle/role/$approle");
+  $self->vault->query("vault delete auth/approle/role/$approle");
 
   $rc = $self->vault->set(
     "auth/approle/role/$approle",
@@ -215,7 +212,7 @@ sub _setup_concourse_approle {
   # Generate credentials
   info("Generating and storing authentication credentials...");
   my $role_id = $self->vault->get("auth/approle/role/$approle/role-id:role_id");
-  my $approle_secret = $self->vault->query("write -field=secret_id -f auth/approle/role/$approle/secret-id");
+  my $approle_secret = $self->vault->query("vault write -field=secret_id -f auth/approle/role/$approle/secret-id");
 
   # Store credentials
   $self->vault->set("${concourse_approle_path}", "approle-id", "$role_id");
@@ -292,7 +289,7 @@ sub _setup_pipelines_approle {
 
   # Create AppRole
   info("Creating and configuring app role #C{$approle}...");
-  $self->vault->query("delete auth/approle/role/$approle");
+  $self->vault->query("vault delete auth/approle/role/$approle");
 
   $rc = $self->vault->set(
     "auth/approle/role/$approle",
@@ -312,7 +309,7 @@ sub _setup_pipelines_approle {
   # Generate credentials
   info("Writing access credentials to Exodus...");
   my $role_id = $self->vault->get("auth/approle/role/$approle/role-id:role_id");
-  my $approle_secret = $self->vault->query("write -field=secret_id -f auth/approle/role/$approle/secret-id");
+  my $approle_secret = $self->vault->query("vault write -field=secret_id -f auth/approle/role/$approle/secret-id");
 
   # Store credentials in CI mount
   $self->vault->set("${ENV{GENESIS_CI_MOUNT}}$approle", "approle-id", "$role_id");
@@ -350,7 +347,7 @@ sub _get_mount_type {
 
 sub _match_mount {
   my ($self, $path) = @_;
-  my $output = $self->vault->query("secrets list --detailed");
+  my $output = $self->vault->query("vault secrets list --detailed");
 
   # Get all kv mounts with versions
   my @mounts = ();
