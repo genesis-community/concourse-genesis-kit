@@ -65,17 +65,9 @@ sub perform {
   }
 
   # Setup genesis-pipelines approle
-  my $create_pipelines = "";
-  prompt_for_boolean('create',
-    'boolean',
-    "-i",
-    "--default",
-    "true",
-    "Do you want to install the #C{genesis-pipelines} app role?",
-    \$create_pipelines
-  );
+  my $create_pipelines = prompt_for_boolean("Do you want to install the #C{genesis-pipelines} app role?", 0);
 
-  if ($create_pipelines eq 'true') {
+  if ($create_pipelines) {
     $self->_setup_pipelines_approle(\@roles);
   }
 
@@ -90,43 +82,17 @@ sub _setup_concourse_approle {
   if (grep { $_ eq $approle } @$roles_ref) {
     info("#y{[WARNING]} App role #C{$approle} already exists. This action will overwrite it...");
     my $continue = "";
-    prompt_for_boolean(
-      'continue',
-      'boolean',
-      "-i",
-      "Continue?",
-      "--default",
-      "false",
-      \$continue
-    );
-    return 0 if $continue ne 'true';
+    prompt_for_boolean( "Continue?", 0);
+    return 0 if $continue ;
   }
 
   # Get concourse mount point
   my $concourse_mount = "concourse";
-#  prompt_for(
-#    'concourse_mount',
-#    'line',
-#    "-i",
-#    "--default",
-#    'concourse',
-#    "-V",
-#    '/^[a-z0-9]*$/',
-#    "Mount to use for concourse secrets ",
-#    \$concourse_mount
-#  );
+# $concourse_mount =  prompt_for_string("Mount to use for concourse secrets ", 'concourse', '/^[a-z0-9]*$/');
 
   # Get approle path
   my $concourse_approle_path = $ENV{GENESIS_SECRETS_BASE} . "approle/concourse";
-#  prompt_for(
-#    'concourse_approle_path',
-#    'line',
-#    "-i",
-#    "--default",
-#    $concourse_approle_path,
-#    "Vault path for storing concourse app role credentials",
-#    \$concourse_approle_path
-#  );
+#  prompt_for_name("Vault path for storing concourse app role credentials", $concourse_approle_path);
 
   # Check if mount exists
   my $mount_type = $self->_get_mount_type($concourse_mount);
@@ -135,7 +101,7 @@ sub _setup_concourse_approle {
   $concourse_mount_path = "/$concourse_mount_path";
 
   if (!$mount_type) {
-    # Create mount if it doesn't exist
+    # Create mount if it doesn't exist, Is there a reason to still offer kv_v1?
     my $kv_version = "2";
 #    prompt_for('kv_version', 'select', "", "--default", "2",
 #      "Mount ${concourse_mount_path} does not exist. It must be a v1 or v2 kv store.",
@@ -171,9 +137,7 @@ sub _setup_concourse_approle {
   info("Creating #C{concourse} policy...");
   my $policy = "";
   $policy .= "# List, create, update, and delete key/value secrets for Concourse\n";
-  my $capabilities = '" {
-  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
-}';
+  my $capabilities = '" { capabilities = ["create", "read", "update", "delete", "list", "sudo"] }';
 
   if ($mount_type eq "kv_v1") {
     $policy .= "path \"${concourse_mount_path}/*$capabilities\n";
@@ -182,7 +146,15 @@ sub _setup_concourse_approle {
     $policy .= "path \"${concourse_mount_path}/metadata/*$capabilities\n";
   }
 
-  my $rc = $self->vault->query("vault","policy","write","concourse","- <<<", $policy);
+	info("#Y{Policy file being applied to Concourse}\n\n%s\n\n", $policy);
+
+	# Write policy to file
+  open(my $fh, '>', '/tmp/policy.hcl') or bail("#R{[error]}\nFailed to write policy to /tmp/policy.hcl: $!");
+  print $fh $policy;
+  close($fh);
+
+  my $rc = $self->vault->query("vault","policy","write","concourse","/tmp/policy.hcl");
+	info("Output: %s", $rc);
   if ($rc != 0) {
     bail("#R{[error]}\nFailed to save #C{concourse} policy.");
   }
@@ -191,7 +163,7 @@ sub _setup_concourse_approle {
 
   # Create app role
   info("Creating and configuring app role #C{$approle}...");
-  $self->vault->query("vault delete auth/approle/role/$approle");
+  $self->vault->query("vault","delete","auth/approle/role/$approle");
 
   $rc = $self->vault->set(
     "auth/approle/role/$approle",
@@ -212,7 +184,7 @@ sub _setup_concourse_approle {
   # Generate credentials
   info("Generating and storing authentication credentials...");
   my $role_id = $self->vault->get("auth/approle/role/$approle/role-id:role_id");
-  my $approle_secret = $self->vault->query("vault write -field=secret_id -f auth/approle/role/$approle/secret-id");
+  my $approle_secret = $self->vault->query("vault","write","-field=secret_id","-f","auth/approle/role/$approle/secret-id");
 
   # Store credentials
   $self->vault->set("${concourse_approle_path}", "approle-id", "$role_id");
@@ -231,9 +203,8 @@ sub _setup_pipelines_approle {
   # Check if role already exists
   if (grep { $_ eq $approle } @$roles_ref) {
     info("#y{[WARNING]} App role #C{$approle} already exists. This action will overwrite it...");
-    my $continue = "";
-    prompt_for('continue', 'boolean', "-i", "Continue?", "--default", "false", \$continue);
-    return 0 if $continue ne 'true';
+    my $continue = prompt_for_boolean("Continue?", 0);
+    return 0 if $continue;
   }
 
   # Create genesis-pipelines policy
@@ -255,13 +226,9 @@ sub _setup_pipelines_approle {
   # Build policy based on mount types and paths
   my $policy = "# Allow the pipelines to read all items within Vault, and write to secret/exodus (for genesis exodus data)\n\n";
 
-  my $read_capabilities = '" {
-  capabilities = ["read", "list"]
-  }';
+  my $read_capabilities = '" { capabilities = ["read", "list"] }';
 
-  my $write_capabilities = '" {
-  capabilities = ["create", "read", "update", "list", "delete"]
-  }';
+  my $write_capabilities = '" { capabilities = ["create", "read", "update", "list", "delete"] }';
 
   # Secrets path (read access)
   if ($sec_ver eq "2" && $sec_path) {
@@ -279,8 +246,14 @@ sub _setup_pipelines_approle {
     $policy .= "path \"${ENV{GENESIS_EXODUS_MOUNT}}/*$write_capabilities\n";
   }
 
+	# Write policy to file
+  open(my $fh, '>', '/tmp/policy.hcl') or bail("#R{[error]}\nFailed to write policy to /tmp/policy.hcl: $!");
+  print $fh $policy;
+  close($fh);
+
   # Write policy to vault
-  my $rc = $self->vault->query("policy write \"$approle\" - <<< \"$policy\"");
+  my $rc = $self->vault->query("policy","write","$approle","/tmp/policy.hcl");
+	info("Output: %s", $rc);
   if ($rc != 0) {
     bail("#R{[error]}\nFailed to create #C{$approle} policy.");
   }
@@ -289,7 +262,7 @@ sub _setup_pipelines_approle {
 
   # Create AppRole
   info("Creating and configuring app role #C{$approle}...");
-  $self->vault->query("vault delete auth/approle/role/$approle");
+  $self->vault->query("vault","delete","auth/approle/role/$approle");
 
   $rc = $self->vault->set(
     "auth/approle/role/$approle",
@@ -323,7 +296,7 @@ sub _setup_pipelines_approle {
 
 sub _get_mount_type {
   my ($self, $mount) = @_;
-  my $output = $self->vault->query("secrets list -detailed");
+  my $output = $self->vault->query("secrets","list","-detailed");
 
   # Parse output to find mount type
   my @lines = split(/\n/, $output);
@@ -347,7 +320,7 @@ sub _get_mount_type {
 
 sub _match_mount {
   my ($self, $path) = @_;
-  my $output = $self->vault->query("vault secrets list --detailed");
+  my $output = $self->vault->query("vault","secrets","list","--detailed");
 
   # Get all kv mounts with versions
   my @mounts = ();
