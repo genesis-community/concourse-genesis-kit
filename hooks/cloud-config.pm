@@ -75,9 +75,9 @@ sub perform {
           },
           stackit => {
             'instance_type' => $self->for_scale({
-              dev => 'm1.2',
-              prod => 'g1.3'
-            }, 'm1.3'),
+              dev => 'm1a.2d',
+              prod => 'g1a.4d'
+            }, 'm1a.4d'),
             'root_disk' => {
               'size' => 40 # in gigabytes
             },
@@ -115,9 +115,9 @@ sub perform {
           },
           stackit => {
             'instance_type' => $self->for_scale({
-              dev => 'g1.3',
-              prod => 'g1.4'
-            }, 'm1.3'),
+              dev => 'g1a.2d',
+              prod => 'g1a.4d'
+            }, 'm1a.2d'),
             'root_disk' => {
               'size' => 80 # in gigabytes
             },
@@ -178,7 +178,7 @@ sub perform {
 
   $self->done($config);
 
-	return 1;
+  return 1;
 
 }
 
