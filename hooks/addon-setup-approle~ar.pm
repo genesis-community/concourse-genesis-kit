@@ -81,8 +81,7 @@ sub _setup_concourse_approle {
   # Check if role already exists
   if (grep { $_ eq $approle } @$roles_ref) {
     info("#y{[WARNING]} App role #C{$approle} already exists. This action will overwrite it...");
-    my $continue = "";
-    prompt_for_boolean( "Continue?", 0);
+    my $continue = prompt_for_boolean( "Continue?", 0);
     return 0 if $continue ;
   }
 
@@ -92,7 +91,7 @@ sub _setup_concourse_approle {
 
   # Get approle path
   my $concourse_approle_path = $ENV{GENESIS_SECRETS_BASE} . "approle/concourse";
-#  prompt_for_name("Vault path for storing concourse app role credentials", $concourse_approle_path);
+#  prompt_for_line("Vault path for storing concourse app role credentials", $concourse_approle_path);
 
   # Check if mount exists
   my $mount_type = $self->_get_mount_type($concourse_mount);
@@ -116,7 +115,9 @@ sub _setup_concourse_approle {
       my $rc = $self->vault->query(
         "vault","secrets","enable","-path",$concourse_mount,"-version",$kv_version,"-description",$desc, "kv"
       );
-      if ($rc != 0) {
+      info("Output: %s", $rc);
+
+      if ($rc =~ /Error/ ) {
         bail("#R{[error]}\nFailed to create mount ${concourse_mount_path} -- please resolve and try again\n");
       }
     }
@@ -155,7 +156,7 @@ sub _setup_concourse_approle {
 
   my $rc = $self->vault->query("vault","policy","write","concourse","/tmp/policy.hcl");
 	info("Output: %s", $rc);
-  if ($rc != 0) {
+  if ($rc !~ /Success/) {
     bail("#R{[error]}\nFailed to save #C{concourse} policy.");
   }
   info("#G{[ok]}");
@@ -246,15 +247,15 @@ sub _setup_pipelines_approle {
     $policy .= "path \"${ENV{GENESIS_EXODUS_MOUNT}}/*$write_capabilities\n";
   }
 
-	# Write policy to file
+  # Write policy to file
   open(my $fh, '>', '/tmp/policy.hcl') or bail("#R{[error]}\nFailed to write policy to /tmp/policy.hcl: $!");
   print $fh $policy;
   close($fh);
 
   # Write policy to vault
   my $rc = $self->vault->query("policy","write","$approle","/tmp/policy.hcl");
-	info("Output: %s", $rc);
-  if ($rc != 0) {
+  info("Output: %s", $rc);
+  if ($rc !~ /Success/) {
     bail("#R{[error]}\nFailed to create #C{$approle} policy.");
   }
   info("#G{[ok]}");
