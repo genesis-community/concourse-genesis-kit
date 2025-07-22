@@ -205,7 +205,7 @@ sub _setup_pipelines_approle {
   if (grep { $_ eq $approle } @$roles_ref) {
     info("#y{[WARNING]} App role #C{$approle} already exists. This action will overwrite it...");
     my $continue = prompt_for_boolean("Continue?", 0);
-    return 0 if $continue;
+    return 0 if !$continue;
   }
 
   # Create genesis-pipelines policy
@@ -218,11 +218,14 @@ sub _setup_pipelines_approle {
   }
   my ($sec_mnt, $sec_path, $sec_ver) = @$sec_info;
 
+  info("Secret Mount: '%s', Path: '%s', Version: '%s'", $sec_mnt, $sec_path, $sec_ver);
+
   my $exo_info = $self->_match_mount($ENV{GENESIS_EXODUS_MOUNT});
   if (!$exo_info) {
     bail("#R{[error]}\nCannot find mount for exodus path of '$ENV{GENESIS_EXODUS_MOUNT}'");
   }
   my ($exo_mnt, $exo_path, $exo_ver) = @$exo_info;
+  info("Exodus Mount: '%s', Path: '%s', Version: '%s'", $exo_mnt, $exo_path, $exo_ver);
 
   # Build policy based on mount types and paths
   my $policy = "# Allow the pipelines to read all items within Vault, and write to secret/exodus (for genesis exodus data)\n\n";
@@ -253,7 +256,7 @@ sub _setup_pipelines_approle {
   close($fh);
 
   # Write policy to vault
-  my $rc = $self->vault->query("policy","write","$approle","/tmp/policy.hcl");
+  my $rc = $self->vault->query("vault","policy","write","$approle","/tmp/policy.hcl");
   info("Output: %s", $rc);
   if ($rc !~ /Success/) {
     bail("#R{[error]}\nFailed to create #C{$approle} policy.");
@@ -283,7 +286,7 @@ sub _setup_pipelines_approle {
   # Generate credentials
   info("Writing access credentials to Exodus...");
   my $role_id = $self->vault->get("auth/approle/role/$approle/role-id:role_id");
-  my $approle_secret = $self->vault->query("vault write -field=secret_id -f auth/approle/role/$approle/secret-id");
+  my $approle_secret = $self->vault->query("vault","write","-field=secret_id","-f","auth/approle/role/$approle/secret-id");
 
   # Store credentials in CI mount
   $self->vault->set("${ENV{GENESIS_CI_MOUNT}}$approle", "approle-id", "$role_id");
