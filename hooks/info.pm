@@ -7,7 +7,7 @@ use warnings; # Genesis supports min perl v5.20.
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 
 # Parent class inheritance
-use parent qw(Genesis::Hook::Info);
+use parent qw(Genesis::Hook);
 
 # Import required functions
 use Genesis qw/bail info/;
@@ -69,7 +69,7 @@ sub perform {
          "\n  username: #C{$username}".
          "\n  password: #C{$password}");
 
-    if ($env->want_feature("shout")) {
+    if ($self->want_feature("shout")) {
       info("");
       info("Shout! Integration".
            "\n  URL:   #G{" . $env->exodus_lookup("shout_url") . "}".

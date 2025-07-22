@@ -82,16 +82,16 @@ sub _setup_concourse_approle {
   if (grep { $_ eq $approle } @$roles_ref) {
     info("#y{[WARNING]} App role #C{$approle} already exists. This action will overwrite it...");
     my $continue = prompt_for_boolean( "Continue?", 0);
-    return 0 if $continue ;
+    return 0 if !$continue ;
   }
 
   # Get concourse mount point
   my $concourse_mount = "concourse";
-# $concourse_mount =  prompt_for_string("Mount to use for concourse secrets ", 'concourse', '/^[a-z0-9]*$/');
+  #  $concourse_mount = prompt_for_line("Mount to use for concourse secrets", 'concourse', '/^[a-z0-9]*$/'); # FIXME
 
   # Get approle path
   my $concourse_approle_path = $ENV{GENESIS_SECRETS_BASE} . "approle/concourse";
-#  prompt_for_line("Vault path for storing concourse app role credentials", $concourse_approle_path);
+  #  $concourse_approle_path = prompt_for_line("Vault path for storing concourse app role credentials", $concourse_approle_path); # FIXME
 
   # Check if mount exists
   my $mount_type = $self->_get_mount_type($concourse_mount);
@@ -112,13 +112,13 @@ sub _setup_concourse_approle {
 
     if ($kv_version) {
       my $desc = "endpoint used for interpolating concourse pipeline secrets";
-      my $rc = $self->vault->query(
+      my ( $out, $rc, $err ) = $self->vault->query(
         "vault","secrets","enable","-path",$concourse_mount,"-version",$kv_version,"-description",$desc, "kv"
       );
-      info("Output: %s", $rc);
+      info("Output: %s", $out);
 
-      if ($rc =~ /Error/ ) {
-        bail("#R{[error]}\nFailed to create mount ${concourse_mount_path} -- please resolve and try again\n");
+      if ($err//$out =~ /Error/ ) {
+        bail("#R{[error]}\nFailed to create mount ${concourse_mount_path} -- please resolve and try again:\n %s", $err//$out);
       }
     }
     info("#G[ok]");
@@ -154,10 +154,11 @@ sub _setup_concourse_approle {
   print $fh $policy;
   close($fh);
 
-  my $rc = $self->vault->query("vault","policy","write","concourse","/tmp/policy.hcl");
-	info("Output: %s", $rc);
-  if ($rc !~ /Success/) {
-    bail("#R{[error]}\nFailed to save #C{concourse} policy.");
+  use Pry; pry();
+  my ($out, $rc, $err) = $self->vault->query("vault","policy","write","concourse","/tmp/policy.hcl");
+  info("Output: %s", $out) if $out;
+  if ($out !~ /Success/) {
+    bail("#R{[error]}\nFailed to save #C{concourse} policy:\n%s", $err//$out);
   }
   info("#G{[ok]}");
   info("#wui{Policy for $approle}\n#K{$policy}\n");
@@ -256,10 +257,10 @@ sub _setup_pipelines_approle {
   close($fh);
 
   # Write policy to vault
-  my $rc = $self->vault->query("vault","policy","write","$approle","/tmp/policy.hcl");
+  my ($out, $rc, $err) = $self->vault->query("vault","policy","write","$approle","/tmp/policy.hcl");
   info("Output: %s", $rc);
-  if ($rc !~ /Success/) {
-    bail("#R{[error]}\nFailed to create #C{$approle} policy.");
+  if ($out !~ /Success/) {
+    bail("#R{[error]}\nFailed to create #C{$approle} policy:\n%s", $err//$out);
   }
   info("#G{[ok]}");
   info("#wui{Policy for $approle}\n#K{$policy}\n");
@@ -300,7 +301,7 @@ sub _setup_pipelines_approle {
 
 sub _get_mount_type {
   my ($self, $mount) = @_;
-  my $output = $self->vault->query("secrets","list","-detailed");
+  my ($output, $rc, $err) = $self->vault->query("secrets","list","-detailed");
 
   # Parse output to find mount type
   my @lines = split(/\n/, $output);
