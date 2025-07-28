@@ -11,10 +11,7 @@ genesis_version_min: 2.7.6
 
 supports:
 - aws
-- azure
-- gcp
 - openstack
-- vsphere
 - stackit
 
 certificates:

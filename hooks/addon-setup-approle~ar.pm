@@ -154,7 +154,6 @@ sub _setup_concourse_approle {
   print $fh $policy;
   close($fh);
 
-  use Pry; pry();
   my ($out, $rc, $err) = $self->vault->query("vault","policy","write","concourse","/tmp/policy.hcl");
   info("Output: %s", $out) if $out;
   if ($out !~ /Success/) {

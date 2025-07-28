@@ -1,4 +1,11 @@
 ---
+meta:
+  ocfp:
+    certs:
+      trusted:
+        - (( vault genesis.secrets_mount "certs/org:ca" )) # Organization CA, if exists
+        - (( vault genesis.secrets_mount "certs/dbs:ca" )) # External Databases CA
+
 # AWS-specific OCFP integrations
 
 # Web VM integration with AWS IaaS
