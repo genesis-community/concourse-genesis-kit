@@ -1,6 +1,6 @@
 ---
 params:
-  vault_url:               (( vault meta.vault "/approle/concourse:url" ))            # was (( vault meta.vault "/vault:url"))
+  vault_url:               (( grab $GENESIS_TARGET_VAULT )) # Assumed to match meta.vault "/vault:url" or "/approle/concourse:url"
   vault_token:             ~
   vault_auth_backend:      approle
   vault_approle_role_id:   (( vault meta.vault "/approle/concourse:approle-id" ))     # was (( vault meta.vault "/vault:approle_role_id"))
