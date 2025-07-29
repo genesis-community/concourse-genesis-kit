@@ -2,7 +2,7 @@ package Genesis::Hook::Addon::Concourse::Logout;
 
 use v5.20;
 use warnings; # Genesis min perl version is 5.20
-use Genesis qw/bail info run/;
+use Genesis qw/bail info run humanize_path/;
 # Only needed for development
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'./.genesis/lib'}
 

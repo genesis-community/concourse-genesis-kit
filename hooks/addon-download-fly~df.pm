@@ -112,13 +112,13 @@ sub perform {
   }
 
   # Download the file
-  my ($output, $statuscode) = run(
+  my ($output, $resultcode) = run(
     'curl -o "$1" -w "%{http_code}" -Lk "$2/api/v1/cli?arch=amd64&platform=$3"',
     $path, $url, $platform
   );
 
-  if ($statuscode ne "200") {
-    bail("#R{[ERROR]} Failed to download fly (Status: $statuscode): $output");
+  if ($resultcode ne "0") {
+    bail("#R{[ERROR]} Failed to download fly (Status: $resultcode): $output");
   }
 
   # Make it executable
