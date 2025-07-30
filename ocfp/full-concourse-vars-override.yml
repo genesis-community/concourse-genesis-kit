@@ -1,14 +1,20 @@
 ---
+meta:
+  ocfp:
+    env:
+      cloud: (( concat genesis.env "." genesis.type "." ))
+
 params:
   external_domain: (( vault meta.ocfp.vault.config "/lbs/concourse:domain" ))
 
   num_web_nodes: 1
   worker: 3
 
-  concourse_network:   (( concat genesis.env "-concourse" ))
-  concourse_disk_type: (( concat "concourse-" meta.ocfp.env.scale ))
-  concourse_vm_type:   (( concat "concourse-" meta.ocfp.env.scale ))
-  worker_vm_type:      (( concat "concourse-worker-" meta.ocfp.env.scale ))
+  concourse_network:     (( concat meta.ocfp.env.cloud "net-concourse" ))
+  concourse_network_web: (( concat meta.ocfp.env.cloud "net-concourse-web" ))
+  concourse_disk_type:   (( concat meta.ocfp.env.cloud "disk-concourse" ))
+  concourse_vm_type:     (( concat meta.ocfp.env.cloud "vm-concourse" ))
+  worker_vm_type:        (( concat meta.ocfp.env.cloud "vm-concourse-worker" ))
 
   availability_zones:
     - (( concat genesis.env "-z1" ))
@@ -28,11 +34,11 @@ exodus:
 
 - type: replace
   path: /instance_groups/name=worker/networks/0/name
-  value: (( concat genesis.env "-concourse" ))
+  value: (( grab params.concourse_network ))
 
 - type: replace
   path: /instance_groups/name=web/networks/0/name
-  value: (( concat genesis.env "-concourse-web" ))
+  value: (( grab params.concourse_network ))
 
 - type: replace
   path: /instance_groups/name=web/azs

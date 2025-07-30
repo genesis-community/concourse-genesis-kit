@@ -32,6 +32,7 @@ sub perform {
   return 1 if $self->completed;
 
   my $network_name = $self->env->lookup('params.concourse_network', 'concourse');
+  my $network_web_name = $self->env->lookup('params.concourse_web_network', 'concourse-web'); # Used by AWS
   my $is_ocfp = $self->want_feature('ocfp');
   my $env_scale = $is_ocfp ? $self->env->lookup('meta.ocfp.env.scale', 'dev') : 'default';
 
@@ -53,12 +54,34 @@ sub perform {
 	      'security_groups' => $self->network_reference('sgs', 'get_sgs_by_names', 'ocfp', 'default'),
             },
             aws => {
-              'subnet' => $self->network_reference('id'),
-              'security_groups' => ['concourse'],
+              'subnet' => $self->subnet_reference('id'),
+	      'security_groups' => ['concourse'],
             },
           },
         },
-      )
+      ),
+      $self->network_definition($network_web_name,
+        strategy => $is_ocfp ? 'ocfp' : 'manual',
+        dynamic_subnets => {
+          allocation => {
+            total_size => 6,
+          },
+          cloud_properties_for_iaas => {
+            openstack => {
+              'net_id' => $self->network_reference('id'),
+              'security_groups' => ['default', 'concourse-web'],
+            },
+            stackit => {  # STACKIT most likely will use the IaaS Load-balancer for access
+              'net_id' => $self->network_reference('id'),
+	      'security_groups' => $self->network_reference('sgs', 'get_sgs_by_names', 'ocfp', 'default'),
+            },
+            aws => {
+              'subnet' => $self->subnet_reference('id'),
+	      'security_groups' => ['concourse-web'],
+            },
+          },
+        },
+      ),
     ],
     'vm_types' => [
       $self->vm_type_definition('concourse',
