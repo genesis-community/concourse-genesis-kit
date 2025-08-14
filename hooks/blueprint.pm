@@ -113,6 +113,21 @@ sub perform {
     } elsif ($self->want_feature("azure") || $self->want_feature("gcp") || $self->want_feature("vsphere")) {
       bail("#R{[ERROR]} The #c{azure}, #c{gcp} or #c{vsphere} features are not supported.");
     }
+
+    # Handle OAuth options
+    for my $oauth ("github-oauth", "cf-oauth") {
+      if ($self->want_feature($oauth)) {
+        $self->add_files("manifests/oauth/$oauth.yml");
+      }
+    }
+
+    if ($self->want_feature("github-enterprise-oauth")) {
+      # github enterprise oauth just adds the host param to github oauth
+      if (!$self->want_feature("github-oauth")) {
+        $self->add_files("manifests/oauth/github-oauth.yml");
+      }
+      $self->add_files("manifests/oauth/github-enterprise-oauth.yml");
+    }
   } elsif ($self->want_feature("full") || $self->want_feature("small-footprint")) {
     if ($self->want_feature("full")) {
       $self->add_files(
