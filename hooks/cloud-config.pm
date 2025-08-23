@@ -42,7 +42,7 @@ sub perform {
         strategy => $is_ocfp ? 'ocfp' : 'manual',
         dynamic_subnets => {
           allocation => {
-            total_size => 12, #was 16
+            total_size => 0, #was 16
           },
           cloud_properties_for_iaas => {
             openstack => {
@@ -51,20 +51,21 @@ sub perform {
             },
             stackit => {
               'net_id' => $self->network_reference('id'),
-	      'security_groups' => $self->network_reference('sgs', 'get_sgs_by_names', 'ocfp', 'default'),
+	            'security_groups' => $self->network_reference('sgs', 'get_sgs_by_names', 'ocfp', 'default'),
             },
             aws => {
               'subnet' => $self->subnet_reference('id'),
-	      'security_groups' => ['concourse'],
+	            'security_groups' => $self->get_network_security_groups(),
             },
           },
         },
       ),
       $self->network_definition($network_web_name,
         strategy => $is_ocfp ? 'ocfp' : 'manual',
+        subnets => ['ocfp-0'],
         dynamic_subnets => {
           allocation => {
-            total_size => 6,
+            total_size => 0,
           },
           cloud_properties_for_iaas => {
             openstack => {
@@ -73,11 +74,11 @@ sub perform {
             },
             stackit => {  # STACKIT most likely will use the IaaS Load-balancer for access
               'net_id' => $self->network_reference('id'),
-	      'security_groups' => $self->network_reference('sgs', 'get_sgs_by_names', 'ocfp', 'default'),
+	            'security_groups' => $self->network_reference('sgs', 'get_sgs_by_names', 'ocfp', 'default'),
             },
             aws => {
               'subnet' => $self->subnet_reference('id'),
-	      'security_groups' => ['concourse-web'],
+              'security_groups' => $self->get_network_security_groups(),
             },
           },
         },
@@ -107,9 +108,9 @@ sub perform {
           },
           aws => {
             'instance_type' => $self->for_scale({
-              dev => 't3.medium',
+              dev => 't3.large',
               prod => 'm6i.large'
-            }, 't3.medium'),
+            }, 't3.large'),
             'ephemeral_disk' => {
               'encrypted' => $self->TRUE,
               'size' => $self->for_scale({

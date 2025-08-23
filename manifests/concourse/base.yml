@@ -27,7 +27,9 @@ update:
 instance_groups:
   - name: worker
     instances: (( grab params.workers ))
-    azs: (( grab params.availability_zones || meta.default.azs ))
+    azs: 
+    - (( grab params.availability_zones[1] ))
+    - (( grab params.availability_zones[2] ))
     stemcell: default
     vm_type: (( grab params.worker_vm_type ))
     networks:

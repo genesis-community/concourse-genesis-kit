@@ -47,8 +47,8 @@ instance_groups:
     stemcell: default
     vm_type: (( grab params.web_vm_type || params.concourse_vm_type ))
     networks:
-      - name: (( grab params.concourse_network ))
-        static_ips: (( static_ips 1, 2, 4, 5, 6 ))
+      - name: (( grab params.concourse_network_web ))
+        static_ips: (( grab params.static_ips ))
     jobs:
       - name: web
         .: (( inject meta.jobs.web ))

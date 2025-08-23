@@ -15,6 +15,7 @@ params:
   concourse_disk_type:   (( concat meta.ocfp.env.cloud "disk-concourse" ))
   concourse_vm_type:     (( concat meta.ocfp.env.cloud "vm-concourse" ))
   worker_vm_type:        (( concat meta.ocfp.env.cloud "vm-concourse-worker" ))
+  static_ips:             (( vault meta.ocfp.vault.config "/net/subnets/ocfp-0/reserved-ips:concourse-web_ip"))
 
   availability_zones:
     - (( concat genesis.env "-z1" ))
@@ -38,7 +39,7 @@ exodus:
 
 - type: replace
   path: /instance_groups/name=web/networks/0/name
-  value: (( grab params.concourse_network ))
+  value: (( grab params.concourse_network_web ))
 
 - type: replace
   path: /instance_groups/name=web/azs

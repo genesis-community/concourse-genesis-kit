@@ -95,7 +95,7 @@ sub perform {
       "ocfp/vault-vars-override.yml"
     );
 
-    if (!$iaas eq "stackit") {  # STACKIT doesn't use external DB's yet
+    if ($iaas ne "stackit") {  # STACKIT doesn't use external DB's yet
       # 'external-db' & 'external-db-ca' features, using OCFP vars
       $self->add_files(
         "manifests/addons/external-db.yml",
