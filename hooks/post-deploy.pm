@@ -2,13 +2,12 @@ package Genesis::Hook::PostDeploy::Concourse;
 
 use v5.20;
 use warnings; # Genesis min perl version is 5.20
-use Genesis qw/info/;
-# Only needed for development
-BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'./.genesis/lib'}
 
+# Only needed for development
+BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 use parent qw(Genesis::Hook::PostDeploy);
 
-use lib $ENV{GENESIS_LIB} // "$ENV{HOME}/.genesis/lib";
+use Genesis qw/info/;
 
 sub init {
   my ($class, %ops) = @_;
