@@ -1,4 +1,4 @@
-package Genesis::Hook::Blueprint::Concourse;
+package Genesis::Hook::Blueprint::Concourse v5.0.0;
 
 use v5.20;
 use warnings;
