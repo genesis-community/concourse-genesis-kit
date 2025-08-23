@@ -62,8 +62,8 @@ sub perform {
       ),
       $self->network_definition($network_web_name,
         strategy => $is_ocfp ? 'ocfp' : 'manual',
-        subnets => ['ocfp-0'],
         dynamic_subnets => {
+          subnets => ['ocfp-0'],
           allocation => {
             total_size => 0,
           },
