@@ -1,0 +1,9 @@
+---
+# Stackit-specific OCFP integrations
+meta:
+  concourse_network:     (( concat meta.ocfp.env.cloud "net-concourse" ))
+
+# Web VM integration with Stackit IaaS
+instance_groups:
+- name: web
+  vm_extensions: (( append [ "concourse-lb" ] ))

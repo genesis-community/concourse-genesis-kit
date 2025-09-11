@@ -12,3 +12,8 @@ meta:
 instance_groups:
 - name: web
   vm_extensions: (( append [ "concourse-lb" ] ))
+- name: worker
+  azs:
+  - (( replace ))
+  - (( grab params.availability_zones[1] ))
+  - (( grab params.availability_zones[2] ))

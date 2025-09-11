@@ -80,13 +80,6 @@ sub perform {
     # OCFP enforces the 'no-haproxy' feature
     $self->add_files("manifests/addons/no-haproxy.yml");
 
-    # OCFP vars overrides
-    #
-    if ($iaas eq "stackit") {
-      $self->add_files("ocfp/full-concourse-vars-override-stackit.yml"); # Uses static IP for F5 or external lb
-    } else {
-      $self->add_files("ocfp/full-concourse-vars-override.yml"); # Uses ELB
-    }
 
     # 'vault' feature, using OCFP vars
     $self->add_files(
@@ -106,13 +99,14 @@ sub perform {
 
     $self->add_files("ocfp/ocfp.yml");
 
-    if ($self->want_feature("aws")) {
-      $self->add_files("ocfp/iaas/aws.yml");
-    } elsif ($self->want_feature("stackit")) {
-      $self->add_files("ocfp/iaas/stackit.yml");
-    } elsif ($self->want_feature("azure") || $self->want_feature("gcp") || $self->want_feature("vsphere")) {
-      bail("#R{[ERROR]} The #c{azure}, #c{gcp} or #c{vsphere} features are not supported.");
-    }
+		# OCFP IaaS overrides
+		bail(
+			"#R{[ERROR]} The #c{azure}, #c{gcp} or #c{vsphere} features are not supported."
+		) if ($iaas =~ /(azure|gcp|vsphere)/);
+		$self->add_files_if_exists(
+			"ocfp/$iaas/base.yml",
+			"ocfp/$iaas/full.yml",
+		);
 
     # Handle OAuth options
     for my $oauth ("github-oauth", "cf-oauth") {

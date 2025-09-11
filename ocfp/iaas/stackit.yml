@@ -1,7 +1,0 @@
----
-# Stackit-specific OCFP integrations
-
-# Web VM integration with Stackit IaaS
-instance_groups:
-- name: web
-  vm_extensions: (( append [ "concourse-lb" ] ))

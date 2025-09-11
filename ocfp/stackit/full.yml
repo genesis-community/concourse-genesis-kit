@@ -16,12 +16,9 @@ params:
   worker_vm_type:      (( concat meta.ocfp.env.cloud "vm-concourse-worker" ))
 
   availability_zones:
-    - (( concat genesis.env "-z1" ))
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-
-  static_ips: 
-    - (( vault meta.ocfp.vault.config "/net/subnets/ocfp-0/reserved-ips:concourse_ip" ))
+  - (( concat genesis.env "-z1" ))
+  - (( concat genesis.env "-z2" ))
+  - (( concat genesis.env "-z3" ))
 
 exodus:
   tsa_host: (( grab params.external_domain ))
@@ -36,16 +33,5 @@ exodus:
   value: (( grab params.concourse_network ))
 
 - type: replace
-  path: /instance_groups/name=web/azs
-  value: 
-    - (( concat genesis.env "-z1" ))
-
-- type: replace
-  path: /instance_groups/name=worker/azs
-  value: 
-    - (( concat genesis.env "-z2" ))
-    - (( concat genesis.env "-z3" ))
-
-- type: replace
   path: /instance_groups/name=web/networks/0/static_ips
-  value: [ (( grab params.static_ips )) ]
+  value: (( static_ips 0, 1, 2))
