@@ -11,7 +11,10 @@ meta:
 # Web VM integration with AWS IaaS
 instance_groups:
 - name: web
-  vm_extensions: (( append [ "concourse-lb" ] ))
+  vm_extensions:
+  - (( append ))
+  - concourse-lb
+
 - name: worker
   azs:
   - (( replace ))

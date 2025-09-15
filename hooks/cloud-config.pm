@@ -36,13 +36,15 @@ sub perform {
   my $is_ocfp = $self->want_feature('ocfp');
   my $env_scale = $is_ocfp ? $self->env->lookup('meta.ocfp.env.scale', 'dev') : 'default';
 
+	my $topology = $self->env->ocfp_config_lookup('net.topology', 'v2');
+
   my $config = $self->build_cloud_config({
     'networks' => [
       $self->network_definition($network_name,
         strategy => $is_ocfp ? 'ocfp' : 'manual',
         dynamic_subnets => {
           allocation => {
-            total_size => 0, #was 16
+            total_size => $topology eq 'v1' ? 0 : 16
           },
           cloud_properties_for_iaas => {
             openstack => {
@@ -60,7 +62,7 @@ sub perform {
           },
         },
       ),
-      $self->network_definition($network_web_name,
+      $topology eq 'v1' ? $self->network_definition($network_web_name,
         strategy => $is_ocfp ? 'ocfp' : 'manual',
         dynamic_subnets => {
           subnets => ['ocfp-0'],
@@ -74,7 +76,7 @@ sub perform {
             },
             stackit => {  # STACKIT most likely will use the IaaS Load-balancer for access
               'net_id' => $self->network_reference('id'),
-	            'security_groups' => $self->network_reference('sgs', 'get_sgs_by_names', 'ocfp', 'default'),
+              'security_groups' => $self->network_reference('sgs', 'get_sgs_by_names', 'ocfp', 'default'),
             },
             aws => {
               'subnet' => $self->subnet_reference('id'),
@@ -82,7 +84,7 @@ sub perform {
             },
           },
         },
-      ),
+      ) : (),
     ],
     'vm_types' => [
       $self->vm_type_definition('concourse',

@@ -7,7 +7,7 @@ use warnings;
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 use parent qw(Genesis::Hook::Blueprint);
 
-use Genesis qw/bail/;
+use Genesis qw/bail mkfile_or_fail/;
 
 sub init {
   my $class = shift;
@@ -107,6 +107,21 @@ sub perform {
 			"ocfp/$iaas/base.yml",
 			"ocfp/$iaas/full.yml",
 		);
+		my $topology = $self->env->ocfp_config_lookup('net.topology', 'v2');
+		if ($topology eq 'v2') {
+			# Need to adjust the static IPs for the instance count
+			my $web_count = $self->env->lookup('params.num_web_nodes', 1);
+			bail("#R{[ERROR]} Stackit OCFP deployment requires 1-3 web nodes.") if ($web_count < 1 || $web_count > 3);
+			my @static_ips = map {
+				scalar $self->env->ocfp_config_lookup("net.subnets.ocfp-$_.reserved-ips.concourse_ip")
+			} (0 .. $web_count - 1);
+			my $dynamic_static_ips_file = "ocfp/stackit/static-ips.yml";
+			mkfile_or_fail(
+				$self->env->kit->path($dynamic_static_ips_file),
+				"---\nparams:\n  static_ips: [ " . join(", ", @static_ips) . " ]\n"
+			);
+			$self->add_files($dynamic_static_ips_file);
+		}
 
     # Handle OAuth options
     for my $oauth ("github-oauth", "cf-oauth") {
