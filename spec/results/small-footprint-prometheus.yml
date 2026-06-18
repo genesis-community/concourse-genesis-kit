@@ -121,9 +121,9 @@ instance_groups:
 name: small-footprint-prometheus-concourse
 releases:
 - name: concourse
-  sha1: 20ef477efc14cbf701c0ddfe69565ad5c238a87a
-  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=7.13.2
-  version: 7.13.2
+  sha1: dbc32d7c40ad1e6648d8dd749b8b50251bfd6b94
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=8.2.2
+  version: 8.2.2
 - name: slack-notification-resource
   sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
