@@ -1,4 +1,4 @@
-package Genesis::Hook::Info::Concourse v5.0.1;
+package Genesis::Hook::Info::Concourse v5.1.0;
 
 use v5.20;
 use warnings; # Genesis supports min perl v5.20.
