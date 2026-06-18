@@ -1,6 +1,7 @@
 ---
 kit:
   name:    dev
+  version: latest
   features:
     - full
     - self-signed-cert

@@ -1,6 +1,7 @@
 ---
 kit:
   name:    dev
+  version: latest
   features:
     - small-footprint
     - self-signed-cert
