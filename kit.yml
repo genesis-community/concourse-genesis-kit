@@ -1,6 +1,6 @@
 ---
 name: concourse
-version: 5.0.1
+version: 5.1.0
 authors:
 - James Hunt  <jhunt@starkandwayne.com>
 - Dennis Bell <dennis@rubidiumstudios.com>
