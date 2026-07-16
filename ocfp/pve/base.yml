@@ -1,0 +1,4 @@
+---
+# PVE-specific OCFP integrations
+params:
+  concourse_network:     (( concat meta.ocfp.env.cloud "net-concourse" ))

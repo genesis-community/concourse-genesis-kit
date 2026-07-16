@@ -1,0 +1,58 @@
+---
+meta:
+  ocfp:
+    env:
+      cloud: (( concat genesis.env "." genesis.type "." ))
+
+params:
+  external_domain: (( vault meta.ocfp.vault.config "/fqdns:concourse" ))
+
+  num_web_nodes: 1
+  worker: 1
+
+  concourse_network:   (( concat meta.ocfp.env.cloud "net-concourse" ))
+  concourse_disk_type: (( concat meta.ocfp.env.cloud "disk-concourse" ))
+  concourse_vm_type:   (( concat meta.ocfp.env.cloud "vm-concourse" ))
+  worker_vm_type:      (( concat meta.ocfp.env.cloud "vm-concourse-worker" ))
+
+  # PVE lab: pin Concourse to a single AZ (z1 = ocfp-0). The PVE bridge is a
+  # shared L2 with no cross-director IPAM, and z3 = ocfp-2 is the compilation
+  # subnet; spreading across z1/z2/z3 would draw dynamic IPs from those shared
+  # subnets and risk collisions. All Concourse VMs live in ocfp-0's dynamic
+  # band (available_0/1 = .68.65-.94, set clear of the ocf/CF band .12-.60).
+  availability_zones:
+  - (( concat genesis.env "-z1" ))
+
+  static_ips:
+  - (( vault meta.ocfp.vault.config "/net/subnets/ocfp-0/reserved-ips:concourse_ip" ))
+
+exodus:
+  tsa_host: (( grab params.external_domain ))
+
+---
+# The OCFP network name contains dots (env.type.net-concourse), which BOSH-DNS
+# mangles into an unresolvable long-form link address (web ATC -> db postgres
+# link fails: "no such host"). Resolve inter-job links to IPs instead of DNS so
+# the multi-VM web/db/worker topology works on the dotted PVE network naming.
+- type: replace
+  path: /features?
+  value:
+    use_dns_addresses: false
+    use_short_dns_addresses: false
+    use_link_dns_names: false
+
+- type: replace
+  path: /instance_groups/name=web/networks/0/name
+  value: (( grab params.concourse_network ))
+
+- type: replace
+  path: /instance_groups/name=web/networks/0/static_ips
+  value: (( grab params.static_ips ))
+
+- type: replace
+  path: /instance_groups/name=db/networks/0/name
+  value: (( grab params.concourse_network ))
+
+- type: replace
+  path: /instance_groups/name=worker/networks/0/name
+  value: (( grab params.concourse_network ))

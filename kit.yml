@@ -13,6 +13,7 @@ supports:
 - aws
 - openstack
 - stackit
+- pve
 
 certificates:
   self-signed-cert:
