@@ -1,0 +1,15 @@
+---
+# Authorize by GitHub organization: every member of the org can log in.
+#
+# Included only when the environment sets params.authz_allowed_orgs (or
+# params.github.orgs); see _handle_oauth_features in hooks/blueprint.pm.
+# The value is a single organization name, wrapped into the list the
+# concourse release's main_team.auth.github.orgs property expects.
+meta:
+  jobs:
+    web:
+      properties:
+        main_team:
+          auth:
+            github:
+              orgs: [(( grab params.authz_allowed_orgs || params.github.orgs ))]

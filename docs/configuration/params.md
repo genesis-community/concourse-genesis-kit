@@ -60,8 +60,8 @@ This document provides a comprehensive reference for all parameters available in
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `authz_allowed_orgs` | string | none | What Github organization to authenticate. **Required** when using GitHub OAuth. |
-| `github_authz` | array | none | A list of authorizations to determine who is allowed to authenticate. Supersedes `authz_allowed_orgs`. |
+| `authz_allowed_orgs` | string | none | GitHub organization whose members may log in. Required unless `authz_allowed_teams` is set. |
+| `authz_allowed_teams` | array | none | GitHub `org:team` slugs whose members may log in, e.g. `[ my-org:platform-team ]`. Required unless `authz_allowed_orgs` is set. |
 | `github_host` | string | none | Domain of the Github Enterprise installation for enterprise GitHub OAuth. |
 
 ### CF OAuth

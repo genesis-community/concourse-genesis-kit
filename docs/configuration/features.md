@@ -20,7 +20,7 @@ These feature flags determine the authentication method:
 
 | Feature Flag | Description | Required Parameters | Vault Secret Paths |
 |--------------|-------------|---------------------|-------------------|
-| `github-oauth` | Enable GitHub OAuth authentication | `authz_allowed_orgs` or `github_authz` | `secret/$env/concourse/oauth` |
+| `github-oauth` | Enable GitHub OAuth authentication | `authz_allowed_orgs` and/or `authz_allowed_teams` | `secret/$env/concourse/oauth` |
 | `github-enterprise-oauth` | Enable GitHub Enterprise OAuth authentication | `github_host` + GitHub OAuth params | `secret/$env/concourse/oauth` |
 | `cf-oauth` | Enable Cloud Foundry UAA OAuth authentication | `cf_api_uri`, `cf_spaces`, `cf_ca_cert_vault_path` | `secret/$env/concourse/oauth` |
 | `okta` | Enable SAML authentication via Okta | None | Various `secret/$env/concourse/okta:*` paths |

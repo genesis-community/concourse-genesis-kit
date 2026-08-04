@@ -1,16 +1,15 @@
 exodus:
-  atc_ca_cert: <!{meta.vault}/ssl/ca:certificate!>
-  bosh: small-footprint-self-signed-cert
+  bosh: full-github-teams
   external_url: https://concourse.testing.examle
-  features: small-footprint,self-signed-cert
+  features: full,no-tls,github-oauth
   iaas: null
   is_director: false
-  mode: small-footprint
+  main_target: full-github-teams
+  mode: full
   password: <!{meta.vault}/webui:password!>
   scale: null
-  self-signed: true
   services: null
-  tsa_host: 10.99.0.16
+  tsa_host: 10.99.0.17
   tsa_host_public_key: <!{meta.vault}/tsa/host_key:public!>
   tsa_port: 2222
   tsa_worker_private_key: <!{meta.vault}/tsa/worker_key:private!>
@@ -22,7 +21,7 @@ instance_groups:
   - z1
   - z2
   - z3
-  instances: 1
+  instances: 3
   jobs:
   - name: worker
     properties:
@@ -44,9 +43,83 @@ instance_groups:
   - name: concourse
   stemcell: default
   update:
-    max_in_flight: 1
+    max_in_flight: 3
     serial: true
   vm_type: concourse-worker
+- azs:
+  - z1
+  - z2
+  - z3
+  instances: 1
+  jobs:
+  - name: haproxy
+    properties:
+      ha_proxy:
+        tcp:
+        - backend_port: 80
+          backend_servers:
+          - 10.99.0.17
+          name: web_http
+          port: 80
+    release: haproxy
+  - name: bpm
+    release: bpm
+  name: haproxy
+  networks:
+  - name: concourse
+    static_ips:
+    - 10.99.0.16
+  stemcell: default
+  vm_type: small
+- azs:
+  - z1
+  - z2
+  - z3
+  instances: 1
+  jobs:
+  - name: web
+    properties:
+      add_local_users:
+      - concourse:<!{meta.vault}/webui:password-bcrypt!>
+      bind_port: 80
+      external_url: https://concourse.testing.examle
+      github_auth:
+        client_id: <!{meta.vault}/oauth:provider_key!>
+        client_secret: <!{meta.vault}/oauth:provider_secret!>
+      main_team:
+        auth:
+          github:
+            teams:
+            - test-org:test-team
+            - test-org:other-team
+          local:
+            users:
+            - concourse
+      postgresql:
+        database: atc
+        role:
+          name: atc
+          password: <!{meta.vault}/database/atc:password!>
+      publicly_viewable: true
+      token_signing_key:
+        private_key: <!{meta.vault}/atc/token_signing_key:private!>
+        public_key: <!{meta.vault}/atc/token_signing_key:public!>
+      worker_gateway:
+        authorized_keys:
+        - <!{meta.vault}/tsa/worker_key:public!>
+        host_key:
+          private_key: <!{meta.vault}/tsa/host_key:private!>
+          public_key: <!{meta.vault}/tsa/host_key:public!>
+    release: concourse
+  - name: bpm
+    release: bpm
+  name: web
+  networks:
+  - name: concourse
+    static_ips:
+    - 10.99.0.17
+  stemcell: default
+  vm_type: small
 - azs:
   - z1
   - z2
@@ -71,50 +144,13 @@ instance_groups:
         ssl_key: <!{meta.vault}/locker/server:key!>
         user: locker
     release: locker
-  - name: web
-    properties:
-      add_local_users:
-      - concourse:<!{meta.vault}/webui:password-bcrypt!>
-      bind_port: 80
-      external_url: https://concourse.testing.examle
-      main_team:
-        auth:
-          local:
-            users:
-            - concourse
-      postgresql:
-        database: atc
-        role:
-          name: atc
-          password: <!{meta.vault}/database/atc:password!>
-      publicly_viewable: true
-      tls:
-        bind_port: 443
-        cert:
-          certificate: <!{meta.vault}/ssl/server:certificate!>
-          private_key: <!{meta.vault}/ssl/server:key!>
-      token_signing_key:
-        private_key: <!{meta.vault}/atc/token_signing_key:private!>
-        public_key: <!{meta.vault}/atc/token_signing_key:public!>
-      worker_gateway:
-        authorized_keys:
-        - <!{meta.vault}/tsa/worker_key:public!>
-        host_key:
-          private_key: <!{meta.vault}/tsa/host_key:private!>
-          public_key: <!{meta.vault}/tsa/host_key:public!>
-    release: concourse
-  - name: bpm
-    properties:
-      bind_port: 80
-    release: bpm
-  name: concourse
+  name: db
   networks:
   - name: concourse
-    static_ips:
-    - 10.99.0.16
+  persistent_disk_type: concourse
   stemcell: default
   vm_type: small
-name: small-footprint-self-signed-cert-concourse
+name: full-github-teams-concourse
 releases:
 - name: concourse
   sha1: dbc32d7c40ad1e6648d8dd749b8b50251bfd6b94
@@ -132,6 +168,10 @@ releases:
   sha1: ccfcc48d63555a3733c3594d9429a5c1875a9dd2
   url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
   version: 0.2.1
+- name: haproxy
+  sha1: 70f2fd8eb3d35708406137ee91c8da781d16b38b
+  url: https://bosh.io/d/github.com/cloudfoundry/haproxy-boshrelease?v=14.1.1%2B2.8.10
+  version: 14.1.1+2.8.10
 - name: bpm
   sha1: 00223345c70d5629d35008e88c42bf4482bdf766
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.20

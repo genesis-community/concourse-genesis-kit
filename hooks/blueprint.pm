@@ -123,20 +123,7 @@ sub perform {
 			$self->add_files($dynamic_static_ips_file);
 		}
 
-    # Handle OAuth options
-    for my $oauth ("github-oauth", "cf-oauth") {
-      if ($self->want_feature($oauth)) {
-        $self->add_files("manifests/oauth/$oauth.yml");
-      }
-    }
-
-    if ($self->want_feature("github-enterprise-oauth")) {
-      # github enterprise oauth just adds the host param to github oauth
-      if (!$self->want_feature("github-oauth")) {
-        $self->add_files("manifests/oauth/github-oauth.yml");
-      }
-      $self->add_files("manifests/oauth/github-enterprise-oauth.yml");
-    }
+    $self->_handle_oauth_features();
   } elsif ($self->want_feature("full") || $self->want_feature("small-footprint")) {
     if ($self->want_feature("full")) {
       $self->add_files(
@@ -157,21 +144,7 @@ sub perform {
       );
     }
 
-    # Handle OAuth options
-    for my $oauth ("github-oauth", "cf-oauth") {
-      if ($self->want_feature($oauth)) {
-        $self->add_files("manifests/oauth/$oauth.yml");
-      }
-    }
-
-    if ($self->want_feature("github-enterprise-oauth")) {
-      # github enterprise oauth just adds the host param to github oauth
-      if (!$self->want_feature("github-oauth")) {
-        $self->add_files("manifests/oauth/github-oauth.yml");
-      }
-      $self->add_files("manifests/oauth/github-enterprise-oauth.yml");
-    }
-
+    $self->_handle_oauth_features();
     $self->_handle_tls_features();
     $self->_handle_okta_feature();
 
@@ -258,6 +231,49 @@ sub perform {
   }
 
   return $self->done(1);
+}
+
+sub _handle_oauth_features {
+  my ($self) = @_;
+
+  if ($self->want_feature("cf-oauth")) {
+    $self->add_files("manifests/oauth/cf-oauth.yml");
+  }
+
+  my $ghe    = $self->want_feature("github-enterprise-oauth");
+  my $github = $self->want_feature("github-oauth") || $ghe;
+  return unless $github;
+
+  $self->add_files("manifests/oauth/github-oauth.yml");
+
+  # Authorization is granted by organization -- every member of the org gets
+  # in -- and/or by team, which admits only that team's members.  Either one
+  # alone is a complete answer, so only the files the environment actually
+  # configured are merged in: emitting an empty orgs list beside a teams list
+  # would be read by Concourse as "no orgs", which is right, but emitting
+  # neither leaves a Concourse that authenticates everybody and authorizes
+  # nobody.
+  my (undef, $orgs_key)  = $self->env->lookup(['params.authz_allowed_orgs',  'params.github.orgs']);
+  my ($teams, $teams_key) = $self->env->lookup(['params.authz_allowed_teams', 'params.github.teams']);
+
+  bail(
+    "#R{[ERROR]} The #c{%s} feature needs to know who is authorized.".
+    "\nSet #C{params.authz_allowed_orgs} to a GitHub organization, and/or".
+    "\n#C{params.authz_allowed_teams} to a list of #C{org:team} slugs.",
+    $ghe ? "github-enterprise-oauth" : "github-oauth"
+  ) unless $orgs_key || $teams_key;
+
+  bail(
+    "#R{[ERROR]} #C{%s} must be a list of GitHub #C{org:team} slugs".
+    "\n(for example: #C{[ fivetwenty-io:pipes ]}).",
+    $teams_key
+  ) if $teams_key && ref($teams) ne 'ARRAY';
+
+  $self->add_files("manifests/oauth/github-oauth-orgs.yml")  if $orgs_key;
+  $self->add_files("manifests/oauth/github-oauth-teams.yml") if $teams_key;
+
+  # github enterprise oauth just adds the host param to github oauth
+  $self->add_files("manifests/oauth/github-enterprise-oauth.yml") if $ghe;
 }
 
 sub _handle_tls_features {
