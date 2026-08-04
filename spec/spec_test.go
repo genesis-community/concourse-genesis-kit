@@ -62,5 +62,10 @@ var _ = Describe("Concourse Kit", func() {
 			CloudConfig: "aws",
 			CPI:         "aws",
 		})
+		Test(Environment{
+			Name:        "full-github-teams",
+			CloudConfig: "aws",
+			CPI:         "aws",
+		})
 	})
 })

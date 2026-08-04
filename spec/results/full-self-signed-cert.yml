@@ -3,11 +3,14 @@ exodus:
   bosh: full-self-signed-cert
   external_url: https://concourse.testing.examle
   features: full,self-signed-cert
+  iaas: null
   is_director: false
   main_target: full-self-signed-cert
   mode: full
   password: <!{meta.vault}/webui:password!>
+  scale: null
   self-signed: true
+  services: null
   tsa_host: 10.99.0.17
   tsa_host_public_key: <!{meta.vault}/tsa/host_key:public!>
   tsa_port: 2222
@@ -175,9 +178,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/haproxy-boshrelease?v=14.1.1%2B2.8.10
   version: 14.1.1+2.8.10
 - name: bpm
-  sha1: d3e85f17607fbe7fa4e8db1e797ef16fa411dd5d
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.2.20
-  version: 1.2.20
+  sha1: 00223345c70d5629d35008e88c42bf4482bdf766
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.20
+  version: 1.4.20
 stemcells:
 - alias: default
   os: ubuntu-noble

@@ -52,15 +52,19 @@ params:
   authz_allowed_orgs: my-github-org
 ```
 
-For more granular control:
+That admits every member of the organization. To admit only particular
+teams, name them by their GitHub `org:team` slugs instead:
 
 ```yaml
 params:
-  github_authz:
-    - organization: my-github-org
-      teams: [platform-team, ci-admins]
-    - user: specific-github-user
+  authz_allowed_teams:
+    - my-github-org:platform-team
+    - my-github-org:ci-admins
 ```
+
+Both parameters may be set together, in which case org members and team
+members are all admitted. Setting neither is an error, since GitHub OAuth
+would then authenticate everyone and authorize no one.
 
 ### CF OAuth
 

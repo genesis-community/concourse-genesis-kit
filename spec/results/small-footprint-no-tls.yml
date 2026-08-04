@@ -2,9 +2,12 @@ exodus:
   bosh: small-footprint-no-tls
   external_url: https://concourse.testing.examle
   features: small-footprint,no-tls
+  iaas: null
   is_director: false
   mode: small-footprint
   password: <!{meta.vault}/webui:password!>
+  scale: null
+  services: null
   tsa_host: 10.99.0.16
   tsa_host_public_key: <!{meta.vault}/tsa/host_key:public!>
   tsa_port: 2222
@@ -123,9 +126,9 @@ releases:
   url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
   version: 0.2.1
 - name: bpm
-  sha1: d3e85f17607fbe7fa4e8db1e797ef16fa411dd5d
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.2.20
-  version: 1.2.20
+  sha1: 00223345c70d5629d35008e88c42bf4482bdf766
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.20
+  version: 1.4.20
 stemcells:
 - alias: default
   os: ubuntu-noble

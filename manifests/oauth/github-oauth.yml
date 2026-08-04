@@ -1,22 +1,15 @@
 ---
-params:
-  authz_allowed_orgs: (( param "Please provide the name of the organization authorized for using Concourse" ))
-
-meta:
-  default:
-    github_authz:
-      - organization: (( grab params.authz_allowed_orgs ))
-        teams:        all
-
+# GitHub OAuth: who Concourse talks to.  *Who is allowed in* is decided by
+# github-oauth-orgs.yml and/or github-oauth-teams.yml, which the blueprint
+# hook pulls in based on which authz params the environment sets.
+#
+# This file used to also carry a `meta.default.github_authz` block, but the
+# document declared `meta:` twice, so that block never survived the parse and
+# nothing ever grabbed it.
 meta:
   jobs:
     web:
       properties:
-        main_team:
-          auth:
-            github:
-              orgs: [(( grab params.authz_allowed_orgs || params.github.orgs ))]
-
         github_auth:
           client_id:     (( vault meta.vault "/oauth:provider_key" ))
           client_secret: (( vault meta.vault "/oauth:provider_secret" ))

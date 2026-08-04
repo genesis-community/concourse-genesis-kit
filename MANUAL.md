@@ -97,7 +97,18 @@ The Concourse Genesis Kit supports multiple authentication methods:
 
 2. **GitHub OAuth**
    - Enable with `github-oauth` feature
-   - Set `authz_allowed_orgs` or `github_authz` parameters
+
+   - Set `authz_allowed_orgs` to a GitHub organization to admit every member
+     of that organization
+
+   - Set `authz_allowed_teams` to a list of GitHub `org:team` slugs to admit
+     only the members of those teams — for example
+     `[ fivetwenty-io:pipes ]`. Use the slugs GitHub generates, not the
+     display names
+
+   - Either parameter alone is sufficient, and both may be set together;
+     setting neither is an error. Local basic authentication keeps working
+     alongside GitHub OAuth
 
 3. **CF OAuth**
    - Enable with `cf-oauth` feature

@@ -2,10 +2,13 @@ exodus:
   bosh: full-all-params
   external_url: https://concourse.testing.examle
   features: full,no-tls,github-oauth,vault,vault-approle,shout,prometheus
+  iaas: null
   is_director: false
   main_target: full-all-params
   mode: full
   password: <!{meta.vault}/webui:password!>
+  scale: null
+  services: null
   shout_admin_password: <!{meta.vault}/shout/admin:password!>
   shout_admin_username: admin
   shout_ops_password: <!{meta.vault}/shout/ops:password!>
@@ -211,9 +214,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/haproxy-boshrelease?v=14.1.1%2B2.8.10
   version: 14.1.1+2.8.10
 - name: bpm
-  sha1: d3e85f17607fbe7fa4e8db1e797ef16fa411dd5d
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.2.20
-  version: 1.2.20
+  sha1: 00223345c70d5629d35008e88c42bf4482bdf766
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.20
+  version: 1.4.20
 - name: shout
   sha1: 73c5c0161730a655c03f5a6ceb1c8b2e33403874
   url: https://github.com/jhunt/shout-boshrelease/releases/download/v0.1.0/shout-0.1.0.tar.gz
