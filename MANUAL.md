@@ -98,12 +98,12 @@ The Concourse Genesis Kit supports multiple authentication methods:
 2. **GitHub OAuth**
    - Enable with `github-oauth` feature
 
-   - Set `authz_allowed_orgs` to a GitHub organization to admit every member
-     of that organization
+   - Set `github_allowed_orgs` to a list of GitHub organizations to admit
+     every member of those organizations
 
-   - Set `authz_allowed_teams` to a list of GitHub `org:team` slugs to admit
+   - Set `github_allowed_teams` to a list of GitHub `org:team` slugs to admit
      only the members of those teams — for example
-     `[ fivetwenty-io:pipes ]`. Use the slugs GitHub generates, not the
+     `[ my-org:platform-team ]`. Use the slugs GitHub generates, not the
      display names
 
    - Either parameter alone is sufficient, and both may be set together;
@@ -252,7 +252,8 @@ kit:
 params:
   env: dev
   external_domain: concourse-dev.example.com
-  authz_allowed_orgs: my-github-org
+  github_allowed_orgs:
+    - my-github-org
 ```
 
 ### Workers-Only Deployment

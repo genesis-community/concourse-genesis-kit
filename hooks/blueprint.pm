@@ -246,31 +246,59 @@ sub _handle_oauth_features {
 
   $self->add_files("manifests/oauth/github-oauth.yml");
 
-  # Authorization is granted by organization -- every member of the org gets
-  # in -- and/or by team, which admits only that team's members.  Either one
-  # alone is a complete answer, so only the files the environment actually
-  # configured are merged in: emitting an empty orgs list beside a teams list
-  # would be read by Concourse as "no orgs", which is right, but emitting
-  # neither leaves a Concourse that authenticates everybody and authorizes
-  # nobody.
-  my (undef, $orgs_key)  = $self->env->lookup(['params.authz_allowed_orgs',  'params.github.orgs']);
-  my ($teams, $teams_key) = $self->env->lookup(['params.authz_allowed_teams', 'params.github.teams']);
+  # Retired spellings fail loudly, with the fix in the message.  github_authz
+  # needs it most: it has been silently dead since v3.0.0, so anyone setting
+  # it believed they were team-restricted while actually admitting the whole
+  # organization.
+  my (undef, $dead_key) = $self->env->lookup(['params.github_authz']);
+  bail(
+    "#R{[ERROR]} #C{params.github_authz} has not worked since v3.0.0 -- it was".
+    "\nsilently ignored, and every member of the organization could log in.".
+    "\nSet #C{params.github_allowed_teams} to a list of GitHub #C{org:team}".
+    "\nslugs instead (for example: #C{[ my-org:platform-team ]})."
+  ) if $dead_key;
+
+  my (undef, $renamed_key) = $self->env->lookup(['params.authz_allowed_orgs']);
+  bail(
+    "#R{[ERROR]} #C{params.authz_allowed_orgs} has been renamed.  Set".
+    "\n#C{params.github_allowed_orgs} to a *list* of GitHub organizations".
+    "\n(for example: #C{[ my-org ]})."
+  ) if $renamed_key;
+
+  # Authorization is granted by organization -- every member of each listed
+  # org gets in -- and/or by team, which admits only that team's members.
+  # Either one alone is a complete answer, so only the files the environment
+  # actually configured are merged in: emitting an empty orgs list beside a
+  # teams list would be read by Concourse as "no orgs", which is right, but
+  # emitting neither leaves a Concourse that authenticates everybody and
+  # authorizes nobody.
+  my ($orgs,  $orgs_key)  = $self->env->lookup(['params.github_allowed_orgs']);
+  my ($teams, $teams_key) = $self->env->lookup(['params.github_allowed_teams']);
 
   bail(
     "#R{[ERROR]} The #c{%s} feature needs to know who is authorized.".
-    "\nSet #C{params.authz_allowed_orgs} to a GitHub organization, and/or".
-    "\n#C{params.authz_allowed_teams} to a list of #C{org:team} slugs.",
+    "\nSet #C{params.github_allowed_orgs} to a list of GitHub organizations,".
+    "\nand/or #C{params.github_allowed_teams} to a list of #C{org:team} slugs.",
     $ghe ? "github-enterprise-oauth" : "github-oauth"
   ) unless $orgs_key || $teams_key;
 
-  bail(
-    "#R{[ERROR]} #C{%s} must be a list of GitHub #C{org:team} slugs".
-    "\n(for example: #C{[ fivetwenty-io:pipes ]}).",
-    $teams_key
-  ) if $teams_key && ref($teams) ne 'ARRAY';
+  if ($orgs_key) {
+    bail(
+      "#R{[ERROR]} #C{%s} must be a list of GitHub organizations".
+      "\n(for example: #C{[ my-org ]}).",
+      $orgs_key
+    ) if ref($orgs) ne 'ARRAY';
+    $self->add_files("manifests/oauth/github-oauth-orgs.yml");
+  }
 
-  $self->add_files("manifests/oauth/github-oauth-orgs.yml")  if $orgs_key;
-  $self->add_files("manifests/oauth/github-oauth-teams.yml") if $teams_key;
+  if ($teams_key) {
+    bail(
+      "#R{[ERROR]} #C{%s} must be a list of GitHub #C{org:team} slugs".
+      "\n(for example: #C{[ my-org:platform-team ]}).",
+      $teams_key
+    ) if ref($teams) ne 'ARRAY';
+    $self->add_files("manifests/oauth/github-oauth-teams.yml");
+  }
 
   # github enterprise oauth just adds the host param to github oauth
   $self->add_files("manifests/oauth/github-enterprise-oauth.yml") if $ghe;

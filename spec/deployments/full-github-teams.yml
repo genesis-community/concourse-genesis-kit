@@ -1,6 +1,6 @@
 ---
 # GitHub OAuth authorized by team rather than by organization: only members
-# of the named teams may log in. authz_allowed_orgs is deliberately unset,
+# of the named teams may log in. github_allowed_orgs is deliberately unset,
 # so main_team.auth.github must carry teams and no orgs at all -- an orgs
 # entry here would admit every member of the organization.
 kit:
@@ -17,6 +17,6 @@ genesis:
 params:
   external_domain: concourse.testing.examle
 
-  authz_allowed_teams:
+  github_allowed_teams:
     - test-org:test-team
     - test-org:other-team

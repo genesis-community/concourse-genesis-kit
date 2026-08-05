@@ -2,11 +2,10 @@
 # Authorize by GitHub team: only members of the named teams can log in,
 # rather than everyone in the organization.
 #
-# Included only when the environment sets params.authz_allowed_teams (or
-# params.github.teams); see _handle_oauth_features in hooks/blueprint.pm.
-# The value is a list, because a Concourse deployment may serve several
-# teams, and each entry is GitHub's "org:team" *slug* form -- the slugs,
-# not the display names (a team shown as "Pipes" under "FiveTwenty IO" is
+# Included only when the environment sets params.github_allowed_teams; see
+# _handle_oauth_features in hooks/blueprint.pm.  The value is a list, and
+# each entry is GitHub's "org:team" *slug* form -- the slugs, not the
+# display names (a team shown as "Pipes" under "FiveTwenty IO" is
 # fivetwenty-io:pipes).
 meta:
   jobs:
@@ -15,4 +14,4 @@ meta:
         main_team:
           auth:
             github:
-              teams: (( grab params.authz_allowed_teams || params.github.teams ))
+              teams: (( grab params.github_allowed_teams ))

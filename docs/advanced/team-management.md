@@ -49,7 +49,8 @@ When using GitHub OAuth, you can specify which GitHub organizations or teams hav
 
 ```yaml
 params:
-  authz_allowed_orgs: my-github-org
+  github_allowed_orgs:
+    - my-github-org
 ```
 
 That admits every member of the organization. To admit only particular
@@ -57,7 +58,7 @@ teams, name them by their GitHub `org:team` slugs instead:
 
 ```yaml
 params:
-  authz_allowed_teams:
+  github_allowed_teams:
     - my-github-org:platform-team
     - my-github-org:ci-admins
 ```

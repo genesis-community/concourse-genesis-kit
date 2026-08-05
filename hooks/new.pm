@@ -140,12 +140,12 @@ sub _configure_oauth {
     info("".
          "\nConcourse authorizes access based off of GitHub Organizations");
 
-    my $authz_allowed_orgs;
-    prompt_for('authz_allowed_orgs', 'line',
+    my $github_allowed_org;
+    prompt_for('github_allowed_org', 'line',
       "Which GitHub organization do you want to grant access to Concourse?",
-      \$authz_allowed_orgs);
+      \$github_allowed_org);
 
-    $$params_ref .= "  authz_allowed_orgs: $authz_allowed_orgs\n";
+    $$params_ref .= "  github_allowed_orgs:\n  - $github_allowed_org\n";
 
     if ($auth_backend_feature eq "github-enterprise-oauth") {
       info("".
