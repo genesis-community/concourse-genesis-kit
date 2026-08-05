@@ -33,7 +33,8 @@ params:
     public_key: test-token-signing-key-public
     private_key: test-token-signing-key-private
 
-  authz_allowed_orgs: test-org
+  github_allowed_orgs:
+    - test-org
   vault_approle_role_id: test-role-id
   vault_approle_secret_id: test-secret
   vault_url: https://vault.testing.example
