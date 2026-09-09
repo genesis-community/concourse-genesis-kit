@@ -1,4 +1,4 @@
-package Genesis::Hook::Addon::Concourse::SetupApprole v5.1.0;
+package Genesis::Hook::Addon::Concourse::SetupApprole v5.1.1;
 
 use v5.20;
 use warnings; # Genesis min perl version is 5.20
@@ -24,12 +24,20 @@ sub cmd_details {
   "The concourse app role will provide concourse access to a vault location\n".
   "(usually `/concourse`) for interpolating secrets in pipelines. The genesis-pipelines\n".
   "app role is used to allow the Genesis pipelines to access vault for reading\n".
-  "deployment secrets and writing exodus data.\n";
+  "deployment secrets and writing exodus data.\n".
+  "\n".
+  "Supports the following options:\n".
+  "[[  #y{--yes, -y}          >>Answer yes to every confirmation, for non-interactive runs\n";
 }
 
 sub perform {
   my ($self) = @_;
   my $env = $self->env;
+
+  my %options = $self->parse_options([
+    'yes|y', # Answer yes to every confirmation prompt
+  ]);
+  $self->{non_interactive} = $options{'yes'} ? 1 : 0;
 
   info(
     "\nThis will setup up the app roles and policies for concourse and".
@@ -58,14 +66,14 @@ sub perform {
   }
 
   # Setup concourse approle
-  my $create_concourse = prompt_for_boolean("Do you want to install the #C{concourse} app role? [Y/N]", 0);
+  my $create_concourse = $self->_confirm("Do you want to install the #C{concourse} app role? [Y/N]", 0);
 
   if ($create_concourse) {
     $self->_setup_concourse_approle(\@roles);
   }
 
   # Setup genesis-pipelines approle
-  my $create_pipelines = prompt_for_boolean("Do you want to install the #C{genesis-pipelines} app role?", 0);
+  my $create_pipelines = $self->_confirm("Do you want to install the #C{genesis-pipelines} app role?", 0);
 
   if ($create_pipelines) {
     $self->_setup_pipelines_approle(\@roles);
@@ -81,7 +89,7 @@ sub _setup_concourse_approle {
   # Check if role already exists
   if (grep { $_ eq $approle } @$roles_ref) {
     info("#y{[WARNING]} App role #C{$approle} already exists. This action will overwrite it...");
-    my $continue = prompt_for_boolean( "Continue?", 0);
+    my $continue = $self->_confirm("Continue?", 0);
     return 0 if !$continue ;
   }
 
@@ -204,7 +212,7 @@ sub _setup_pipelines_approle {
   # Check if role already exists
   if (grep { $_ eq $approle } @$roles_ref) {
     info("#y{[WARNING]} App role #C{$approle} already exists. This action will overwrite it...");
-    my $continue = prompt_for_boolean("Continue?", 0);
+    my $continue = $self->_confirm("Continue?", 0);
     return 0 if !$continue;
   }
 
@@ -320,6 +328,16 @@ sub _get_mount_type {
   }
 
   return "";
+}
+
+sub _confirm {
+  my ($self, $prompt, $default) = @_;
+  if ($self->{non_interactive}) {
+    (my $shown = $prompt) =~ s/\s*\[Y\/N\]\s*$//;
+    info("%s #G{yes} (--yes)", $shown);
+    return 1;
+  }
+  return prompt_for_boolean($prompt, $default);
 }
 
 sub _match_mount {
