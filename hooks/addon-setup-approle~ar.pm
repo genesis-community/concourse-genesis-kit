@@ -1,4 +1,4 @@
-package Genesis::Hook::Addon::Concourse::SetupApprole v5.1.1;
+package Genesis::Hook::Addon::Concourse::SetupApprole v5.1.2;
 
 use v5.20;
 use warnings; # Genesis min perl version is 5.20
@@ -308,7 +308,14 @@ sub _setup_pipelines_approle {
 
 sub _get_mount_type {
   my ($self, $mount) = @_;
-  my ($output, $rc, $err) = $self->vault->query("secrets","list","-detailed");
+  # vault->query runs safe, so the vault CLI has to be invoked through
+  # `safe vault ...`; a bare `safe secrets list` is not a safe command and
+  # returns nothing, which used to make this look like a missing mount.
+  my ($output, $rc, $err) = $self->vault->query("vault","secrets","list","--detailed");
+  bail(
+    "#R{[error]}\nFailed to list vault mounts while checking for %s -- please resolve and try again:\n %s",
+    $mount, $err // $output
+  ) if $rc;
 
   # Parse output to find mount type
   my @lines = split(/\n/, $output);
