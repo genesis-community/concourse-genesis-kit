@@ -8,7 +8,7 @@ params:
   external_domain: (( vault meta.ocfp.vault.config "/lbs/concourse:domain" ))
 
   num_web_nodes: 1
-  worker: 3
+  workers: 3
 
   concourse_network:     (( concat meta.ocfp.env.cloud "net-concourse" ))
   concourse_network_web: (( concat meta.ocfp.env.cloud "net-concourse-web" ))
