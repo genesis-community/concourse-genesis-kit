@@ -1,4 +1,4 @@
-package Genesis::Hook::Addon::Concourse::SetupApprole v5.1.2;
+package Genesis::Hook::Addon::Concourse::SetupApprole v5.1.3;
 
 use v5.20;
 use warnings; # Genesis min perl version is 5.20
@@ -174,16 +174,20 @@ sub _setup_concourse_approle {
   info("Creating and configuring app role #C{$approle}...");
   $self->vault->query("vault","delete","auth/approle/role/$approle");
 
-  $rc = $self->vault->set(
-    "auth/approle/role/$approle",
-    "secret_id_ttl", "0",
-    "token_num_uses", "0",
-    "token_period", "3600",
-    "token_ttl", "3600",
-    "token_max_ttl", "0",
-    "secret_id_num_uses", "0",
-    "policies", "concourse"
+  # A role is API config, not a kv secret, so we write it natively: safe set
+  # would merge into a read-back whose values come back normalised (lists,
+  # integers), which the write confirmation then refuses to trust.
+  my ($role_out, $role_rc, $role_err) = $self->vault->query(
+    "vault", "write", "auth/approle/role/$approle",
+    "secret_id_ttl=0",
+    "token_num_uses=0",
+    "token_period=3600",
+    "token_ttl=3600",
+    "token_max_ttl=0",
+    "secret_id_num_uses=0",
+    "token_policies=concourse",
   );
+  $rc = $role_rc;
 
   if ($rc != 0) {
     bail("#R{[error]}\nFailed to create #C{$approle} approle.");
@@ -276,15 +280,19 @@ sub _setup_pipelines_approle {
   info("Creating and configuring app role #C{$approle}...");
   $self->vault->query("vault","delete","auth/approle/role/$approle");
 
-  $rc = $self->vault->set(
-    "auth/approle/role/$approle",
-    "secret_id_ttl", "0",
-    "token_num_uses", "0",
-    "token_ttl", "60m",
-    "token_max_ttl", "60m",
-    "secret_id_num_uses", "0",
-    "policies", "default,$approle"
+  # A role is API config, not a kv secret, so we write it natively: safe set
+  # would merge into a read-back whose values come back normalised (lists,
+  # integers), which the write confirmation then refuses to trust.
+  my ($role_out, $role_rc, $role_err) = $self->vault->query(
+    "vault", "write", "auth/approle/role/$approle",
+    "secret_id_ttl=0",
+    "token_num_uses=0",
+    "token_ttl=60m",
+    "token_max_ttl=60m",
+    "secret_id_num_uses=0",
+    "token_policies=default,$approle",
   );
+  $rc = $role_rc;
 
   if ($rc != 0) {
     bail("#R{[error]}\nFailed to create #C{$approle} approle.");
