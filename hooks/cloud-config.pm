@@ -1,4 +1,4 @@
-package Genesis::Hook::CloudConfig::Concourse v5.1.0;
+package Genesis::Hook::CloudConfig::Concourse v5.1.1;
 
 use v5.20;
 use warnings; # Genesis min perl version is 5.20
@@ -35,16 +35,28 @@ sub perform {
   my $network_web_name = $self->env->lookup('params.concourse_web_network', 'concourse-web'); # Used by AWS
   my $is_ocfp = $self->want_feature('ocfp');
   my $env_scale = $is_ocfp ? $self->env->lookup('meta.ocfp.env.scale', 'dev') : 'default';
+  my $is_pve = ($self->iaas // '') eq 'pve';
 
 	my $topology = $self->env->ocfp_config_lookup('net.topology', 'v2');
+
+  # On PVE the ocfp/pve/full.yml overlay pins every Concourse VM to z1, which
+  # is the ocfp-0 subnet, so we only draw dynamic IPs from that subnet and keep
+  # the count small: web takes the reserved concourse_ip static, and db and
+  # worker take one dynamic IP each. The compact PVE layout leaves only eight
+  # dynamic IPs per subnet for the whole mgmt tier, so the 16-across-three-
+  # subnets default cannot fit there. Every other IaaS keeps the wide spread.
+  my $concourse_total_size = $topology eq 'v1' ? 0
+    : $is_pve ? $self->for_scale({ dev => 4, prod => 8 }, 4)
+    : 16;
 
   my $config = $self->build_cloud_config({
     'networks' => [
       $self->network_definition($network_name,
         strategy => $is_ocfp ? 'ocfp' : 'manual',
         dynamic_subnets => {
+          ($is_pve ? (subnets => ['ocfp-0']) : ()),
           allocation => {
-            total_size => $topology eq 'v1' ? 0 : 16
+            total_size => $concourse_total_size,
           },
           cloud_properties_for_iaas => {
             openstack => {
