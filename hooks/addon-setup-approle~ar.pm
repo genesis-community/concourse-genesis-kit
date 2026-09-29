@@ -8,6 +8,7 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/
 
 use Genesis qw/bail info run/;
 use Genesis::UI qw/prompt_for_boolean/;
+use File::Temp ();
 
 use parent qw(Genesis::Hook::Addon);
 sub init {
@@ -146,25 +147,11 @@ sub _setup_concourse_approle {
 
   # Create concourse policy
   info("Creating #C{concourse} policy...");
-  my $policy = "";
-  $policy .= "# List, create, update, and delete key/value secrets for Concourse\n";
-  my $capabilities = '" { capabilities = ["create", "read", "update", "delete", "list", "sudo"] }';
-
-  if ($mount_type eq "kv_v1") {
-    $policy .= "path \"${concourse_mount_path}/*$capabilities\n";
-  } else {
-    $policy .= "path \"${concourse_mount_path}/data/*$capabilities\n";
-    $policy .= "path \"${concourse_mount_path}/metadata/*$capabilities\n";
-  }
+  my $policy = _concourse_policy($concourse_mount, $mount_type eq "kv_v1" ? "1" : "2");
 
 	info("#Y{Policy file being applied to Concourse}\n\n%s\n\n", $policy);
 
-	# Write policy to file
-  open(my $fh, '>', '/tmp/policy.hcl') or bail("#R{[error]}\nFailed to write policy to /tmp/policy.hcl: $!");
-  print $fh $policy;
-  close($fh);
-
-  my ($out, $rc, $err) = $self->vault->query("vault","policy","write","concourse","/tmp/policy.hcl");
+  my ($out, $rc, $err) = $self->_write_policy("concourse", $policy);
   info("Output: %s", $out) if $out;
   if ($out !~ /Success/) {
     bail("#R{[error]}\nFailed to save #C{concourse} policy:\n%s", $err//$out);
@@ -242,35 +229,10 @@ sub _setup_pipelines_approle {
   info("Exodus Mount: '%s', Path: '%s', Version: '%s'", $exo_mnt, $exo_path, $exo_ver);
 
   # Build policy based on mount types and paths
-  my $policy = "# Allow the pipelines to read all items within Vault, and write to secret/exodus (for genesis exodus data)\n\n";
-
-  my $read_capabilities = '" { capabilities = ["read", "list"] }';
-
-  my $write_capabilities = '" { capabilities = ["create", "read", "update", "list", "delete"] }';
-
-  # Secrets path (read access)
-  if ($sec_ver eq "2" && $sec_path) {
-    $policy .= "path \"${sec_mnt}data/${sec_path}/*$read_capabilities\n";
-    $policy .= "path \"${sec_mnt}metadata/${sec_path}/*$read_capabilities\n";
-  } else {
-    $policy .= "path \"${ENV{GENESIS_SECRETS_MOUNT}}/*$read_capabilities\n";
-  }
-
-  # Exodus path (write access)
-  if ($exo_ver eq "2" && $exo_path) {
-    $policy .= "path \"${exo_mnt}data/${exo_path}/*$write_capabilities\n";
-    $policy .= "path \"${exo_mnt}metadata/${exo_path}/*$write_capabilities\n";
-  } else {
-    $policy .= "path \"${ENV{GENESIS_EXODUS_MOUNT}}/*$write_capabilities\n";
-  }
-
-  # Write policy to file
-  open(my $fh, '>', '/tmp/policy.hcl') or bail("#R{[error]}\nFailed to write policy to /tmp/policy.hcl: $!");
-  print $fh $policy;
-  close($fh);
+  my $policy = _pipelines_policy($sec_info, $exo_info);
 
   # Write policy to vault
-  my ($out, $rc, $err) = $self->vault->query("vault","policy","write","$approle","/tmp/policy.hcl");
+  my ($out, $rc, $err) = $self->_write_policy($approle, $policy);
   info("Output: %s", $rc);
   if ($out !~ /Success/) {
     bail("#R{[error]}\nFailed to create #C{$approle} policy:\n%s", $err//$out);
@@ -360,28 +322,104 @@ sub _confirm {
 sub _match_mount {
   my ($self, $path) = @_;
   my $output = $self->vault->query("vault","secrets","list","--detailed");
+  return _longest_mount_match($path, _parse_kv_mounts($output));
+}
 
-  # Get all kv mounts with versions
+sub _write_policy {
+  my ($self, $name, $policy) = @_;
+
+  # A private temp file (mode 0600) that is removed when $tmp goes out of
+  # scope, so concurrent runs cannot clobber or read each other's policy.
+  my $tmp = File::Temp->new(TEMPLATE => "genesis-policy-XXXXXX", SUFFIX => ".hcl", TMPDIR => 1);
+  print $tmp $policy or bail("#R{[error]}\nFailed to write policy to %s: %s", $tmp->filename, $!);
+  close($tmp) or bail("#R{[error]}\nFailed to write policy to %s: %s", $tmp->filename, $!);
+
+  return $self->vault->query("vault","policy","write",$name,$tmp->filename);
+}
+
+# Pure helpers {{{
+# Everything below takes plain values and returns plain values, so the policy
+# text can be tested without a vault.
+
+# Collapse a vault path to its segments joined by single slashes, with no
+# leading or trailing slash: "/secret//exodus/" becomes "secret/exodus".
+sub _normalize_path {
+  my ($path) = @_;
+  return join('/', grep { length } split(m{/+}, $path // ''));
+}
+
+# Parse `vault secrets list --detailed` into [ mount, version ] pairs for every
+# kv mount. A kv mount with no version option is kv v1.
+sub _parse_kv_mounts {
+  my ($output) = @_;
   my @mounts = ();
-  my @lines = split(/\n/, $output);
-  for my $line (@lines) {
-    if ($line =~ /^(\/?)([^\/].*\/)  *kv  *.*map\[version:([12])\]/) {
-      push @mounts, [ "/$2", $3 ];
-    }
+  for my $line (split(/\n/, $output // '')) {
+    my ($mount, $type) = split(' ', $line);
+    next unless defined($type) && $type eq 'kv' && $mount =~ m{/$};
+    my $version = ($line =~ /map\[[^\]]*\bversion:([12])\b/) ? $1 : "1";
+    push @mounts, [ _normalize_path($mount), $version ];
   }
+  return @mounts;
+}
 
-  # Find best match
+# Find the most specific kv mount holding $path, matching whole segments, so
+# secret/exodus/ wins over secret/ when both are mounted. Returns
+# [ "mount/", subpath, version ] or undef.
+sub _longest_mount_match {
+  my ($path, @mounts) = @_;
+  my $want = _normalize_path($path);
+
+  my $best;
   for my $mount_info (@mounts) {
     my ($mount, $version) = @$mount_info;
-    if ($path =~ /^$mount(.*)/) {
-      my $subpath = $1 || "";
-      $subpath =~ s/^\///;
-      return [ $mount, $subpath, $version ];
-    }
+    $mount = _normalize_path($mount);
+    next unless length($mount);
+    next unless $want eq $mount || index($want, "$mount/") == 0;
+    next if $best && length($best->[0]) >= length($mount);
+    $best = [ $mount, _normalize_path(substr($want, length($mount))), $version ];
   }
+  return undef unless $best;
 
-  return undef;
+  $best->[0] .= '/';
+  return $best;
 }
+
+# The policy globs covering everything under $subpath of a kv mount: the path
+# itself on kv v1, and its data/ and metadata/ trees on kv v2.
+sub _kv_policy_paths {
+  my ($mount, $subpath, $version) = @_;
+  my @trees = ($version eq "2") ? ("data", "metadata") : ("");
+  return map {
+    join('/', grep { length } (_normalize_path($mount), $_, _normalize_path($subpath), '*'))
+  } @trees;
+}
+
+sub _policy_rules {
+  my ($paths, @capabilities) = @_;
+  my $caps = join(', ', map { "\"$_\"" } @capabilities);
+  return join('', map { "path \"$_\" { capabilities = [$caps] }\n" } @$paths);
+}
+
+sub _concourse_policy {
+  my ($mount, $version) = @_;
+  return
+    "# List, create, update, and delete key/value secrets for Concourse\n".
+    _policy_rules(
+      [ _kv_policy_paths($mount, "", $version) ],
+      qw(create read update delete list sudo)
+    );
+}
+
+# $sec_info and $exo_info are the [ mount, subpath, version ] results of
+# _match_mount for the secrets and exodus paths.
+sub _pipelines_policy {
+  my ($sec_info, $exo_info) = @_;
+  return
+    "# Allow the pipelines to read deployment secrets, and write genesis exodus data\n\n".
+    _policy_rules([ _kv_policy_paths(@$sec_info) ], qw(read list)).
+    _policy_rules([ _kv_policy_paths(@$exo_info) ], qw(create read update list delete));
+}
+# }}}
 
 1;
 # vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
