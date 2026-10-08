@@ -54,9 +54,11 @@ These feature flags enable integration with external systems:
 |--------------|-------------|----------------|
 | `vault` | Enable Vault integration for pipeline secrets | `vault_url`, `vault_path_prefix` |
 | `vault-approle` | Use Vault AppRole instead of tokens | `vault_approle_role_id`, `vault_approle_secret_id` |
-| `prometheus` | Enable Prometheus metrics endpoint | `prometheus_metrics_port` (defaults to 9391) |
+| `prometheus` | Enable Prometheus metrics endpoint. Works with `full` and `ocfp`. | `prometheus_metrics_port` (defaults to 9391) |
 | `prometheus-small-footprint` | Enable Prometheus for small footprint | Used with `small-footprint` |
 | `shout` | Enable Shout! notification gateway | `shout_rules` |
+
+The `prometheus` feature turns on the Prometheus listener on the Concourse web job. With the `full` feature, the kit also adds an HAProxy listener on the metrics port that forwards to the web nodes. The `prometheus` feature works under `ocfp` as well. Under `ocfp` there is no HAProxy, so there is no HAProxy listener, and the scrape goes to the web VM directly on the metrics port.
 
 ## Database Feature Flags
 
@@ -138,5 +140,4 @@ For more detailed information on each feature, refer to the relevant documentati
 - [Authentication Methods](../authentication/)
 - [Vault Integration](../integrations/vault.md)
 - [External Database](../integrations/external-db.md)
-- [Prometheus Integration](../integrations/prometheus.md)
 - [OCFP Integration](../advanced/ocfp.md)

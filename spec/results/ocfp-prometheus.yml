@@ -1,0 +1,145 @@
+exodus:
+  bosh: ocfp-prometheus
+  external_url: https://concourse.testing.examle
+  features: ocfp,aws,no-tls,prometheus
+  iaas: aws
+  is_director: false
+  main_target: ocfp-prometheus
+  mode: full
+  password: <!{meta.vault}/webui:password!>
+  scale: null
+  services: null
+  tsa_host: concourse.testing.examle
+  tsa_host_public_key: <!{meta.vault}/tsa/host_key:public!>
+  tsa_port: 2222
+  tsa_worker_private_key: <!{meta.vault}/tsa/worker_key:private!>
+  tsa_worker_public_key: <!{meta.vault}/tsa/worker_key:public!>
+  use_create_env: false
+  username: concourse
+instance_groups:
+- azs:
+  - ocfp-prometheus-z2
+  - ocfp-prometheus-z3
+  instances: 3
+  jobs:
+  - name: worker
+    properties:
+      baggageclaim:
+        driver: detect
+      http_proxy_url: ""
+      https_proxy_url: ""
+      no_proxy:
+      - localhost
+      - 127.0.0.1
+      runtime: containerd
+      worker_gateway:
+        worker_key:
+          private_key: <!{meta.vault}/tsa/worker_key:private!>
+          public_key: <!{meta.vault}/tsa/worker_key:public!>
+    release: concourse
+  name: worker
+  networks:
+  - name: ocfp-prometheus.concourse.net-concourse
+  stemcell: default
+  update:
+    max_in_flight: 3
+    serial: true
+  vm_type: ocfp-prometheus.concourse.vm-concourse-worker
+- azs:
+  - ocfp-prometheus-z1
+  instances: 1
+  jobs:
+  - name: web
+    properties:
+      add_local_users:
+      - concourse:<!{meta.vault}/webui:password-bcrypt!>
+      bind_port: 80
+      external_url: https://concourse.testing.examle
+      main_team:
+        auth:
+          local:
+            users:
+            - concourse
+      postgresql:
+        ca_cert:
+          certificate: test-db-ca
+        database: concourse
+        host: db.testing.example
+        port: "5432"
+        role:
+          name: concourse
+          password: test-db-password
+        sslmode: verify-ca
+      prometheus:
+        bind_ip: 0.0.0.0
+        bind_port: 9391
+      publicly_viewable: true
+      token_signing_key:
+        private_key: <!{meta.vault}/atc/token_signing_key:private!>
+        public_key: <!{meta.vault}/atc/token_signing_key:public!>
+      vault:
+        auth:
+          backend: approle
+          backend_max_ttl: null
+          client_token: null
+          params:
+            role_id: test-role-id
+            secret_id: test-role-secret
+        path_prefix: /secret/concourse
+        shared_path: shared
+        tls:
+          insecure_skip_verify: false
+        url: https://vault.testing.example
+      worker_gateway:
+        authorized_keys:
+        - <!{meta.vault}/tsa/worker_key:public!>
+        host_key:
+          private_key: <!{meta.vault}/tsa/host_key:private!>
+          public_key: <!{meta.vault}/tsa/host_key:public!>
+    release: concourse
+  - name: bpm
+    release: bpm
+  - name: locker
+    properties:
+      locker:
+        password: <!{meta.vault}/locker/api:password!>
+        ssl_cert: <!{meta.vault}/locker/server:certificate!>
+        ssl_key: <!{meta.vault}/locker/server:key!>
+        user: locker
+    release: locker
+  name: web
+  networks:
+  - name: ocfp-prometheus.concourse.net-concourse-web
+  stemcell: default
+  vm_extensions:
+  - concourse-lb
+  - concourse-lb
+  vm_type: ocfp-prometheus.concourse.vm-concourse
+name: ocfp-prometheus-concourse
+releases:
+- name: concourse
+  sha1: dbc32d7c40ad1e6648d8dd749b8b50251bfd6b94
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=8.2.2
+  version: 8.2.2
+- name: slack-notification-resource
+  sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
+  url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
+  version: 9
+- name: locker
+  sha1: ccfcc48d63555a3733c3594d9429a5c1875a9dd2
+  url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
+  version: 0.2.1
+- name: bpm
+  sha1: 00223345c70d5629d35008e88c42bf4482bdf766
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.20
+  version: 1.4.20
+stemcells:
+- alias: default
+  os: ubuntu-noble
+  version: latest
+update:
+  canaries: 1
+  canary_watch_time: 1000-60000
+  max_in_flight: 4
+  serial: false
+  update_watch_time: 1000-60000

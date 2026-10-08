@@ -1,8 +1,3 @@
-meta:
-  metrics:
-    prometheus:
-      port: (( grab params.prometheus_metrics_port || 9391 ))
-
 instance_groups:
 - name: haproxy
   jobs:
@@ -14,11 +9,3 @@ instance_groups:
           port: (( grab meta.metrics.prometheus.port ))
           backend_port: (( grab meta.metrics.prometheus.port ))
           backend_servers: (( grab instance_groups.web.networks.0.static_ips ))
-- name: web
-  jobs:
-  - name: web
-    properties:
-      prometheus:
-        bind_ip: 0.0.0.0
-        bind_port: (( grab meta.metrics.prometheus.port ))
-

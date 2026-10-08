@@ -39,6 +39,14 @@ var _ = Describe("Concourse Kit", func() {
 		})
 	})
 
+	Describe("ocfp", func() {
+		Test(Environment{
+			Name:        "ocfp-prometheus",
+			CloudConfig: "aws",
+			CPI:         "aws",
+		})
+	})
+
 	Describe("full", func() {
 		Test(Environment{
 			Name:        "full-no-tls",

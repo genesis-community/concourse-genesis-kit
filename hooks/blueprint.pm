@@ -80,6 +80,12 @@ sub perform {
     # OCFP enforces the 'no-haproxy' feature
     $self->add_files("manifests/addons/no-haproxy.yml");
 
+    # 'prometheus' feature: with no haproxy there is no metrics listener to
+    # add, so only the web job's Prometheus endpoint is configured and the
+    # scrape goes to the web VMs directly.
+    if ($self->want_feature("prometheus")) {
+      $self->add_files("manifests/addons/prometheus-web.yml");
+    }
 
     # 'vault' feature, using OCFP vars
     $self->add_files(
@@ -182,7 +188,10 @@ sub perform {
       if ($self->want_feature("small-footprint")) {
         $self->add_files("manifests/addons/prometheus-small-footprint.yml");
       } else {
-        $self->add_files("manifests/addons/prometheus.yml");
+        $self->add_files(
+          "manifests/addons/prometheus-web.yml",
+          "manifests/addons/prometheus.yml"
+        );
       }
     }
 

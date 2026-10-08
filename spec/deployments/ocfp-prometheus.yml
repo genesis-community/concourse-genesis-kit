@@ -1,0 +1,17 @@
+---
+kit:
+  name:    dev
+  version: latest
+  iaas:    aws
+  features:
+    - ocfp
+    - aws
+    - no-tls
+    - prometheus
+
+genesis:
+  env:         ocfp-prometheus
+
+params:
+  external_domain: concourse.testing.examle
+  vault_url: https://vault.testing.example

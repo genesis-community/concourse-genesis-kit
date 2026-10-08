@@ -1,0 +1,13 @@
+meta:
+  metrics:
+    prometheus:
+      port: (( grab params.prometheus_metrics_port || 9391 ))
+
+instance_groups:
+- name: web
+  jobs:
+  - name: web
+    properties:
+      prometheus:
+        bind_ip: 0.0.0.0
+        bind_port: (( grab meta.metrics.prometheus.port ))

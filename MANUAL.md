@@ -81,7 +81,7 @@ For details, see the [Deployment Types Documentation](docs/configuration/deploym
 |--------------|-------------|
 | `vault` | Enable Vault integration for pipeline secrets |
 | `vault-approle` | Use Vault AppRole instead of tokens |
-| `prometheus` | Enable Prometheus metrics endpoint |
+| `prometheus` | Enable Prometheus metrics endpoint, including under `ocfp` |
 | `external-db` | Use an external PostgreSQL database |
 | `ocfp` | Deploy as part of an OCFP architecture |
 
@@ -142,7 +142,7 @@ features:
   - prometheus
 ```
 
-For details, see the [Prometheus Integration Documentation](docs/integrations/prometheus.md).
+The metrics port defaults to 9391, and you can change it with the `prometheus_metrics_port` parameter. With the `full` feature, the kit adds an HAProxy listener on that port that forwards to the web nodes. The `prometheus` feature also works with the `ocfp` feature. Under `ocfp` there is no HAProxy, so there is no listener to add, and Prometheus scrapes the web VMs directly on the metrics port.
 
 ### External Database
 
