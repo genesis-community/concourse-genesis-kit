@@ -33,7 +33,7 @@ sub perform {
 
   # Check for custom ops files in the deployment
   for my $feature ($self->features) {
-    if ($feature =~ /^(azure|shield|workers|full|small-footprint|no-tls|provided-cert|self-signed-cert|github-oauth|github-enterprise-oauth|cf-oauth|vault|vault-approle|shout|prometheus|no-haproxy|dynamic-web-ip|external-db|external-db-ca|ocfp|okta|aws|stackit|\+internal-db|\+locker|\+vault-token-default|\+vault-approle-default)$/) {
+    if ($feature =~ /^(azure|shield|workers|full|small-footprint|no-tls|provided-cert|self-signed-cert|github-oauth|github-enterprise-oauth|cf-oauth|vault|vault-approle|shout|prometheus|no-haproxy|dynamic-web-ip|external-db|external-db-ca|ocfp|okta|resolute|aws|stackit|\+internal-db|\+locker|\+vault-token-default|\+vault-approle-default)$/) {
       # These are standard features handled below
     } elsif (-f $self->env->path("ops/$feature.yml")) {
       if ($self->want_feature('ocfp')) {
@@ -230,6 +230,31 @@ sub perform {
   if ($self->want_feature("azure")) {
     $self->env->notify("#Y{[WARNING]} The 'azure' feature is no longer necessary - azure CPI will be detected".
                         "\nautomatically at deployment time.");
+  }
+
+  # Ubuntu resolute stemcells (opt-in; the default stays ubuntu-noble).  Added
+  # after every other fragment so that it wins over the stemcell default.
+  if ($self->want_feature("resolute")) {
+    my $stemcell_os = $self->env->lookup("params.stemcell_os", "ubuntu-resolute");
+    bail(
+      "The #c{resolute} feature sets the stemcell os to ubuntu-resolute, but ".
+      "the environment sets #c{params.stemcell_os} to #R{%s}.  ".
+      "Remove that parameter.", $stemcell_os
+    ) if $stemcell_os ne "ubuntu-resolute";
+    $self->add_files("manifests/resolute.yml");
+
+    # The haproxy release the kit pins bundles a socat that does not compile
+    # on resolute.  The release only exists in the manifest when the haproxy
+    # instance group does, which excludes ocfp, small-footprint, and no-haproxy.
+    if ($self->want_feature("full") && !$self->want_feature("ocfp") && !$self->want_feature("no-haproxy")) {
+      $self->add_files("manifests/resolute-haproxy.yml");
+    }
+  } elsif ($self->env->lookup("params.stemcell_os", "ubuntu-noble") eq "ubuntu-resolute") {
+    bail(
+      "The environment sets #c{params.stemcell_os} to ubuntu-resolute ".
+      "without the #c{resolute} feature.  Enable the feature and remove ".
+      "that parameter."
+    );
   }
 
   # Add any ops files last if using OCFP

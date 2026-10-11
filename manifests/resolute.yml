@@ -1,0 +1,9 @@
+---
+# Ubuntu resolute stemcell.
+#
+# Loaded last by the resolute feature so that it wins over the ubuntu-noble
+# default in base.yml.  The stemcell version still comes from
+# params.stemcell_version.
+
+params:
+  stemcell_os: ubuntu-resolute
