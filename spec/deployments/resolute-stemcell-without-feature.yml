@@ -1,0 +1,14 @@
+---
+kit:
+  name:    dev
+  version: latest
+  features:
+    - full
+    - no-tls
+
+genesis:
+  env:         resolute-stemcell-without-feature
+
+params:
+  external_domain: concourse.testing.examle
+  stemcell_os: ubuntu-resolute

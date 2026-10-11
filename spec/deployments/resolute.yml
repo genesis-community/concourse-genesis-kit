@@ -1,0 +1,15 @@
+---
+kit:
+  name:    dev
+  version: latest
+  features:
+    - full
+    - no-tls
+    - resolute
+
+genesis:
+  env:         resolute
+
+params:
+  external_domain: concourse.testing.examle
+  stemcell_version: "0.184"

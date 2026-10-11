@@ -1,0 +1,16 @@
+---
+kit:
+  name:    dev
+  version: latest
+  features:
+    - full
+    - no-tls
+    - no-haproxy
+    - resolute
+
+genesis:
+  env:         resolute-no-haproxy
+
+params:
+  external_domain: concourse.testing.examle
+  stemcell_version: "0.184"

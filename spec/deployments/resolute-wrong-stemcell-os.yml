@@ -1,0 +1,15 @@
+---
+kit:
+  name:    dev
+  version: latest
+  features:
+    - full
+    - no-tls
+    - resolute
+
+genesis:
+  env:         resolute-wrong-stemcell-os
+
+params:
+  external_domain: concourse.testing.examle
+  stemcell_os: ubuntu-noble

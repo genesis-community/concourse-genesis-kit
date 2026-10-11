@@ -12,6 +12,7 @@ This manual serves as an overview of the kit functionality with links to more de
 - [Authentication Options](#authentication-options)
 - [Integration Options](#integration-options)
 - [Advanced Configuration](#advanced-configuration)
+- [Ubuntu Resolute Stemcells](#ubuntu-resolute-stemcells)
 - [Available Addons](#available-addons)
 - [Detailed Documentation](#detailed-documentation)
 - [Example Deployments](#example-deployments)
@@ -57,6 +58,7 @@ For details, see the [Deployment Types Documentation](docs/configuration/deploym
 | `full` | Deploy a complete Concourse system |
 | `small-footprint` | Deploy a smaller Concourse with web/DB on one VM |
 | `workers` | Deploy only worker nodes for a remote Concourse |
+| `resolute` | **Experimental.** Deploy on the ubuntu-resolute stemcell instead of ubuntu-noble. See [Ubuntu Resolute Stemcells](#ubuntu-resolute-stemcells) |
 
 ### Authentication Feature Flags
 
@@ -186,6 +188,32 @@ features:
 ```
 
 For details, see the [OCFP Documentation](docs/advanced/ocfp.md).
+
+## Ubuntu Resolute Stemcells
+
+The kit deploys Concourse on ubuntu-noble stemcells unless we ask for something else. Adding the `resolute` feature moves every instance group onto ubuntu-resolute.
+
+```yaml
+kit:
+  features:
+  - full
+  - resolute
+
+params:
+  stemcell_version: "0.184"
+```
+
+The feature is experimental, so we recommend trying it on a canary Concourse before we point anything real at it. It sets the stemcell `os` to `ubuntu-resolute`, and `stemcell_version` still selects the version, which defaults to `latest`. We pin it to a resolute version such as `"0.184"`, so that the environment stays on a known resolute build when a newer stemcell is uploaded. The feature works the same with or without `ocfp`. Because the feature owns the stemcell os, an environment that sets `params.stemcell_os` to anything else is refused. An environment that sets `params.stemcell_os` to `ubuntu-resolute` without the feature is refused as well.
+
+Before the first deploy we need to do two things on the director.
+
+- Upload the resolute stemcell to the director that deploys Concourse, since both the compilation VMs and the instances need it.
+
+- Make sure the director's runtime config carries bosh-dns 1.39.31 or later. Earlier bosh-dns releases do not run on resolute.
+
+Resolute ships without runit, so the `chpst` command is missing. A job whose start script drops privileges with `chpst` hangs on resolute, and we have to switch it to `setpriv` or bpm before its release can run there. The Concourse worker uses start-stop-daemon and the other jobs run under bpm, so the releases this kit deploys are not affected, but we should check any job we add before we move it to resolute.
+
+The haproxy releases before 16.13.0 bundle a socat that fails to compile on resolute. The default pin is haproxy 14.1.1, so a `full` deployment with the `resolute` feature switches to haproxy 16.13.0 with HAProxy 3.2.25 and leaves the pin alone for every other deployment. The kit only sets `ha_proxy.tcp` on that job, and the new release accepts it unchanged. The switch does not apply to `ocfp`, `small-footprint`, or `no-haproxy` deployments, because none of them deploys the haproxy release.
 
 ## Available Addons
 

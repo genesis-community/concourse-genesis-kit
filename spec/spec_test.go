@@ -6,6 +6,7 @@ import (
 
 	. "github.com/genesis-community/testkit/v2/testing"
 	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 var _ = BeforeSuite(func() {
 	_, filename, _, _ := runtime.Caller(0)
@@ -74,6 +75,44 @@ var _ = Describe("Concourse Kit", func() {
 			Name:        "full-github-teams",
 			CloudConfig: "aws",
 			CPI:         "aws",
+		})
+	})
+
+	Describe("resolute", func() {
+		Test(Environment{
+			Name:        "resolute",
+			CloudConfig: "aws",
+			CPI:         "aws",
+		})
+		Test(Environment{
+			Name:        "resolute-no-haproxy",
+			CloudConfig: "aws",
+			CPI:         "aws",
+		})
+		Test(Environment{
+			Name:        "resolute-mgmt",
+			CloudConfig: "aws",
+			CPI:         "aws",
+		})
+		Test(Environment{
+			Name:        "resolute-wrong-stemcell-os",
+			CloudConfig: "aws",
+			CPI:         "aws",
+			OutputMatchers: OutputMatchers{
+				GenesisAddSecrets: ContainSubstring("stemcell os to"),
+				GenesisCheck:      ContainSubstring("stemcell os to"),
+				GenesisManifest:   ContainSubstring("stemcell os to"),
+			},
+		})
+		Test(Environment{
+			Name:        "resolute-stemcell-without-feature",
+			CloudConfig: "aws",
+			CPI:         "aws",
+			OutputMatchers: OutputMatchers{
+				GenesisAddSecrets: ContainSubstring("Enable the feature and remove that parameter"),
+				GenesisCheck:      ContainSubstring("Enable the feature and remove that parameter"),
+				GenesisManifest:   ContainSubstring("Enable the feature and remove that parameter"),
+			},
 		})
 	})
 })

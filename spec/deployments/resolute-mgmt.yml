@@ -1,0 +1,18 @@
+---
+kit:
+  name:    dev
+  version: latest
+  iaas:    aws
+  features:
+    - ocfp
+    - aws
+    - no-tls
+    - resolute
+
+genesis:
+  env:         resolute-mgmt
+
+params:
+  external_domain: concourse.testing.examle
+  vault_url: https://vault.testing.example
+  stemcell_version: "0.184"
