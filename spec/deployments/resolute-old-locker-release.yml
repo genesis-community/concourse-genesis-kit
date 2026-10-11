@@ -1,0 +1,18 @@
+---
+kit:
+  name:    dev
+  version: latest
+  features:
+    - full
+    - no-tls
+    - resolute
+
+genesis:
+  env:         resolute-old-locker-release
+
+params:
+  external_domain: concourse.testing.examle
+  stemcell_version: "0.184"
+  resolute_locker_release_version: 0.2.1
+  resolute_locker_release_url: https://example.com/locker-0.2.1.tgz
+  resolute_locker_release_sha1: sha256:00

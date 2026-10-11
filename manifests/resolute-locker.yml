@@ -1,0 +1,13 @@
+---
+# locker release for ubuntu-resolute.
+#
+# locker-boshrelease 0.2.1 calls chpst, which resolute does not ship, so the
+# locker job cannot start.  The blueprint hook refuses to render unless the
+# operator names a fixed release, and spruce merges this entry over the pin in
+# releases/locker.yml by name.
+
+releases:
+- name:    locker
+  version: (( grab params.resolute_locker_release_version ))
+  url:     (( grab params.resolute_locker_release_url ))
+  sha1:    (( grab params.resolute_locker_release_sha1 ))

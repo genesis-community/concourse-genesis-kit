@@ -123,9 +123,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=57.0.0
   version: 57.0.0
 - name: locker
-  sha1: ccfcc48d63555a3733c3594d9429a5c1875a9dd2
-  url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
-  version: 0.2.1
+  sha1: sha256:00
+  url: https://example.com/locker-0.2.2.tgz
+  version: 0.2.2
 - name: bpm
   sha1: sha256:7b445508d63d2171d892ba33f836087e1e519b9782f44c5fa5290323616ca8e6
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.41
