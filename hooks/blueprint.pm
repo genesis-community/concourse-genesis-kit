@@ -249,6 +249,11 @@ sub perform {
     if ($self->want_feature("full") && !$self->want_feature("ocfp") && !$self->want_feature("no-haproxy")) {
       $self->add_files("manifests/resolute-haproxy.yml");
     }
+
+    # bpm 1.4.20 and 1.4.22 bundle a tini package that needs an older CMake
+    # than resolute ships.  Every deployment type except workers-only carries
+    # the bpm release.
+    $self->add_files("manifests/resolute-bpm.yml") unless $self->want_feature("workers");
   } elsif ($self->env->lookup("params.stemcell_os", "ubuntu-noble") eq "ubuntu-resolute") {
     bail(
       "The environment sets #c{params.stemcell_os} to ubuntu-resolute ".

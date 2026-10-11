@@ -213,6 +213,8 @@ Before the first deploy we need to do two things on the director.
 
 Resolute ships without runit, so the `chpst` command is missing. A job whose start script drops privileges with `chpst` hangs on resolute, and we have to switch it to `setpriv` or bpm before its release can run there. The Concourse worker uses start-stop-daemon and the other jobs run under bpm, so the releases this kit deploys are not affected, but we should check any job we add before we move it to resolute.
 
+The bpm releases 1.4.20 and 1.4.22 fail to compile on resolute, because their bundled tini package needs an older CMake than resolute ships. The feature therefore pins bpm 1.4.41 in every deployment type that carries the bpm release, and noble deployments keep 1.4.20.
+
 The haproxy releases before 16.13.0 bundle a socat that fails to compile on resolute. The default pin is haproxy 14.1.1, so a `full` deployment with the `resolute` feature switches to haproxy 16.13.0 with HAProxy 3.2.25 and leaves the pin alone for every other deployment. The kit only sets `ha_proxy.tcp` on that job, and the new release accepts it unchanged. The switch does not apply to `ocfp`, `small-footprint`, or `no-haproxy` deployments, because none of them deploys the haproxy release.
 
 ## Available Addons

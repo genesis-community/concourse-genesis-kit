@@ -137,9 +137,9 @@ releases:
   url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
   version: 0.2.1
 - name: bpm
-  sha1: 00223345c70d5629d35008e88c42bf4482bdf766
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.20
-  version: 1.4.20
+  sha1: sha256:7b445508d63d2171d892ba33f836087e1e519b9782f44c5fa5290323616ca8e6
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.41
+  version: 1.4.41
 stemcells:
 - alias: default
   os: ubuntu-resolute
