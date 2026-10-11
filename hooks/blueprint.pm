@@ -250,6 +250,15 @@ sub perform {
       $self->add_files("manifests/resolute-haproxy.yml");
     }
 
+    # postgres-release 54.0.0 and later compile postgres-16 with no bin
+    # directory on resolute, so 57.0.0 replaces release 52.  Only the
+    # deployments that run the postgres job carry the release, which excludes
+    # workers, external-db, and ocfp on every IaaS but stackit and pve.
+    my $has_postgres = ($self->want_feature("full") || $self->want_feature("small-footprint"))
+      ? !$self->want_feature("external-db")
+      : ($self->want_feature("ocfp") && ($iaas eq "stackit" || $iaas eq "pve"));
+    $self->add_files("manifests/resolute-postgres.yml") if $has_postgres;
+
     # bpm 1.4.20 and 1.4.22 bundle a tini package that needs an older CMake
     # than resolute ships.  Every deployment type except workers-only carries
     # the bpm release.

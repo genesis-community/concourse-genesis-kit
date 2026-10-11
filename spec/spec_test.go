@@ -90,6 +90,11 @@ var _ = Describe("Concourse Kit", func() {
 			CPI:         "aws",
 		})
 		Test(Environment{
+			Name:        "resolute-small-footprint",
+			CloudConfig: "aws",
+			CPI:         "aws",
+		})
+		Test(Environment{
 			Name:        "resolute-mgmt",
 			CloudConfig: "aws",
 			CPI:         "aws",

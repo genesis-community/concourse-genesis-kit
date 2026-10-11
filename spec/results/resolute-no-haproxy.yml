@@ -103,6 +103,7 @@ instance_groups:
         roles:
         - name: atc
           password: <!{meta.vault}/database/atc:password!>
+        version: 16
     release: postgres
   - name: locker
     properties:
@@ -129,9 +130,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
   version: 9
 - name: postgres
-  sha1: c00282991b51ca0b3a7399c1c96fb18eff907659
-  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=52
-  version: "52"
+  sha1: sha256:fc5f73f57a6b9e7208e4293a7fb7faf11e4fb8fc8bb79db80d0d97e41ab1ee2a
+  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=57.0.0
+  version: 57.0.0
 - name: locker
   sha1: ccfcc48d63555a3733c3594d9429a5c1875a9dd2
   url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz

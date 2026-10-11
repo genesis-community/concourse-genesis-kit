@@ -1,0 +1,142 @@
+exodus:
+  bosh: resolute-small-footprint
+  external_url: https://concourse.testing.examle
+  features: small-footprint,no-tls,resolute
+  iaas: null
+  is_director: false
+  mode: small-footprint
+  password: <!{meta.vault}/webui:password!>
+  scale: null
+  services: null
+  tsa_host: 10.99.0.16
+  tsa_host_public_key: <!{meta.vault}/tsa/host_key:public!>
+  tsa_port: 2222
+  tsa_worker_private_key: <!{meta.vault}/tsa/worker_key:private!>
+  tsa_worker_public_key: <!{meta.vault}/tsa/worker_key:public!>
+  use_create_env: false
+  username: concourse
+instance_groups:
+- azs:
+  - z1
+  - z2
+  - z3
+  instances: 1
+  jobs:
+  - name: worker
+    properties:
+      baggageclaim:
+        driver: detect
+      http_proxy_url: ""
+      https_proxy_url: ""
+      no_proxy:
+      - localhost
+      - 127.0.0.1
+      runtime: containerd
+      worker_gateway:
+        worker_key:
+          private_key: <!{meta.vault}/tsa/worker_key:private!>
+          public_key: <!{meta.vault}/tsa/worker_key:public!>
+    release: concourse
+  name: worker
+  networks:
+  - name: concourse
+  stemcell: default
+  update:
+    max_in_flight: 1
+    serial: true
+  vm_type: concourse-worker
+- azs:
+  - z1
+  - z2
+  - z3
+  instances: 1
+  jobs:
+  - name: postgres
+    properties:
+      databases:
+        databases:
+        - name: atc
+        port: 5432
+        roles:
+        - name: atc
+          password: <!{meta.vault}/database/atc:password!>
+        version: 16
+    release: postgres
+  - name: locker
+    properties:
+      locker:
+        password: <!{meta.vault}/locker/api:password!>
+        ssl_cert: <!{meta.vault}/locker/server:certificate!>
+        ssl_key: <!{meta.vault}/locker/server:key!>
+        user: locker
+    release: locker
+  - name: web
+    properties:
+      add_local_users:
+      - concourse:<!{meta.vault}/webui:password-bcrypt!>
+      bind_port: 80
+      external_url: https://concourse.testing.examle
+      main_team:
+        auth:
+          local:
+            users:
+            - concourse
+      postgresql:
+        database: atc
+        role:
+          name: atc
+          password: <!{meta.vault}/database/atc:password!>
+      publicly_viewable: true
+      token_signing_key:
+        private_key: <!{meta.vault}/atc/token_signing_key:private!>
+        public_key: <!{meta.vault}/atc/token_signing_key:public!>
+      worker_gateway:
+        authorized_keys:
+        - <!{meta.vault}/tsa/worker_key:public!>
+        host_key:
+          private_key: <!{meta.vault}/tsa/host_key:private!>
+          public_key: <!{meta.vault}/tsa/host_key:public!>
+    release: concourse
+  - name: bpm
+    properties:
+      bind_port: 80
+    release: bpm
+  name: concourse
+  networks:
+  - name: concourse
+    static_ips:
+    - 10.99.0.16
+  stemcell: default
+  vm_type: small
+name: resolute-small-footprint-concourse
+releases:
+- name: concourse
+  sha1: dbc32d7c40ad1e6648d8dd749b8b50251bfd6b94
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=8.2.2
+  version: 8.2.2
+- name: slack-notification-resource
+  sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
+  url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
+  version: 9
+- name: postgres
+  sha1: sha256:fc5f73f57a6b9e7208e4293a7fb7faf11e4fb8fc8bb79db80d0d97e41ab1ee2a
+  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=57.0.0
+  version: 57.0.0
+- name: locker
+  sha1: ccfcc48d63555a3733c3594d9429a5c1875a9dd2
+  url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.1/locker-0.2.1.tgz
+  version: 0.2.1
+- name: bpm
+  sha1: sha256:7b445508d63d2171d892ba33f836087e1e519b9782f44c5fa5290323616ca8e6
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.41
+  version: 1.4.41
+stemcells:
+- alias: default
+  os: ubuntu-resolute
+  version: "0.184"
+update:
+  canaries: 1
+  canary_watch_time: 1000-60000
+  max_in_flight: 4
+  serial: false
+  update_watch_time: 1000-60000

@@ -1,0 +1,22 @@
+---
+# postgres release for ubuntu-resolute.
+#
+# postgres-release 54.0.0 and later compile postgres-16 with no bin directory
+# on resolute, and 57.0.0 vendors the libicu that fixes it.  Spruce merges
+# this entry over the pin in releases/postgres.yml by name.  Release 52
+# defaults to PostgreSQL 16 and release 57.0.0 defaults to 18, so the pin sets
+# 16 to keep the existing data directory on its current major and avoid a
+# pg_upgrade during the stemcell change.
+
+releases:
+- name:    postgres
+  version: 57.0.0
+  url:     https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=57.0.0
+  sha1:    sha256:fc5f73f57a6b9e7208e4293a7fb7faf11e4fb8fc8bb79db80d0d97e41ab1ee2a
+
+meta:
+  jobs:
+    postgres:
+      properties:
+        databases:
+          version: 16

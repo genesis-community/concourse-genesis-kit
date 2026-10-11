@@ -217,6 +217,8 @@ The bpm releases 1.4.20 and 1.4.22 fail to compile on resolute, because their bu
 
 The haproxy releases before 16.13.0 bundle a socat that fails to compile on resolute. The default pin is haproxy 14.1.1, so a `full` deployment with the `resolute` feature switches to haproxy 16.13.0 with HAProxy 3.2.25 and leaves the pin alone for every other deployment. The kit only sets `ha_proxy.tcp` on that job, and the new release accepts it unchanged. The switch does not apply to `ocfp`, `small-footprint`, or `no-haproxy` deployments, because none of them deploys the haproxy release.
 
+The postgres-release 54.0.0 and later compile postgres-16 with no `bin` directory on resolute, so the feature moves a deployment that runs the postgres job from release 52 to 57.0.0, which compiles there, and it sets `databases.version` to 16, the major that release 52 already runs by default, so the existing data directory stays on PostgreSQL 16 and no pg_upgrade runs during the stemcell change.
+
 ## Available Addons
 
 The Concourse Genesis Kit provides several helpful addons:
