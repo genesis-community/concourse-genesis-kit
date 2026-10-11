@@ -221,6 +221,34 @@ The postgres-release 54.0.0 and later compile postgres-16 with no `bin` director
 
 The locker release 0.2.1 calls `chpst`, so every deployment that carries the locker job needs `resolute_locker_release_version`, `resolute_locker_release_url`, and `resolute_locker_release_sha1` set to a locker release newer than 0.2.1, and the feature refuses to render until we do.
 
+### Postgres collation after the stemcell move
+
+Moving from ubuntu-noble to ubuntu-resolute takes glibc from 2.39 to 2.43, and a postgres server that keeps its data directory notices the change. Each database records the collation version it was created with, so after the move the postgres log fills with warnings such as `database "atc" has a collation version mismatch`. Text indexes built under the old glibc may order strings differently under the new one, so we rebuild them once and then record the new version. We only need this when an existing deployment moves from noble to resolute with its data kept. A deployment built new on resolute has no mismatch.
+
+We run the fix once for every database on the server, including `postgres` and `template1`, which hold no application data but warn all the same. Open a shell on the instance that runs postgres with `bosh ssh`. That is the `db` instance in a `full` deployment, and it is the `concourse` instance in `small-footprint`, where postgres shares the VM with the web node.
+
+```
+bosh -d <deployment> ssh db
+```
+
+Then become root with `sudo -i` and run the following. The server trusts the `vcap` user over the local socket in `/tmp`, so no password is needed.
+
+```
+PSQL="sudo -u vcap /var/vcap/packages/postgres-16/bin/psql -h /tmp -p 5432 -U vcap -X"
+for db in atc postgres template1; do
+  $PSQL -v ON_ERROR_STOP=1 -d $db -c "REINDEX DATABASE \"$db\";"
+  $PSQL -v ON_ERROR_STOP=1 -d $db -c "ALTER DATABASE \"$db\" REFRESH COLLATION VERSION;"
+done
+```
+
+Both statements print the mismatch warning themselves until the refresh completes, which is expected. The reindex is not concurrent and holds locks while it runs, but it is brief on a database of this size. We can confirm the result by comparing the two versions, and every row should show 2.43 on both sides.
+
+```
+$PSQL -d postgres -c "select datname, datcollversion, pg_database_collation_actual_version(oid) as actual from pg_database where datname<>'template0' order by 1"
+```
+
+Nothing needs a restart or a redeploy.
+
 ## Available Addons
 
 The Concourse Genesis Kit provides several helpful addons:
