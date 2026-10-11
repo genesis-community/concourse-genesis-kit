@@ -100,26 +100,6 @@ var _ = Describe("Concourse Kit", func() {
 			CPI:         "aws",
 		})
 		Test(Environment{
-			Name:        "resolute-missing-locker-release",
-			CloudConfig: "aws",
-			CPI:         "aws",
-			OutputMatchers: OutputMatchers{
-				GenesisAddSecrets: ContainSubstring("resolute_locker_release_version"),
-				GenesisCheck:      ContainSubstring("resolute_locker_release_version"),
-				GenesisManifest:   ContainSubstring("resolute_locker_release_version"),
-			},
-		})
-		Test(Environment{
-			Name:        "resolute-old-locker-release",
-			CloudConfig: "aws",
-			CPI:         "aws",
-			OutputMatchers: OutputMatchers{
-				GenesisAddSecrets: ContainSubstring("still calls"),
-				GenesisCheck:      ContainSubstring("still calls"),
-				GenesisManifest:   ContainSubstring("still calls"),
-			},
-		})
-		Test(Environment{
 			Name:        "resolute-wrong-stemcell-os",
 			CloudConfig: "aws",
 			CPI:         "aws",

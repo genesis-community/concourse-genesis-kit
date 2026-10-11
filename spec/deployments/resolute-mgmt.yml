@@ -16,6 +16,3 @@ params:
   external_domain: concourse.testing.examle
   vault_url: https://vault.testing.example
   stemcell_version: "0.184"
-  resolute_locker_release_version: 0.2.2
-  resolute_locker_release_url: https://example.com/locker-0.2.2.tgz
-  resolute_locker_release_sha1: sha256:00

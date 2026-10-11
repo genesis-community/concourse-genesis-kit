@@ -2,12 +2,11 @@
 # locker release for ubuntu-resolute.
 #
 # locker-boshrelease 0.2.1 calls chpst, which resolute does not ship, so the
-# locker job cannot start.  The blueprint hook refuses to render unless the
-# operator names a fixed release, and spruce merges this entry over the pin in
-# releases/locker.yml by name.
+# locker job cannot start.  Release 0.2.2 fixes that, and spruce merges this
+# entry over the pin in releases/locker.yml by name.
 
 releases:
 - name:    locker
-  version: (( grab params.resolute_locker_release_version ))
-  url:     (( grab params.resolute_locker_release_url ))
-  sha1:    (( grab params.resolute_locker_release_sha1 ))
+  version: 0.2.2
+  url:     https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.2/locker-0.2.2.tgz
+  sha1:    08d5b679d4fccae26def6d7303f9f876f724c870

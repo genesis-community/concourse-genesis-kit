@@ -123,8 +123,8 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
   version: 9
 - name: locker
-  sha1: sha256:00
-  url: https://example.com/locker-0.2.2.tgz
+  sha1: 08d5b679d4fccae26def6d7303f9f876f724c870
+  url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.2/locker-0.2.2.tgz
   version: 0.2.2
 - name: bpm
   sha1: sha256:7b445508d63d2171d892ba33f836087e1e519b9782f44c5fa5290323616ca8e6

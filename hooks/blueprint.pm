@@ -266,29 +266,9 @@ sub perform {
 
     # locker-boshrelease 0.2.1 calls chpst, which resolute does not ship, so
     # the locker job cannot start.  Every deployment type except workers-only
-    # carries the locker release.  The operator names a fixed release, and the
-    # kit refuses to render without one.
-    unless ($self->want_feature("workers")) {
-      my %release = map {
-        ($_ => scalar($self->env->lookup("params.resolute_locker_release_$_", "")))
-      } qw(version url sha1);
-      my @missing = grep {$release{$_} eq ""} qw(version url sha1);
-      bail(
-        "The locker release 0.2.1 calls #C{chpst}, which ubuntu-resolute does ".
-        "not ship, so the locker job cannot start.  Set ".
-        "#c{params.resolute_locker_release_version}, ".
-        "#c{params.resolute_locker_release_url}, and ".
-        "#c{params.resolute_locker_release_sha1} to a locker release newer than ".
-        "0.2.1 (missing: %s).", join(", ", map {"resolute_locker_release_$_"} @missing)
-      ) if @missing;
-      my @v = ($release{version} =~ /^(\d+)\.(\d+)\.(\d+)/);
-      bail(
-        "Locker release #R{%s} still calls #C{chpst}, which ubuntu-resolute ".
-        "does not ship.  Set #c{params.resolute_locker_release_version} to a ".
-        "release newer than 0.2.1.", $release{version}
-      ) if @v != 3 || ($v[0] <=> 0 || $v[1] <=> 2 || $v[2] <=> 1) <= 0;
-      $self->add_files("manifests/resolute-locker.yml");
-    }
+    # carries the locker release, and this overlay pins 0.2.2, which does not
+    # need chpst.
+    $self->add_files("manifests/resolute-locker.yml") unless $self->want_feature("workers");
   } elsif ($self->env->lookup("params.stemcell_os", "ubuntu-noble") eq "ubuntu-resolute") {
     bail(
       "The environment sets #c{params.stemcell_os} to ubuntu-resolute ".
