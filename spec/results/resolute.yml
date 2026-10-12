@@ -159,9 +159,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=57.0.0
   version: 57.0.0
 - name: locker
-  sha1: 08d5b679d4fccae26def6d7303f9f876f724c870
-  url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.2/locker-0.2.2.tgz
-  version: 0.2.2
+  sha1: 4836455ed37c9df322325fd117cc9f940ac9870c
+  url: https://github.com/cloudfoundry-community/locker-boshrelease/releases/download/v0.2.3/locker-0.2.3.tgz
+  version: 0.2.3
 - name: haproxy
   sha1: sha256:0c0b25fbd6e37bff79aeca0405ab8ea2f0f5aea3b42326d16824957e0a8b9fc9
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/haproxy-boshrelease?v=16.13.0%2B3.2.25

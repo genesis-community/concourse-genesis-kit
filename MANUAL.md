@@ -219,7 +219,7 @@ The haproxy releases before 16.13.0 bundle a socat that fails to compile on reso
 
 The postgres-release 54.0.0 and later compile postgres-16 with no `bin` directory on resolute, so the feature moves a deployment that runs the postgres job from release 52 to 57.0.0, which compiles there, and it sets `databases.version` to 16, the major that release 52 already runs by default, so the existing data directory stays on PostgreSQL 16 and no pg_upgrade runs during the stemcell change.
 
-The locker release 0.2.1 calls `chpst`, which resolute does not ship, so the feature switches every deployment that carries the locker job to locker 0.2.2.
+The locker release 0.2.1 calls `chpst`, which resolute does not ship, so the feature switches every deployment that carries the locker job to locker 0.2.3. Release 0.2.2 fixed the `chpst` dependency, and 0.2.3 stops the locker job from writing its API password into the ctl script.
 
 ### Postgres collation after the stemcell move
 

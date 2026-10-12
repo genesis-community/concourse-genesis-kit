@@ -266,7 +266,7 @@ sub perform {
 
     # locker-boshrelease 0.2.1 calls chpst, which resolute does not ship, so
     # the locker job cannot start.  Every deployment type except workers-only
-    # carries the locker release, and this overlay pins 0.2.2, which does not
+    # carries the locker release, and this overlay pins 0.2.3, which does not
     # need chpst.
     $self->add_files("manifests/resolute-locker.yml") unless $self->want_feature("workers");
   } elsif ($self->env->lookup("params.stemcell_os", "ubuntu-noble") eq "ubuntu-resolute") {
