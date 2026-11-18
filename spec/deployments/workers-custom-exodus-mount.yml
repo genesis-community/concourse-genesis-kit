@@ -1,0 +1,16 @@
+---
+kit:
+  name:    dev
+  version: latest
+  features:
+    - workers
+
+genesis:
+  env:           workers-custom-exodus-mount
+  exodus_mount:  secret/custom/exodus/
+
+params:
+  tsa_host_env: web-env
+  stemcell_version: "0.184"
+  external_domain: concourse.testing.example
+  env: workers-custom-exodus-mount

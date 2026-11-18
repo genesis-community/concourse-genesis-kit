@@ -12,8 +12,8 @@ meta:
   default:
     tags: [(( grab params.env ))]
   tsa:
-    host: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_host" ))
-    port: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_port" )) 
+    host: (( vault $GENESIS_EXODUS_MOUNT params.tsa_host_env "/concourse:tsa_host" ))
+    port: (( vault $GENESIS_EXODUS_MOUNT params.tsa_host_env "/concourse:tsa_port" )) 
 
 exodus:
   tags: (( grab params.tags || meta.default.tags ))
@@ -34,8 +34,8 @@ instance_groups:
         worker_gateway:
           hosts: 
           - (( concat meta.tsa.host ":" meta.tsa.port ))
-          host_public_key: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_host_public_key" ))
+          host_public_key: (( vault $GENESIS_EXODUS_MOUNT params.tsa_host_env "/concourse:tsa_host_public_key" ))
           worker_key:
-            private_key: (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_worker_private_key" ))
-            public_key:  (( vault "secret/exodus/" params.tsa_host_env "/concourse:tsa_worker_public_key" ))
+            private_key: (( vault $GENESIS_EXODUS_MOUNT params.tsa_host_env "/concourse:tsa_worker_private_key" ))
+            public_key:  (( vault $GENESIS_EXODUS_MOUNT params.tsa_host_env "/concourse:tsa_worker_public_key" ))
 

@@ -1,0 +1,67 @@
+exodus:
+  bosh: workers-custom-exodus-mount
+  features: workers
+  host_env: web-env
+  iaas: null
+  is_director: false
+  mode: worker
+  scale: null
+  services: null
+  tags:
+  - workers-custom-exodus-mount
+  use_create_env: false
+instance_groups:
+- azs:
+  - z1
+  - z2
+  - z3
+  instances: 3
+  jobs:
+  - name: worker
+    properties:
+      baggageclaim:
+        driver: detect
+      http_proxy_url: ""
+      https_proxy_url: ""
+      no_proxy:
+      - localhost
+      - 127.0.0.1
+      runtime: containerd
+      tags:
+      - workers-custom-exodus-mount
+      worker_gateway:
+        host_public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDtsa-host-public-key
+        hosts:
+        - 10.99.0.20:2222
+        worker_key:
+          private_key: not-a-real-private-key
+          public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDtsa-worker-public-key
+    release: concourse
+  name: worker
+  networks:
+  - name: concourse
+  stemcell: default
+  update:
+    max_in_flight: 3
+    serial: true
+  vm_type: concourse-worker
+name: workers-custom-exodus-mount-concourse
+releases:
+- name: concourse
+  sha1: dbc32d7c40ad1e6648d8dd749b8b50251bfd6b94
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=8.2.2
+  version: 8.2.2
+- name: slack-notification-resource
+  sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
+  url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
+  version: 9
+stemcells:
+- alias: default
+  os: ubuntu-noble
+  version: "0.184"
+update:
+  canaries: 1
+  canary_watch_time: 1000-60000
+  max_in_flight: 4
+  serial: false
+  update_watch_time: 1000-60000

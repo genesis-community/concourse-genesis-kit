@@ -1,0 +1,18 @@
+secret/workers/custom/exodus/mount/concourse/atc/token_signing_key:
+    private: <!{meta.vault}/atc/token_signing_key:private!>
+    public: <!{meta.vault}/atc/token_signing_key:public!>
+secret/workers/custom/exodus/mount/concourse/database/atc:
+    password: <!{meta.vault}/database/atc:password!>
+secret/workers/custom/exodus/mount/concourse/locker/api:
+    password: <!{meta.vault}/locker/api:password!>
+secret/workers/custom/exodus/mount/concourse/tsa/host_key:
+    fingerprint: <!{meta.vault}/tsa/host_key:fingerprint!>
+    private: <!{meta.vault}/tsa/host_key:private!>
+    public: <!{meta.vault}/tsa/host_key:public!>
+secret/workers/custom/exodus/mount/concourse/tsa/worker_key:
+    fingerprint: <!{meta.vault}/tsa/worker_key:fingerprint!>
+    private: <!{meta.vault}/tsa/worker_key:private!>
+    public: <!{meta.vault}/tsa/worker_key:public!>
+secret/workers/custom/exodus/mount/concourse/webui:
+    password: <!{meta.vault}/webui:password!>
+    password-bcrypt: <!{meta.vault}/webui:password-bcrypt!>

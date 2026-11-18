@@ -1,0 +1,8 @@
+# The web deployment publishes its exodus data under the environment's own
+# exodus_mount, which this environment moves off the default secret/exodus/.
+secret/custom/exodus/web-env/concourse:
+  tsa_host: 10.99.0.20
+  tsa_port: "2222"
+  tsa_host_public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDtsa-host-public-key
+  tsa_worker_private_key: not-a-real-private-key
+  tsa_worker_public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDtsa-worker-public-key

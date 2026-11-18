@@ -78,6 +78,15 @@ var _ = Describe("Concourse Kit", func() {
 		})
 	})
 
+	Describe("workers", func() {
+		Test(Environment{
+			Name:        "workers-custom-exodus-mount",
+			Exodus:      "workers-custom-exodus-mount",
+			CloudConfig: "aws",
+			CPI:         "aws",
+		})
+	})
+
 	Describe("resolute", func() {
 		Test(Environment{
 			Name:        "resolute",
