@@ -1,7 +1,7 @@
 # Concourse Genesis Kit
 
 [![Version](https://img.shields.io/badge/version-3.13.0-blue)](https://github.com/genesis-community/concourse-genesis-kit/releases/tag/v3.13.0)
-[![Genesis Version](https://img.shields.io/badge/genesis-2.7.6%2B-brightgreen)](https://github.com/genesis-community/genesis)
+[![Genesis Version](https://img.shields.io/badge/genesis-3.1.0%2B-brightgreen)](https://github.com/genesis-community/genesis)
 [![Concourse Version](https://img.shields.io/badge/concourse-7.13.0-brightgreen)](https://github.com/concourse/concourse-bosh-release/releases/tag/v7.13.0)
 
 The Concourse Genesis Kit provides a streamlined way to deploy a full [Concourse CI/CD system](https://concourse-ci.org/). It supports:
@@ -15,7 +15,7 @@ The Concourse Genesis Kit provides a streamlined way to deploy a full [Concourse
 
 ## Quick Start
 
-To use this kit, you don't even need to clone the repository! Just run the following (using Genesis v2.7.6 or later):
+To use this kit, you don't even need to clone the repository! Just run the following (using Genesis v3.1.0 or later):
 
 ```bash
 # Create a concourse-deployments repo using the latest version of the concourse kit
@@ -55,7 +55,7 @@ For detailed documentation, see:
 
 ## Requirements
 
-- Genesis 2.7.6+
+- Genesis 3.1.0+
 - BOSH Director with stemcell support
 - Network and cloud config set up for the Concourse VMs
 

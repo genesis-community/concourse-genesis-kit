@@ -7,7 +7,7 @@ authors:
 docs:   https://concourse.ci
 code:   https://github.com/genesis-community/concourse-genesis-kit
 
-genesis_version_min: 2.7.6
+genesis_version_min: 3.1.0
 
 supports:
 - aws
