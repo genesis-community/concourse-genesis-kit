@@ -1,0 +1,24 @@
+concourse/<VERSION>: manifests/concourse/base.yml
+concourse/<VERSION>: manifests/releases/concourse.yml
+concourse/<VERSION>: manifests/releases/slack-notifications.yml
+concourse/<VERSION>: manifests/concourse/jobs.yml
+concourse/<VERSION>: manifests/concourse/full.yml
+concourse/<VERSION>: manifests/releases/postgres.yml
+concourse/<VERSION>: manifests/releases/locker.yml
+concourse/<VERSION>: manifests/releases/haproxy.yml
+concourse/<VERSION>: manifests/releases/bpm.yml
+concourse/<VERSION>: manifests/addons/no-haproxy.yml
+concourse/<VERSION>: manifests/addons/vault.yml
+concourse/<VERSION>: manifests/addons/vault-approle.yml
+concourse/<VERSION>: ocfp/vault-vars-override.yml
+concourse/<VERSION>: manifests/addons/external-db.yml
+concourse/<VERSION>: manifests/addons/external-db-ca.yml
+concourse/<VERSION>: ocfp/external-db-vars-override.yml
+concourse/<VERSION>: ocfp/ocfp.yml
+concourse/<VERSION>: ocfp/aws/base.yml
+concourse/<VERSION>: ocfp/aws/full.yml
+concourse/<VERSION>: ocfp/stackit/static-ips.yml
+concourse/<VERSION>: manifests/resolute.yml
+concourse/<VERSION>: manifests/resolute-bpm.yml
+concourse/<VERSION>: manifests/resolute-locker.yml
+                local: resolute-mgmt.yml

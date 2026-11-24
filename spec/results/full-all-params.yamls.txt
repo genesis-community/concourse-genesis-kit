@@ -1,0 +1,18 @@
+concourse/<VERSION>: manifests/concourse/base.yml
+concourse/<VERSION>: manifests/releases/concourse.yml
+concourse/<VERSION>: manifests/releases/slack-notifications.yml
+concourse/<VERSION>: manifests/concourse/jobs.yml
+concourse/<VERSION>: manifests/concourse/full.yml
+concourse/<VERSION>: manifests/releases/postgres.yml
+concourse/<VERSION>: manifests/releases/locker.yml
+concourse/<VERSION>: manifests/releases/haproxy.yml
+concourse/<VERSION>: manifests/releases/bpm.yml
+concourse/<VERSION>: manifests/oauth/github-oauth.yml
+concourse/<VERSION>: manifests/oauth/github-oauth-orgs.yml
+concourse/<VERSION>: manifests/addons/vault.yml
+concourse/<VERSION>: manifests/addons/vault-approle.yml
+concourse/<VERSION>: manifests/addons/shout.yml
+concourse/<VERSION>: manifests/releases/shout.yml
+concourse/<VERSION>: manifests/addons/prometheus-web.yml
+concourse/<VERSION>: manifests/addons/prometheus.yml
+                local: full-all-params.yml

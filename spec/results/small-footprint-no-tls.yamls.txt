@@ -1,0 +1,9 @@
+concourse/<VERSION>: manifests/concourse/base.yml
+concourse/<VERSION>: manifests/releases/concourse.yml
+concourse/<VERSION>: manifests/releases/slack-notifications.yml
+concourse/<VERSION>: manifests/concourse/jobs.yml
+concourse/<VERSION>: manifests/concourse/small-footprint.yml
+concourse/<VERSION>: manifests/releases/postgres.yml
+concourse/<VERSION>: manifests/releases/locker.yml
+concourse/<VERSION>: manifests/releases/bpm.yml
+                local: small-footprint-no-tls.yml

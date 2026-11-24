@@ -1,0 +1,6 @@
+concourse/<VERSION>: manifests/concourse/base.yml
+concourse/<VERSION>: manifests/releases/concourse.yml
+concourse/<VERSION>: manifests/releases/slack-notifications.yml
+concourse/<VERSION>: manifests/concourse/jobs.yml
+concourse/<VERSION>: manifests/concourse/workers.yml
+                local: workers-custom-exodus-mount.yml
