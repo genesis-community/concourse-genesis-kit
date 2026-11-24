@@ -1,4 +1,4 @@
-package Genesis::Hook::Addon::Concourse::Login v5.1.0;
+package Genesis::Hook::Addon::Concourse::Login v6.0.0;
 
 use v5.20;
 use warnings; # Genesis min perl version is 5.20
