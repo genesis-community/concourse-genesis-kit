@@ -1,3 +1,5 @@
+secret/full/all/params/concourse/atc/client:
+  secret: <!{meta.vault}/atc/client:secret!>
 secret/full/all/params/concourse/atc/token_signing_key:
   private: <!{meta.vault}/atc/token_signing_key:private!>
   public: <!{meta.vault}/atc/token_signing_key:public!>
@@ -22,6 +24,8 @@ secret/full/all/params/concourse/shout/admin:
   password: <!{meta.vault}/shout/admin:password!>
 secret/full/all/params/concourse/shout/ops:
   password: <!{meta.vault}/shout/ops:password!>
+secret/full/all/params/concourse/tsa/client:
+  secret: <!{meta.vault}/tsa/client:secret!>
 secret/full/all/params/concourse/tsa/host_key:
   fingerprint: <!{meta.vault}/tsa/host_key:fingerprint!>
   private: <!{meta.vault}/tsa/host_key:private!>

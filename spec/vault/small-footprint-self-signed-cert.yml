@@ -1,3 +1,5 @@
+secret/small/footprint/self/signed/cert/concourse/atc/client:
+  secret: <!{meta.vault}/atc/client:secret!>
 secret/small/footprint/self/signed/cert/concourse/atc/token_signing_key:
   private: <!{meta.vault}/atc/token_signing_key:private!>
   public: <!{meta.vault}/atc/token_signing_key:public!>
@@ -25,6 +27,8 @@ secret/small/footprint/self/signed/cert/concourse/ssl/server:
   certificate: <!{meta.vault}/ssl/server:certificate!>
   combined: <!{meta.vault}/ssl/server:combined!>
   key: <!{meta.vault}/ssl/server:key!>
+secret/small/footprint/self/signed/cert/concourse/tsa/client:
+  secret: <!{meta.vault}/tsa/client:secret!>
 secret/small/footprint/self/signed/cert/concourse/tsa/host_key:
   fingerprint: <!{meta.vault}/tsa/host_key:fingerprint!>
   private: <!{meta.vault}/tsa/host_key:private!>

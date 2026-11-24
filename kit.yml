@@ -33,6 +33,14 @@ credentials:
 
     atc/token_signing_key: rsa 2048 fixed
 
+    # OAuth client secrets for the web login flow and for the worker
+    # gateway's token requests, set explicitly so that concourse does
+    # not fall back to values it derives itself.
+    atc/client:
+      secret: random 64
+    tsa/client:
+      secret: random 64
+
     locker/api:
       password: random 16
 
