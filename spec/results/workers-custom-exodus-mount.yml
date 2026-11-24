@@ -48,9 +48,9 @@ instance_groups:
 name: workers-custom-exodus-mount-concourse
 releases:
 - name: concourse
-  sha1: dbc32d7c40ad1e6648d8dd749b8b50251bfd6b94
-  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=8.2.2
-  version: 8.2.2
+  sha1: 8272e6a842cc23d9dcb7dd31cb7d4362ecd1bce7
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=8.3.4
+  version: 8.3.4
 - name: slack-notification-resource
   sha1: a64c65d1f23ea089746e698f29dbe522dd716c1b
   url: https://bosh.io/d/github.com/cloudfoundry-community/slack-notification-resource-boshrelease?v=9
