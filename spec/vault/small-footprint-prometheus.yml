@@ -1,3 +1,5 @@
+secret/small/footprint/prometheus/concourse/atc/client:
+  secret: <!{meta.vault}/atc/client:secret!>
 secret/small/footprint/prometheus/concourse/atc/token_signing_key:
   private: <!{meta.vault}/atc/token_signing_key:private!>
   public: <!{meta.vault}/atc/token_signing_key:public!>
@@ -15,6 +17,8 @@ secret/small/footprint/prometheus/concourse/locker/server:
   certificate: <!{meta.vault}/locker/server:certificate!>
   combined: <!{meta.vault}/locker/server:combined!>
   key: <!{meta.vault}/locker/server:key!>
+secret/small/footprint/prometheus/concourse/tsa/client:
+  secret: <!{meta.vault}/tsa/client:secret!>
 secret/small/footprint/prometheus/concourse/tsa/host_key:
   fingerprint: <!{meta.vault}/tsa/host_key:fingerprint!>
   private: <!{meta.vault}/tsa/host_key:private!>

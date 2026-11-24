@@ -1,3 +1,5 @@
+secret/workers/custom/exodus/mount/concourse/atc/client:
+    secret: <!{meta.vault}/atc/client:secret!>
 secret/workers/custom/exodus/mount/concourse/atc/token_signing_key:
     private: <!{meta.vault}/atc/token_signing_key:private!>
     public: <!{meta.vault}/atc/token_signing_key:public!>
@@ -5,6 +7,8 @@ secret/workers/custom/exodus/mount/concourse/database/atc:
     password: <!{meta.vault}/database/atc:password!>
 secret/workers/custom/exodus/mount/concourse/locker/api:
     password: <!{meta.vault}/locker/api:password!>
+secret/workers/custom/exodus/mount/concourse/tsa/client:
+    secret: <!{meta.vault}/tsa/client:secret!>
 secret/workers/custom/exodus/mount/concourse/tsa/host_key:
     fingerprint: <!{meta.vault}/tsa/host_key:fingerprint!>
     private: <!{meta.vault}/tsa/host_key:private!>

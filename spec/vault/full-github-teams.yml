@@ -1,3 +1,5 @@
+secret/full/github/teams/concourse/atc/client:
+  secret: <!{meta.vault}/atc/client:secret!>
 secret/full/github/teams/concourse/atc/token_signing_key:
   private: <!{meta.vault}/atc/token_signing_key:private!>
   public: <!{meta.vault}/atc/token_signing_key:public!>
@@ -18,6 +20,8 @@ secret/full/github/teams/concourse/locker/server:
 secret/full/github/teams/concourse/oauth:
   provider_key: <!{meta.vault}/oauth:provider_key!>
   provider_secret: <!{meta.vault}/oauth:provider_secret!>
+secret/full/github/teams/concourse/tsa/client:
+  secret: <!{meta.vault}/tsa/client:secret!>
 secret/full/github/teams/concourse/tsa/host_key:
   fingerprint: <!{meta.vault}/tsa/host_key:fingerprint!>
   private: <!{meta.vault}/tsa/host_key:private!>

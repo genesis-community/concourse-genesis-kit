@@ -1,0 +1,12 @@
+concourse/<VERSION>: manifests/concourse/base.yml
+concourse/<VERSION>: manifests/releases/concourse.yml
+concourse/<VERSION>: manifests/releases/slack-notifications.yml
+concourse/<VERSION>: manifests/concourse/jobs.yml
+concourse/<VERSION>: manifests/concourse/full.yml
+concourse/<VERSION>: manifests/releases/postgres.yml
+concourse/<VERSION>: manifests/releases/locker.yml
+concourse/<VERSION>: manifests/releases/haproxy.yml
+concourse/<VERSION>: manifests/releases/bpm.yml
+concourse/<VERSION>: manifests/concourse/tls.yml
+concourse/<VERSION>: manifests/addons/self-signed.yml
+                local: full-self-signed-cert.yml

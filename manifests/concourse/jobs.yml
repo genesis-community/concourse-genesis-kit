@@ -20,6 +20,7 @@ meta:
       release: concourse
       properties:
         worker_gateway:
+          client_secret: (( vault meta.vault "/tsa/client:secret" ))
           host_key:
             private_key: (( vault meta.vault "/tsa/host_key:private" ))
             public_key: (( vault meta.vault "/tsa/host_key:public" ))
@@ -31,6 +32,7 @@ meta:
             name: atc
             password: (( vault meta.vault "/database/atc:password" ))
         token_signing_key: (( grab params.token_signing_key ))
+        client_secret: (( vault meta.vault "/atc/client:secret" ))
         bind_port: 80
         publicly_viewable: true
         main_team:

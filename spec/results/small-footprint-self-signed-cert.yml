@@ -76,6 +76,7 @@ instance_groups:
       add_local_users:
       - concourse:<!{meta.vault}/webui:password-bcrypt!>
       bind_port: 80
+      client_secret: <!{meta.vault}/atc/client:secret!>
       external_url: https://concourse.testing.examle
       main_team:
         auth:
@@ -99,6 +100,7 @@ instance_groups:
       worker_gateway:
         authorized_keys:
         - <!{meta.vault}/tsa/worker_key:public!>
+        client_secret: <!{meta.vault}/tsa/client:secret!>
         host_key:
           private_key: <!{meta.vault}/tsa/host_key:private!>
           public_key: <!{meta.vault}/tsa/host_key:public!>
